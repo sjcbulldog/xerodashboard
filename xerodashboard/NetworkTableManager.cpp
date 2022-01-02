@@ -30,6 +30,7 @@ nt::NetworkTableEntry NetworkTableManager::getEntry(const QString& name)
 void NetworkTableManager::listenNotify(const nt::EntryNotification& ev)
 {
 	QString name = QString::fromStdString(ev.name);
+	QMutexLocker guard(&lock_);
 
 	if ((ev.flags & NT_NOTIFY_NEW) == NT_NOTIFY_NEW)
 	{
@@ -74,6 +75,7 @@ void NetworkTableManager::processNetworkTableEvents()
 			emit connected();
 		}
 
+		QMutexLocker guard(&lock_);
 		while (deletedEntries_.size() > 0)
 		{
 			QString entry = deletedEntries_.first();

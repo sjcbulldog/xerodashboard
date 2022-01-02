@@ -20,18 +20,19 @@ public:
 		layout();
 	}
 
-	void layout() {
-		child_->setGeometry(BorderThickness, header_height_, width() - BorderThickness * 2, height() - header_height_ - BorderThickness);
-	}
+	void layout();
 
 protected:
 	void paintEvent(QPaintEvent* ev);
 	void mousePressEvent(QMouseEvent* ev);
+	void mouseMoveEvent(QMouseEvent* ev);
+	void mouseReleaseEvent(QMouseEvent* ev);
 	void resizeEvent(QResizeEvent* ev);
 	void changeEvent(QEvent* ev);
 
 private:
 	QRect closeBoxRect();
+	QRect headerRect();
 
 private:
 	static constexpr const int BorderThickness = 1;
@@ -40,4 +41,7 @@ private:
 	QString title_;
 	QWidget* child_;
 	int header_height_;
+	bool dragging_;
+	QPoint mouse_;
+	QPoint window_;
 };

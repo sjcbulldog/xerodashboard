@@ -6,7 +6,7 @@
 
 XeroItemFrame::XeroItemFrame(QWidget *parent) : QWidget(parent)
 {
-	setMinimumSize(80, 80);
+	setMinimumSize(10, 10);
 	child_ = nullptr;
 
 	QFontMetrics fm(font());
@@ -17,9 +17,44 @@ XeroItemFrame::~XeroItemFrame()
 {
 }
 
+void XeroItemFrame::layout()
+{
+	if (child_ == nullptr)
+		return;
+
+	int w = width();
+	int h = height();
+
+	if (w < child_->minimumWidth() + BorderThickness * 2)
+		w = child_->minimumWidth() + BorderThickness * 2;
+
+	if (h < child_->minimumHeight() + BorderThickness * 4 + header_height_)
+		h = child_->minimumHeight() + BorderThickness * 4 + header_height_;
+
+	if (w != width() || h != height())
+	{
+		setGeometry(pos().x(), pos().y(), w, h);
+
+		//
+		// This will trigger a resize event which will recursively call back into this method but with a valid width and
+		// height so that the else clause below will execute
+		//
+	}
+	else
+	{
+		child_->setGeometry(BorderThickness, header_height_ + 3 * BorderThickness, width() - BorderThickness * 2, height() - header_height_ - 4 * BorderThickness);
+	}
+}
+
 QRect XeroItemFrame::closeBoxRect()
 {
 	QRect r(width() - BorderThickness - header_height_, BorderThickness, header_height_, header_height_);
+	return r;
+}
+
+QRect XeroItemFrame::headerRect()
+{
+	QRect r(0, 0, width(), header_height_ + 2 * BorderThickness);
 	return r;
 }
 
@@ -31,7 +66,7 @@ void XeroItemFrame::changeEvent(QEvent* ev)
 	{
 		QFontMetrics fm(font());
 		header_height_ = fm.height() + BorderThickness * 2;
-		child_->setGeometry(BorderThickness, header_height_, width() - 2 * BorderThickness, height() - header_height_ - BorderThickness);
+		layout();
 	}
 }
 
@@ -39,17 +74,29 @@ void XeroItemFrame::resizeEvent(QResizeEvent* ev)
 {
 	if (child_ != nullptr)
 	{
-		child_->setGeometry(BorderThickness, header_height_, width() - 2 * BorderThickness, height() - header_height_ - BorderThickness);
+		layout();
 	}
 }
 
 void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 {
-	QRect r = closeBoxRect();
-	if (r.contains(ev->pos()))
+	if (ev->button() == Qt::LeftButton)
 	{
-		child_->close() ;
-		close();
+		QRect r = closeBoxRect();
+		if (r.contains(ev->pos()))
+		{
+			child_->close();
+			close();
+		}
+		else {
+			QRect r = headerRect();
+			if (r.contains(ev->pos()))
+			{
+				dragging_ = true;
+				mouse_ = ev->globalPos();
+				window_ = frameGeometry().topLeft();
+			}
+		}
 	}
 }
 
@@ -72,4 +119,30 @@ void XeroItemFrame::paintEvent(QPaintEvent* ev)
 	p.drawRect(r);
 	p.drawLine(r.topLeft(), r.bottomRight());
 	p.drawLine(r.topRight(), r.bottomLeft());
+}
+
+void XeroItemFrame::mouseMoveEvent(QMouseEvent* ev)
+{
+	if (dragging_)
+	{
+		QPoint dist = ev->globalPos() - mouse_;
+
+		QPoint dest = window_ + dist;
+		if (dest.x() < 0)
+			dest.setX(0);
+		else if (dest.x() > parentWidget()->width() - width())
+			dest.setX(parentWidget()->width() - width());
+
+		if (dest.y() < 0)
+			dest.setY(0);
+		else if (dest.y() > parentWidget()->height() - height())
+			dest.setY(parentWidget()->height() - height());
+
+		move(dest);
+	}
+}
+
+void XeroItemFrame::mouseReleaseEvent(QMouseEvent* ev)
+{
+	dragging_ = false;
 }

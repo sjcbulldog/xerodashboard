@@ -93,5 +93,4 @@ void NetworkTableTreeWidget::updatedEntryDetected(const QString & name)
 
 void NetworkTableTreeWidget::deletedEntryDetected(const QString& name)
 {
-	qDebug() << "DELETED: " << name;
 }

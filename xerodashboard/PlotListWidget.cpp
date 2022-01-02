@@ -10,7 +10,7 @@ PlotListWidget::PlotListWidget(std::shared_ptr<NetworkTableManager> ntmgr, std::
 {
 	plot_key_ = plotkey;
 	ntmgr_ = ntmgr;
-	plot_mgr_ = plotmgr;
+	plotmgr_ = plotmgr;
 
 	static QStringList labels = { "Name", "Status" };
 	setColumnCount(2);
@@ -99,7 +99,7 @@ QTreeWidgetItem *PlotListWidget::processPlot(const QString &path, QString &plotn
 
 void PlotListWidget::processNewData(QTreeWidgetItem* item, const QString &path, const QString &plotname, const QStringList &key)
 {
-	std::shared_ptr<Plot> plot = plot_mgr_->getAddPlot(plotname);
+	std::shared_ptr<Plot> plot = plotmgr_->getAddPlot(plotname);
 	if (plot == nullptr)
 		return;
 

@@ -18,6 +18,7 @@ protected:
 	void paintEvent(QPaintEvent* ev);
 
 private:
+	void newDetected(const QString& path);
 	void entryUpdateDetected(const QString& path);
 	void disconnectDetected();
 	void connectDetected();

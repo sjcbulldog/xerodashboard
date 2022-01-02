@@ -1,18 +1,30 @@
 #include "DashView.h"
-#include <QtGui/QDragENterEvent>
+#include <QtGui/QDragEnterEvent>
+#include <QtGui/QPainter>
 #include <QtCore/QMimeData>
 #include <QtCore/QDebug>
 #include "XeroItemFrame.h"
 #include "NTValueDisplayWidget.h"
+#include "PlotWidget.h"
 
-DashView::DashView(std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent) : QWidget(parent)
+DashView::DashView(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent) : QWidget(parent)
 {
+	plotmgr_ = plotmgr;
 	ntmgr_ = ntmgr;
 	setAcceptDrops(true);
 }
 
 DashView::~DashView()
 {
+}
+
+void DashView::paintEvent(QPaintEvent* ev)
+{
+	QPainter p(this);
+
+	QBrush br(QColor(192, 192, 192));
+	p.setBrush(br);
+	p.drawRect(0, 0, width(), height());
 }
 
 void DashView::dragEnterEvent(QDragEnterEvent* ev)
@@ -45,6 +57,12 @@ void DashView::dropEvent(QDropEvent* ev)
 	}
 	else if (value.startsWith("PLOT:"))
 	{
+		XeroItemFrame* frame = new XeroItemFrame(this);
+		PlotWidget* vwid = new PlotWidget(plotmgr_, ntmgr_, value.mid(5), frame);
+		frame->setWidget(vwid);
+		frame->setVisible(true);
+		frame->setTitle(value.mid(5));
 
+		frame->setGeometry(ev->pos().x(), ev->pos().y(), frame->width(), frame->height());
 	}
 }

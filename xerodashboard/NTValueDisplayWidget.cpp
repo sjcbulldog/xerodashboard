@@ -1,6 +1,7 @@
 #include "NTValueDisplayWidget.h"
 #include "NetworkTableManager.h"
 #include "NTFormattingUtils.h"
+#include <QtCore/QDebug>
 #include <QtGui/QPainter>
 
 NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> ntmgr, const QString& path, QWidget *parent): QWidget(parent)
@@ -11,8 +12,11 @@ NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> 
 	connected_ = true;
 
 	update_connection_ = connect(ntmgr.get(), &NetworkTableManager::updatedEntry, this, &NTValueDisplayWidget::entryUpdateDetected);
+	update_connection_ = connect(ntmgr.get(), &NetworkTableManager::newEntry, this, &NTValueDisplayWidget::newDetected);
 	disconnect_connection_ = connect(ntmgr.get(), &NetworkTableManager::disconnected, this, &NTValueDisplayWidget::disconnectDetected);
 	connect_connection_ = connect(ntmgr.get(), &NetworkTableManager::connected, this, &NTValueDisplayWidget::connectDetected);
+
+	setMinimumSize(80, 20);
 }
 
 NTValueDisplayWidget::~NTValueDisplayWidget()
@@ -36,6 +40,7 @@ void NTValueDisplayWidget::connectDetected()
 	if (connected_ != true)
 	{
 		connected_ = true;
+		entry_ = ntmgr_->getEntry(path_);
 		update();
 	}
 }
@@ -49,12 +54,25 @@ void NTValueDisplayWidget::entryUpdateDetected(const QString& name)
 	}
 }
 
+void NTValueDisplayWidget::newDetected(const QString& name)
+{
+	if (name == path_)
+	{
+		entry_ = ntmgr_->getEntry(path_);
+		update();
+	}
+}
+
 void NTValueDisplayWidget::paintEvent(QPaintEvent* ev)
 {
+	QPainter p(this);
+
 	auto value = entry_.GetValue();
 	if (value != nullptr && value->IsValid())
 	{
-		QPainter p(this);
+		QBrush back(QColor(255, 255, 255));
+		p.setBrush(back);
+		p.drawRect(0, 0, width(), height());
 
 		if (value->IsBoolean())
 		{
@@ -67,9 +85,10 @@ void NTValueDisplayWidget::paintEvent(QPaintEvent* ev)
 	}
 	else
 	{
-		//
-		// What to draw if the value is not valid, or does not exist
-		//
+		QPen pen(QColor(255, 0, 0));
+		p.setPen(pen);
+		p.drawLine(0, 0, width() - 1, height() - 1);
+		p.drawLine(0, height() - 1, width() - 1, 0);
 	}
 }
 
@@ -79,7 +98,22 @@ void NTValueDisplayWidget::drawContentsBoolean(QPainter& p)
 	assert(value->IsValid());
 	assert(value->IsBoolean());
 
-	QColor color = value->GetBoolean() ? QColor(0, 255, 0) : QColor(255, 0, 0);
+
+	QColor color;
+	
+	if (!connected_)
+	{
+		color = QColor(128, 128, 128);
+	}
+	else if (value->GetBoolean())
+	{
+		color = QColor(0, 255, 0);
+	}
+	else
+	{
+		color = QColor(255, 0, 0);
+	}
+
 	QBrush brush(color);
 	p.setBrush(brush);
 	p.drawRect(0, 0, width(), height());

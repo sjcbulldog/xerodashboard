@@ -48,6 +48,10 @@ public:
 		is_complete_ = false;
 	}
 
+	const QStringList& columns() const {
+		return columns_;
+	}
+
 	void setPoints(int pts) {
 		points_ = pts;
 		checkComplete();

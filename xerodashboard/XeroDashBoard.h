@@ -34,10 +34,10 @@ private:
     void timerCallback();
 
 private:
-    std::shared_ptr<NetworkTableManager> table_mgr_;
+    std::shared_ptr<NetworkTableManager> ntmgr_;
     QTimer timer_;
 
-    std::shared_ptr<PlotMgr> plot_mgr_;
+    std::shared_ptr<PlotMgr> plotmgr_;
 
     QMenu* edit_menu_;
 

@@ -114,6 +114,7 @@
     <ClCompile Include="NTFormattingUtils.cpp" />
     <ClCompile Include="NTValueDisplayWidget.cpp" />
     <ClCompile Include="Plot.cpp" />
+    <ClCompile Include="PlotGraphWidget.cpp" />
     <ClCompile Include="PlotMgr.cpp" />
     <ClCompile Include="PlotWidget.cpp" />
     <ClCompile Include="XeroItemFrame.cpp" />
@@ -151,12 +152,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NTFormattingUtils.h" />
+    <QtMoc Include="PlotGraphWidget.h" />
     <QtMoc Include="PlotWidget.h" />
     <QtMoc Include="NTValueDisplayWidget.h" />
     <QtMoc Include="XeroItemFrame.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="PlotWidget.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

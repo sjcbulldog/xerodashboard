@@ -2,6 +2,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QString>
+#include <QtCore/QMutex>
 #include <networktables/NetworkTableInstance.h>
 
 class NetworkTableManager : public QObject
@@ -35,4 +36,6 @@ private:
 	QStringList deletedEntries_;
 
 	NT_EntryListener listen_;
+
+	QMutex lock_;
 };

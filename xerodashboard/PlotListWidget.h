@@ -32,5 +32,5 @@ private:
 private:
 	QString plot_key_;
 	std::shared_ptr<NetworkTableManager> ntmgr_;
-	std::shared_ptr<PlotMgr> plot_mgr_;
+	std::shared_ptr<PlotMgr> plotmgr_;
 };

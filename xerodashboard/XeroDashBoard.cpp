@@ -8,11 +8,11 @@
 
 XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
 {
-    table_mgr_ = std::make_shared<NetworkTableManager>("127.0.0.1");
+    ntmgr_ = std::make_shared<NetworkTableManager>("127.0.0.1");
     (void)connect(&timer_, &QTimer::timeout, this, &XeroDashBoard::timerCallback);
     timer_.start(std::chrono::milliseconds(100));
 
-    plot_mgr_ = std::make_shared<PlotMgr>(nullptr);
+    plotmgr_ = std::make_shared<PlotMgr>(nullptr);
 
     setMinimumWidth(800);
     setMinimumHeight(600);
@@ -28,23 +28,23 @@ XeroDashBoard::~XeroDashBoard()
 
 void XeroDashBoard::timerCallback()
 {
-    table_mgr_->processNetworkTableEvents();
+    ntmgr_->processNetworkTableEvents();
 }
 
 void XeroDashBoard::createWindows()
 {
-    dash_view_ = new DashView(table_mgr_);
+    dash_view_ = new DashView(plotmgr_, ntmgr_);
     setCentralWidget(dash_view_);
 
     network_table_dock_ = new QDockWidget(tr("Network Table"), this);
     network_table_dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    network_table_view_ = new NetworkTableTreeWidget(table_mgr_, network_table_dock_);
+    network_table_view_ = new NetworkTableTreeWidget(ntmgr_, network_table_dock_);
     network_table_dock_->setWidget(network_table_view_);
     addDockWidget(Qt::LeftDockWidgetArea, network_table_dock_);
 
     plot_list_dock_ = new QDockWidget(tr("Plot List"), this);
     plot_list_dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    plot_list_view_ = new PlotListWidget(table_mgr_, plot_mgr_, "/XeroPlot", plot_list_dock_);
+    plot_list_view_ = new PlotListWidget(ntmgr_, plotmgr_, "/XeroPlot", plot_list_dock_);
     plot_list_dock_->setWidget(plot_list_view_);
     addDockWidget(Qt::LeftDockWidgetArea, plot_list_dock_);
 }
