@@ -1,0 +1,8 @@
+- Display a single item: double, string, boolean
+- Display an array of items: double, string, boolean
+- Display a plot of boolean or numeric key over time
+- Display an error code Xero Plot
+- Display a graphical widget
+- Display video
+- Field view: position of robot, desired position
+
