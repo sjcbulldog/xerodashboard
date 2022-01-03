@@ -97,48 +97,42 @@ QTreeWidgetItem *PlotListWidget::processPlot(const QString &path, QString &plotn
 	return item;
 }
 
-void PlotListWidget::processNewData(QTreeWidgetItem* item, const QString &path, const QString &plotname, const QStringList &key)
+void PlotListWidget::processNewData(QTreeWidgetItem* item, const QString &path, const QString &plotname, const QStringList &keyname)
 {
 	std::shared_ptr<Plot> plot = plotmgr_->getAddPlot(plotname);
 	if (plot == nullptr)
 		return;
 
-	nt::NetworkTableEntry entry = ntmgr_->getEntry(path);
-	auto value = entry.GetValue();
+	QString plotpath = plot_key_ + "/" + plotname + "/";
 
-	if (key.at(0) == "complete")
-	{
-		assert(key.size() == 1);
-		if (value->IsValid() && value->IsBoolean())
-			plot->setComplete(value->GetBoolean());
-	}
-	else if (key.at(0) == "points")
-	{
-		assert(key.size() == 1);
-		if (value->IsValid() && value->IsDouble())
-			plot->setPoints(static_cast<int>(value->GetDouble()));
-	}
-	else if (key.at(0) == "columns")
-	{
-		assert(key.size() == 1);
-		if (value->IsValid() && value->IsStringArray())
-		{
-			QStringList cols;
+	auto value = ntmgr_->getEntry(plotpath + "complete").GetValue();
+	if (value != nullptr && value->IsValid() && value->IsBoolean())
+		plot->setComplete(value->GetBoolean());
 
-			auto colnames = value->GetStringArray();
-			for (int i = 0; i < colnames.size(); i++)
-				cols.push_back(QString::fromStdString(colnames[i]));
-			plot->setColumns(cols);
-		}
-	}
-	else if (key.at(0) == "data")
-	{
-		assert(key.size() == 2);
+	value = ntmgr_->getEntry(plotpath + "points").GetValue();
+	if (value != nullptr && value->IsValid() && value->IsDouble())
+		plot->setPoints(static_cast<int>(value->GetDouble()));
 
+	value = ntmgr_->getEntry(plotpath + "columns").GetValue();
+	if (value != nullptr && value->IsValid() && value->IsStringArray() && plot->columns().size() == 0)
+	{
+		QStringList cols;
+
+		auto colnames = value->GetStringArray();
+		for (int i = 0; i < colnames.size(); i++)
+			cols.push_back(QString::fromStdString(colnames[i]));
+		plot->setColumns(cols);
+	}
+
+	if (keyname.at(0) == "data")
+	{
+		assert(keyname.size() == 2);
+
+		value = ntmgr_->getEntry(plotpath + "data/" + keyname.at(1)).GetValue();
 		if (value->IsValid() && value->IsDoubleArray())
 		{
 			bool ok;
-			int rowno = key.at(1).toInt(&ok);
+			int rowno = keyname.at(1).toInt(&ok);
 			if (ok)
 			{
 				QVector<double> data;
@@ -151,13 +145,18 @@ void PlotListWidget::processNewData(QTreeWidgetItem* item, const QString &path, 
 		}
 	}
 
-	if (plot->isComplete())
-	{
+	switch (plot->state()) {
+	case Plot::State::Complete:
 		item->setText(1, "Complete (" + QString::number(plot->pointsLoaded()) + ")");
-	}
-	else
-	{
+		break;
+
+	case Plot::State::CompleteDisconnected:
+		item->setText(1, "Disconnected (" + QString::number(plot->pointsLoaded()) + ")");
+		break;
+
+	case Plot::State::Reading:
 		item->setText(1, "Reading (" + QString::number(plot->pointsLoaded()) + ")");
+		break;
 	}
 }
 

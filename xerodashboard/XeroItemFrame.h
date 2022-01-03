@@ -29,10 +29,15 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* ev);
 	void resizeEvent(QResizeEvent* ev);
 	void changeEvent(QEvent* ev);
+	void enterEvent(QEvent* ev);
+	void leaveEvent(QEvent* ev);
 
 private:
 	QRect closeBoxRect();
+	QRect maxBoxRect();
 	QRect headerRect();
+	void checkCursor();
+	void checkButtons(const QPoint &pt);
 
 private:
 	static constexpr const int BorderThickness = 1;
@@ -42,6 +47,16 @@ private:
 	QWidget* child_;
 	int header_height_;
 	bool dragging_;
+	bool resize_cursor_;
+	bool resizing_;
+	bool close_highlighted_;
+	bool max_highlighted_;
+	bool is_maximized_;
+	QRect prev_location_;
 	QPoint mouse_;
 	QPoint window_;
+	QSize winsize_;
+
+	QColor header_color_;
+	QColor hilite_color_;
 };

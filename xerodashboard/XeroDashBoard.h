@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtCore/QTimer>
+#include <QtCore/QSettings>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QSplitter>
@@ -22,6 +23,13 @@ public:
     XeroDashBoard(QWidget *parent = Q_NULLPTR);
     virtual ~XeroDashBoard();
 
+protected:
+    void closeEvent(QCloseEvent* ev);
+
+private:
+    static constexpr const char* GeometrySettings = "geometry";
+    static constexpr const char* WindowStateSettings = "windowstate";
+
 private:
     void createWindows();
     void createMenus();
@@ -34,6 +42,8 @@ private:
     void timerCallback();
 
 private:
+    QSettings settings_;
+
     std::shared_ptr<NetworkTableManager> ntmgr_;
     QTimer timer_;
 
@@ -48,4 +58,7 @@ private:
 
     QDockWidget* plot_list_dock_;
     PlotListWidget* plot_list_view_;
+
+    QString key_;
+    QString ipaddr_;
 };

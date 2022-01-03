@@ -8,11 +8,14 @@
 
 XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
 {
-    ntmgr_ = std::make_shared<NetworkTableManager>("127.0.0.1");
+    key_ = "/XeroPlot";
+    ipaddr_ = "127.0.0.1";
+
+    ntmgr_ = std::make_shared<NetworkTableManager>(ipaddr_);
     (void)connect(&timer_, &QTimer::timeout, this, &XeroDashBoard::timerCallback);
     timer_.start(std::chrono::milliseconds(100));
 
-    plotmgr_ = std::make_shared<PlotMgr>(nullptr);
+    plotmgr_ = std::make_shared<PlotMgr>(ntmgr_, key_, nullptr);
 
     setMinimumWidth(800);
     setMinimumHeight(600);
@@ -20,10 +23,23 @@ XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
     createWindows();
     createMenus();
     createStatus();
+
+    if (settings_.contains(GeometrySettings))
+        restoreGeometry(settings_.value(GeometrySettings).toByteArray());
+
+    if (settings_.contains(WindowStateSettings))
+        restoreState(settings_.value(WindowStateSettings).toByteArray());
 }
 
 XeroDashBoard::~XeroDashBoard()
 {
+}
+
+void XeroDashBoard::closeEvent(QCloseEvent* ev)
+{
+    settings_.setValue(GeometrySettings, saveGeometry());
+    settings_.setValue(WindowStateSettings, saveState());
+    QMainWindow::closeEvent(ev);
 }
 
 void XeroDashBoard::timerCallback()
@@ -44,7 +60,7 @@ void XeroDashBoard::createWindows()
 
     plot_list_dock_ = new QDockWidget(tr("Plot List"), this);
     plot_list_dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    plot_list_view_ = new PlotListWidget(ntmgr_, plotmgr_, "/XeroPlot", plot_list_dock_);
+    plot_list_view_ = new PlotListWidget(ntmgr_, plotmgr_, key_, plot_list_dock_);
     plot_list_dock_->setWidget(plot_list_view_);
     addDockWidget(Qt::LeftDockWidgetArea, plot_list_dock_);
 }

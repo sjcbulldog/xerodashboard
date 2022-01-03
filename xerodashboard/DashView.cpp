@@ -3,9 +3,11 @@
 #include <QtGui/QPainter>
 #include <QtCore/QMimeData>
 #include <QtCore/QDebug>
+#include <QtWidgets/QMessageBox>
 #include "XeroItemFrame.h"
 #include "NTValueDisplayWidget.h"
 #include "PlotWidget.h"
+#include "PlotMgr.h"
 
 DashView::DashView(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent) : QWidget(parent)
 {
@@ -57,8 +59,21 @@ void DashView::dropEvent(QDropEvent* ev)
 	}
 	else if (value.startsWith("PLOT:"))
 	{
+		PlotWidget* vwid;
 		XeroItemFrame* frame = new XeroItemFrame(this);
-		PlotWidget* vwid = new PlotWidget(plotmgr_, ntmgr_, value.mid(5), frame);
+
+		try {
+			auto plot = plotmgr_->getPlot(value.mid(5));
+			vwid = new PlotWidget(plotmgr_, ntmgr_, plot, frame);
+		}
+		catch (...)
+		{
+			delete frame;
+			QString msg = "The plot '" + value.mid(5) + "' does not exist";
+			QMessageBox::critical(this, "No Such Plot", msg);
+			return;
+		}
+
 		frame->setWidget(vwid);
 		frame->setVisible(true);
 		frame->setTitle(value.mid(5));

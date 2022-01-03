@@ -1,25 +1,36 @@
 #include "PlotWidget.h"
 #include "PlotMgr.h"
 #include "Plot.h"
-#include "PlotGraphWidget.h"
+#include "PlotContainer.h"
+#include "NetworkTableManager.h"
+#include <stdexcept>
 
-PlotWidget::PlotWidget(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, const QString& plotname, QWidget *parent) : QWidget(parent)
+PlotWidget::PlotWidget(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, std::shared_ptr<Plot> plot, QWidget *parent) : QWidget(parent)
 {
 	ntmgr_ = ntmgr;
 	plotmgr_ = plotmgr;
-	plotname_ = plotname;
+	plot_ = plot;
 
 	setMinimumSize(600, 400);
 
 	createWindows();
+	initPlot();
 
-	auto plot = plotmgr_->getPlot(plotname_);
-	if (plot != nullptr)
-		initPlot(plot);
+	disconnect_connection_ = connect(plot.get(), &Plot::stateChanged, this, &PlotWidget::plotStateChanged);
+
+	if (plot_->isComplete())
+	{
+		busy(false);
+	}
+	else
+	{
+		busy(true);
+	}
 }
 
 PlotWidget::~PlotWidget()
 {
+	disconnect(disconnect_connection_);
 }
 
 void PlotWidget::createWindows()
@@ -46,17 +57,49 @@ void PlotWidget::createWindows()
 	sizes.push_back(splitter_->width() * 7 / 10);
 	splitter_->setSizes(sizes);
 
-	PlotGraphWidget* gr = new PlotGraphWidget(tabs_);
-	tabs_->addTab(gr, plotname_);
+	PlotContainer* gr = new PlotContainer(plot_);
+	tabs_->addTab(gr, plot_->name());
+
+	busy_ = new QLabel("Reading data");
+	QFont font = busy_->font();
+	font.setPointSizeF(24);
+	busy_->setFont(font);
+	busy_->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 }
 
-void PlotWidget::initPlot(std::shared_ptr<Plot> plot)
+void PlotWidget::initPlot()
 {
 	nodes_->clear();
-	for (const QString& col : plot->columns())
+	for (const QString& col : plot_->columns())
 	{
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		item->setText(0, col);
 		nodes_->addTopLevelItem(item);
+	}
+}
+
+void PlotWidget::plotStateChanged(Plot::State oldst, Plot::State newst)
+{
+	if (plot_->isComplete())
+	{
+		busy(false);
+	}
+	else
+	{
+		busy(true);
+	}
+}
+
+void PlotWidget::busy(bool b)
+{
+	if (b)
+	{
+		tabs_->setParent(nullptr);
+		splitter_->addWidget(busy_);
+	}
+	else
+	{
+		busy_->setParent(nullptr);
+		splitter_->addWidget(tabs_);
 	}
 }

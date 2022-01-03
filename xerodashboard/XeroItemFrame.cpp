@@ -1,4 +1,5 @@
 #include "XeroItemFrame.h"
+#include <QtCore/QDebug>
 #include <QtGui/QPainter>
 #include <QtGui/QBrush>
 #include <QtGui/QFontMetrics>
@@ -8,9 +9,21 @@ XeroItemFrame::XeroItemFrame(QWidget *parent) : QWidget(parent)
 {
 	setMinimumSize(10, 10);
 	child_ = nullptr;
+	dragging_ = false;
+	resizing_ = false;
+	resize_cursor_ = false;
 
 	QFontMetrics fm(font());
 	header_height_ = fm.height() + BorderThickness * 2 ;
+
+	setMouseTracking(true);
+
+	close_highlighted_ = false;
+	max_highlighted_ = false;
+	is_maximized_ = false;
+
+	header_color_ = QColor(135, 206, 250);
+	hilite_color_ = QColor(51, 102, 255);
 }
 
 XeroItemFrame::~XeroItemFrame()
@@ -52,6 +65,13 @@ QRect XeroItemFrame::closeBoxRect()
 	return r;
 }
 
+QRect XeroItemFrame::maxBoxRect()
+{
+	int left = width() - BorderThickness - header_height_ - BorderThickness - header_height_;
+	QRect r(left, BorderThickness, header_height_, header_height_);
+	return r;
+}
+
 QRect XeroItemFrame::headerRect()
 {
 	QRect r(0, 0, width(), header_height_ + 2 * BorderThickness);
@@ -80,6 +100,7 @@ void XeroItemFrame::resizeEvent(QResizeEvent* ev)
 
 void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 {
+
 	if (ev->button() == Qt::LeftButton)
 	{
 		QRect r = closeBoxRect();
@@ -87,36 +108,89 @@ void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 		{
 			child_->close();
 			close();
+			return;
 		}
-		else {
-			QRect r = headerRect();
-			if (r.contains(ev->pos()))
+
+		r = maxBoxRect();
+		if (r.contains(ev->pos()))
+		{
+			if (is_maximized_)
 			{
-				dragging_ = true;
-				mouse_ = ev->globalPos();
-				window_ = frameGeometry().topLeft();
+				is_maximized_ = false;
+				setGeometry(prev_location_);
 			}
+			else
+			{
+				prev_location_ = geometry();
+				setGeometry(0, 0, parentWidget()->width(), parentWidget()->height());
+				is_maximized_ = true;
+			}
+			return;
+		}
+
+		r = headerRect();
+		if (r.contains(ev->pos()))
+		{
+			dragging_ = true;
+			mouse_ = ev->globalPos();
+			window_ = frameGeometry().topLeft();
+			return;
+		}
+
+		if (resize_cursor_)
+		{
+			resizing_ = true;
+			mouse_ = ev->globalPos();
+			winsize_ = size();
+			return;
 		}
 	}
 }
 
 void XeroItemFrame::paintEvent(QPaintEvent* ev)
 {
+	QRect r = maxBoxRect();
+
 	QPainter p(this);
 	QFontMetricsF fm(p.font());
 
 	p.setPen(QPen(QColor(0, 0, 0)));
 	p.drawRect(0, 0, width(), height());
 
-	p.setBrush(QBrush(QColor(135, 206, 250)));
+	p.setBrush(QBrush(header_color_));
 	p.drawRect(0, 0, width(), header_height_ + BorderThickness * 2);
-	
-	QPoint pt(width() / 2 - fm.horizontalAdvance(title_) / 2, BorderThickness + fm.ascent());
+
+	int x = width() / 2 - fm.horizontalAdvance(title_) / 2;
+	if (x + fm.horizontalAdvance(title_) > r.left())
+		x = BorderThickness;
+	QPoint pt(x, BorderThickness + fm.ascent());
 	p.drawText(pt, title_);
 
+	// Draw the max button
+	if (max_highlighted_)
+	{
+		p.setBrush(QBrush(hilite_color_));
+		p.drawRect(r);
+	}
 	p.setBrush(Qt::BrushStyle::NoBrush);
-	QRect r = closeBoxRect();
+	r.adjust(2, 2, -2, -2);
 	p.drawRect(r);
+	if (is_maximized_)
+	{
+		r.adjust(-2, 2, -2, 2);
+		p.drawRect(r);
+	}
+
+	// Draw the close button
+	r = closeBoxRect();
+	if (close_highlighted_)
+	{
+		p.setBrush(QBrush(hilite_color_));
+		p.drawRect(r);
+	}
+	p.setBrush(Qt::BrushStyle::NoBrush);
+	r.adjust(2, 2, -2, -2);
+
 	p.drawLine(r.topLeft(), r.bottomRight());
 	p.drawLine(r.topRight(), r.bottomLeft());
 }
@@ -140,9 +214,89 @@ void XeroItemFrame::mouseMoveEvent(QMouseEvent* ev)
 
 		move(dest);
 	}
+	else if (resizing_)
+	{
+		QPoint dist = ev->globalPos() - mouse_;
+		int w = winsize_.width() + dist.x();
+		int h = winsize_.height() + dist.y();
+		setGeometry(pos().x(), pos().y(), w, h);
+	}
+	else
+	{
+		checkCursor();
+		checkButtons(ev->pos());
+	}
+}
+
+void XeroItemFrame::checkButtons(const QPoint &pt)
+{
+	bool newvalue = false;
+
+	QRect r = closeBoxRect();
+	if (r.contains(pt))
+	{
+		newvalue = true;
+	}
+	else
+	{
+		newvalue = false;
+	}
+
+	if (newvalue != close_highlighted_)
+	{
+		close_highlighted_ = newvalue;
+		update();
+	}
+
+	r = maxBoxRect();
+	if (r.contains(pt))
+	{
+		newvalue = true;
+	}
+	else
+	{
+		newvalue = false;
+	}
+
+	if (newvalue != max_highlighted_)
+	{
+		max_highlighted_ = newvalue;
+		update();
+	}
+}
+
+void XeroItemFrame::checkCursor()
+{
+	QPoint gpos = QCursor::pos();
+	QPoint wpos = mapFromGlobal(gpos);
+	QPoint diff = wpos - QPoint(width(), height());
+	if (std::abs(diff.x()) < 8 && std::abs(diff.y()) < 8)
+	{
+		setCursor(Qt::SizeFDiagCursor);
+		resize_cursor_ = true;
+		grabMouse();
+	}
+	else
+	{
+		releaseMouse();
+		setCursor(Qt::ArrowCursor);
+		resize_cursor_ = false;
+	}
 }
 
 void XeroItemFrame::mouseReleaseEvent(QMouseEvent* ev)
 {
 	dragging_ = false;
+	resizing_ = false;
+}
+
+void XeroItemFrame::enterEvent(QEvent* ev)
+{
+	checkCursor();
+}
+
+void XeroItemFrame::leaveEvent(QEvent* ev)
+{
+	setCursor(Qt::ArrowCursor);
+	resize_cursor_ = false;
 }

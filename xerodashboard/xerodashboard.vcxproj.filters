@@ -70,7 +70,16 @@
     <ClCompile Include="PlotWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PlotGraphWidget.cpp">
+    <ClCompile Include="PlotContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SingleChart.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Callout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TabEditName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -108,12 +117,21 @@
     <QtMoc Include="PlotWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="PlotGraphWidget.h">
+    <QtMoc Include="PlotContainer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TabEditName.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NTFormattingUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SingleChart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Callout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -32,12 +32,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>5.15.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;charts</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>5.15.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;charts</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -111,12 +111,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Callout.cpp" />
     <ClCompile Include="NTFormattingUtils.cpp" />
     <ClCompile Include="NTValueDisplayWidget.cpp" />
     <ClCompile Include="Plot.cpp" />
-    <ClCompile Include="PlotGraphWidget.cpp" />
+    <ClCompile Include="PlotContainer.cpp" />
     <ClCompile Include="PlotMgr.cpp" />
     <ClCompile Include="PlotWidget.cpp" />
+    <ClCompile Include="SingleChart.cpp" />
+    <ClCompile Include="TabEditName.cpp" />
     <ClCompile Include="XeroItemFrame.cpp" />
     <ClCompile Include="XeroTreeWidgetBase.cpp" />
     <QtRcc Include="xerodashboard.qrc" />
@@ -151,8 +154,11 @@
     <QtMoc Include="PlotMgr.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Callout.h" />
     <ClInclude Include="NTFormattingUtils.h" />
-    <QtMoc Include="PlotGraphWidget.h" />
+    <ClInclude Include="SingleChart.h" />
+    <QtMoc Include="TabEditName.h" />
+    <QtMoc Include="PlotContainer.h" />
     <QtMoc Include="PlotWidget.h" />
     <QtMoc Include="NTValueDisplayWidget.h" />
     <QtMoc Include="XeroItemFrame.h" />
