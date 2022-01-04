@@ -6,6 +6,7 @@
 
 class NetworkTableManager;
 class PlotMgr;
+class Plot;
 
 class PlotListWidget : public XeroTreeWidgetBase
 {
@@ -25,9 +26,9 @@ private:
 
 	bool processPlotKeyString(const QString& str, QString& plotname, QStringList& key);
 
-	QTreeWidgetItem* findTopLevelItem(const QString& name);
-	QTreeWidgetItem* processPlot(const QString& path, QString& plotname, QStringList& key);
-	void processNewData(QTreeWidgetItem *item, const QString& path, const QString& plotname, const QStringList& key);
+	void updatePlotStatus(std::shared_ptr<Plot> plot);
+
+	void readExistingPlots();
 
 private:
 	QString plot_key_;

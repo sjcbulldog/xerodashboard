@@ -784,8 +784,4 @@ void SingleChart::dataAdded()
 
 void SingleChart::plotStateChanged(Plot::State oldst, Plot::State newst)
 {
-	if (plot_->isComplete())
-		dataAdded();
-	else
-		setEnabled(false);
 }

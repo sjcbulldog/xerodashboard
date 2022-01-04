@@ -28,6 +28,14 @@ public:
 			selected_->editTitle();
 	}
 
+	int count() const {
+		return charts_.size();
+	}
+
+	SingleChart* chart(int index) {
+		return charts_[index];
+	}
+
 protected:
 	virtual void keyPressEvent(QKeyEvent* ev) override;
 	virtual void paintEvent(QPaintEvent* ev) override;

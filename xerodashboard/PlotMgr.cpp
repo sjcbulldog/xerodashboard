@@ -39,3 +39,42 @@ std::shared_ptr<Plot> PlotMgr::getPlot(const QString& name)
 
 	return ret;
 }
+
+QString PlotMgr::extractPlotName(const QString& keyname)
+{
+	QString ret;
+
+	assert(keyname.startsWith(key_));
+	QString str = keyname.mid(key_.length());
+	int index = str.indexOf('/');
+	if (index == -1)
+		ret = str;
+	else
+		ret = str.mid(0, index);
+
+	return ret;
+}
+
+
+std::shared_ptr<Plot> PlotMgr::processNewKey(const QString& keyname)
+{
+	QString name = extractPlotName(keyname);
+	auto plot = getAddPlot(name);
+	plot->readData();
+
+	return plot;
+}
+
+std::shared_ptr<Plot> PlotMgr::processUpdatedKey(const QString& keyname)
+{
+	QString name = extractPlotName(keyname);
+	auto plot = getAddPlot(name);
+	plot->readData();
+
+	return plot;
+}
+
+QString PlotMgr::processDeletedKey(const QString& keyname)
+{
+	return extractPlotName(keyname);
+}

@@ -4,6 +4,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QVector>
+#include <networktables/NetworkTableEntry.h>
 #include <memory>
 
 class NetworkTableManager;
@@ -25,6 +26,8 @@ public:
 	Plot(std::shared_ptr<NetworkTableManager> ntmgr, const QString &key, const QString& name);
 	virtual ~Plot();
 
+	QString statusString();
+
 	bool isDisconnected() const {
 		return state_ == State::CompleteDisconnected || state_ == State::ReadingDisconnected;
 	}
@@ -45,42 +48,9 @@ public:
 		return std::count(hasdata_.begin(), hasdata_.end(), true);
 	}
 
-	void setComplete(bool comp) {
-		if (saw_complete_ == true && comp == false)
-		{
-			points_ = -1;
-			hasdata_.resize(0);
-			data_.resize(0);
-			columns_.clear();
-		}
-
-		saw_complete_ = comp;
-		if (comp == false)
-		{
-			changeState(State::Reading);
-		}
-		else
-		{
-			checkComplete();
-		}
-	}
-
-	void setColumns(const QStringList& cols) {
-		columns_ = cols;
-		points_ = -1;
-		changeState(State::Reading);
-	}
-
 	const QStringList& columns() const {
 		return columns_;
 	}
-
-	void setPoints(int pts) {
-		points_ = pts;
-		checkComplete();
-	}
-
-	void addData(int rowno, const QVector<double>& row);
 
 	int getColumnIndex(const QString& name) const {
 		for (int i = 0; i < columns_.size(); i++)
@@ -108,6 +78,8 @@ public:
 		return data_[row];
 	}
 
+	void readData();
+
 signals:
 	void stateChanged(State oldst, State newst);
 
@@ -117,13 +89,14 @@ private:
 	void changeState(State newst);
 	void readRowData(int row);
 
+	std::shared_ptr<nt::Value> getPlotValue(const QString& name);
+
 private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;
 	QMetaObject::Connection disconnect_connection_;
 	QString key_;
 
 	State state_;
-	bool saw_complete_;
 	QString name_;
 	int points_;
 	QStringList columns_;

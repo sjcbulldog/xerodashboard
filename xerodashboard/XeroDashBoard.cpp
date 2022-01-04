@@ -8,7 +8,7 @@
 
 XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
 {
-    key_ = "/XeroPlot";
+    key_ = "/XeroPlot/";
     ipaddr_ = "127.0.0.1";
 
     ntmgr_ = std::make_shared<NetworkTableManager>(ipaddr_);

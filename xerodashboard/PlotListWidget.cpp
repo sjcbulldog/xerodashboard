@@ -25,10 +25,22 @@ PlotListWidget::PlotListWidget(std::shared_ptr<NetworkTableManager> ntmgr, std::
 	(void)connect(ntmgr_.get(), &NetworkTableManager::newEntry, this, &PlotListWidget::newEntryDetected);
 	(void)connect(ntmgr_.get(), &NetworkTableManager::updatedEntry, this, &PlotListWidget::updatedEntryDetected);
 	(void)connect(ntmgr_.get(), &NetworkTableManager::deletedEntry, this, &PlotListWidget::deletedEntryDetected);
+
+	readExistingPlots();
 }
 
 PlotListWidget::~PlotListWidget()
 {
+}
+
+void PlotListWidget::readExistingPlots()
+{
+	QStringList keys = ntmgr_->getSubKeys(plot_key_);
+	for (const QString& key : keys)
+	{
+		QString longname = plot_key_ + key;
+		newEntryDetected(longname);
+	}
 }
 
 QMimeData* PlotListWidget::mimeData(const QList<QTreeWidgetItem*> items) const
@@ -42,18 +54,6 @@ QMimeData* PlotListWidget::mimeData(const QList<QTreeWidgetItem*> items) const
 	}
 
 	return data;
-}
-
-QTreeWidgetItem* PlotListWidget::findTopLevelItem(const QString& name)
-{
-	for (int i = 0; i < topLevelItemCount(); i++)
-	{
-		auto item = topLevelItem(i);
-		if (item->text(0) == name)
-			return item;
-	}
-
-	return nullptr;
 }
 
 bool PlotListWidget::processPlotKeyString(const QString& name, QString& plotname, QStringList& key)
@@ -77,87 +77,17 @@ bool PlotListWidget::processPlotKeyString(const QString& name, QString& plotname
 	return ret;
 }
 
-QTreeWidgetItem *PlotListWidget::processPlot(const QString &path, QString &plotname, QStringList &key)
+void PlotListWidget::updatePlotStatus(std::shared_ptr<Plot> plot)
 {
-	QTreeWidgetItem* item = nullptr;
-
-	if (processPlotKeyString(path, plotname, key))
+	auto item = findTopLevelItem(plot->name());
+	if (item == nullptr)
 	{
-		item = findTopLevelItem(plotname);
-		if (item == nullptr)
-		{
-			item = new QTreeWidgetItem();
-			item->setText(0, plotname);
-			item->setText(1, "Reading");
-			addTopLevelItem(item);
-			sortItems(0, Qt::SortOrder::AscendingOrder);
-		}
+		item = new QTreeWidgetItem();
+		item->setText(0, plot->name());
+		addTopLevelItem(item);
 	}
 
-	return item;
-}
-
-void PlotListWidget::processNewData(QTreeWidgetItem* item, const QString &path, const QString &plotname, const QStringList &keyname)
-{
-	std::shared_ptr<Plot> plot = plotmgr_->getAddPlot(plotname);
-	if (plot == nullptr)
-		return;
-
-	QString plotpath = plot_key_ + "/" + plotname + "/";
-
-	auto value = ntmgr_->getEntry(plotpath + "complete").GetValue();
-	if (value != nullptr && value->IsValid() && value->IsBoolean())
-		plot->setComplete(value->GetBoolean());
-
-	value = ntmgr_->getEntry(plotpath + "points").GetValue();
-	if (value != nullptr && value->IsValid() && value->IsDouble())
-		plot->setPoints(static_cast<int>(value->GetDouble()));
-
-	value = ntmgr_->getEntry(plotpath + "columns").GetValue();
-	if (value != nullptr && value->IsValid() && value->IsStringArray() && plot->columns().size() == 0)
-	{
-		QStringList cols;
-
-		auto colnames = value->GetStringArray();
-		for (int i = 0; i < colnames.size(); i++)
-			cols.push_back(QString::fromStdString(colnames[i]));
-		plot->setColumns(cols);
-	}
-
-	if (keyname.at(0) == "data")
-	{
-		assert(keyname.size() == 2);
-
-		value = ntmgr_->getEntry(plotpath + "data/" + keyname.at(1)).GetValue();
-		if (value->IsValid() && value->IsDoubleArray())
-		{
-			bool ok;
-			int rowno = keyname.at(1).toInt(&ok);
-			if (ok)
-			{
-				QVector<double> data;
-				auto values = value->GetDoubleArray();
-				for (int i = 0; i < values.size(); i++)
-					data.push_back(values[i]);
-
-				plot->addData(rowno, data);
-			}
-		}
-	}
-
-	switch (plot->state()) {
-	case Plot::State::Complete:
-		item->setText(1, "Complete (" + QString::number(plot->pointsLoaded()) + ")");
-		break;
-
-	case Plot::State::CompleteDisconnected:
-		item->setText(1, "Disconnected (" + QString::number(plot->pointsLoaded()) + ")");
-		break;
-
-	case Plot::State::Reading:
-		item->setText(1, "Reading (" + QString::number(plot->pointsLoaded()) + ")");
-		break;
-	}
+	item->setText(1, plot->statusString());
 }
 
 void PlotListWidget::newEntryDetected(const QString& name)
@@ -167,11 +97,9 @@ void PlotListWidget::newEntryDetected(const QString& name)
 
 	if (name.startsWith(plot_key_))
 	{
-		auto item = processPlot(name, plotname, key);
-		if (item != nullptr)
-		{
-			processNewData(item, name, plotname, key);
-		}
+		auto plot = plotmgr_->processNewKey(name);
+		if (plot != nullptr)
+			updatePlotStatus(plot);
 	}
 }
 
@@ -182,25 +110,19 @@ void PlotListWidget::updatedEntryDetected(const QString& name)
 
 	if (name.startsWith(plot_key_))
 	{
-		auto item = processPlot(name, plotname, key);
-		if (item != nullptr)
-		{
-			processNewData(item, name, plotname, key);
-		}
+		auto plot = plotmgr_->processUpdatedKey(name);
+		if (plot != nullptr)
+			updatePlotStatus(plot);
 	}
 }
 
-void PlotListWidget::deletedEntryDetected(const QString& path)
+void PlotListWidget::deletedEntryDetected(const QString& name)
 {
 	QString plotname;
 	QStringList key;
 
-	if (path.startsWith(plot_key_))
+	if (name.startsWith(plot_key_))
 	{
-		if (processPlotKeyString(path, plotname, key))
-		{
-			auto item = findTopLevelItem(plotname);
-			item->setText(2, "Deleted");
-		}
+		plotmgr_->processDeletedKey(name);
 	}
 }

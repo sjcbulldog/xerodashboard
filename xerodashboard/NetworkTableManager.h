@@ -16,6 +16,7 @@ public:
 	void processNetworkTableEvents();
 
 	nt::NetworkTableEntry getEntry(const QString& name);
+	QStringList getSubKeys(const QString& name);
 
 signals:
 	void newEntry(const QString &entry);

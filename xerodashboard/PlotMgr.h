@@ -22,7 +22,14 @@ public:
 		plots_.remove(name);
 	}
 
+	std::shared_ptr<Plot> processNewKey(const QString& keyname);
+	std::shared_ptr<Plot> processUpdatedKey(const QString& keyname);
+	QString processDeletedKey(const QString& keyname);
+
 signals:
+
+private:
+	QString extractPlotName(const QString& key);
 
 private:
 	QString key_;

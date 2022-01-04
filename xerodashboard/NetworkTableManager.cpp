@@ -27,6 +27,26 @@ nt::NetworkTableEntry NetworkTableManager::getEntry(const QString& name)
 	return inst_.GetEntry(name.toStdString());
 }
 
+QStringList NetworkTableManager::getSubKeys(const QString& name)
+{
+	QStringList ret;
+	QString tname = name;
+
+	if (tname.endsWith("/"))
+		tname = tname.mid(0, tname.length() - 1);
+
+	auto table = inst_.GetTable(tname.toStdString());
+	auto keys = table->GetSubTables();
+	for (int i = 0; i < keys.size(); i++)
+	{
+		QString qname = QString::fromStdString(keys[i]);
+		if (!ret.contains(qname))
+			ret.push_back(qname);
+	}
+
+	return ret;
+}
+
 void NetworkTableManager::listenNotify(const nt::EntryNotification& ev)
 {
 	QString name = QString::fromStdString(ev.name);
