@@ -1,6 +1,7 @@
 #include "NTValueDisplayWidget.h"
 #include "NetworkTableManager.h"
 #include "NTFormattingUtils.h"
+#include "JsonFieldNames.h"
 #include <QtCore/QDebug>
 #include <QtGui/QPainter>
 
@@ -17,6 +18,8 @@ NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> 
 	connect_connection_ = connect(ntmgr.get(), &NetworkTableManager::connected, this, &NTValueDisplayWidget::connectDetected);
 
 	setMinimumSize(80, 20);
+
+	display_type_ = "text";
 }
 
 NTValueDisplayWidget::~NTValueDisplayWidget()
@@ -24,6 +27,21 @@ NTValueDisplayWidget::~NTValueDisplayWidget()
 	disconnect(update_connection_);
 	disconnect(disconnect_connection_);
 	disconnect(connect_connection_);
+}
+
+QJsonObject NTValueDisplayWidget::getJSONDesc() const
+{
+	QJsonObject obj;
+
+	obj[JsonFieldNames::Type] = JsonFieldNames::TypeValueNTV;
+	obj[JsonFieldNames::Display] = display_type_;
+	obj[JsonFieldNames::Path] = path_;
+	obj[JsonFieldNames::X] = pos().x();
+	obj[JsonFieldNames::Y] = pos().y();
+	obj[JsonFieldNames::Width] = width();
+	obj[JsonFieldNames::Height] = height();
+
+	return obj;
 }
 
 void NTValueDisplayWidget::disconnectDetected()

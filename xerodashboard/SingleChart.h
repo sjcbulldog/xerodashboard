@@ -10,12 +10,13 @@
 #include <memory>
 #include "Callout.h"
 #include "TabEditName.h"
+#include "PlotMgr.h"
 #include "Plot.h"
 
 class SingleChart : public QtCharts::QChartView
 {
 public:
-	SingleChart(QString units, std::shared_ptr<Plot> plot, QWidget *parent = Q_NULLPTR);
+	SingleChart(QString units, std::shared_ptr<PlotMgr> plot, const QString &plotname, QWidget *parent = Q_NULLPTR);
 	~SingleChart();
 
 	void setUnits(QString units);
@@ -33,6 +34,11 @@ public:
 
 	void highlight(bool high);
 
+	QJsonObject getJSONDesc() const;
+	bool restoreFromJson(const QJsonObject& obj);
+
+	void insertNode(const QString& node);
+
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event) override;
 	virtual void dragMoveEvent(QDragMoveEvent* event) override;
@@ -43,10 +49,11 @@ protected:
 	virtual void focusInEvent(QFocusEvent* ev) override;
 
 private:
-	void insertNode(const QString &node);
 	QtCharts::QValueAxis* findAxis(QString axisname);
 	QtCharts::QLineSeries* findSeries(QString node);
 	QString nodeToAxis(QString node);
+
+	void initChart();
 
 	void setMinMax(const std::string& name, double minv, double maxv);
 	void getMinMax(const std::string& name, double &minv, double &maxv);
@@ -71,9 +78,20 @@ private:
 
 	void plotStateChanged(Plot::State oldst, Plot::State newst);
 
+	bool attachPlot();
+	void resetNodes();
+
+	void plotAddedDetected(const QString& plotname);
+
 private:
-	// The plot we are displaying
+	// The plot we are displaying, may be null
 	std::shared_ptr<Plot> plot_;
+
+	// The plot manager
+	std::shared_ptr<PlotMgr> plotmgr_;
+
+	// The plot we are displaying
+	QString plotname_;
 
 	// The time axis for the graph
 	QtCharts::QValueAxis* time_;
@@ -120,6 +138,9 @@ private:
 	// The current mouse position
 	QPointF mouse_;
 
+	// The nodes added to the chart
+	QStringList nodes_;
+
 	bool first_point_;
 	bool first_valid_;
 	bool second_valid_;
@@ -131,4 +152,8 @@ private:
 	QGraphicsRectItem* rect_item_;
 
 	std::list<QGraphicsSimpleTextItem*> text_items_;
+
+	bool is_complete_;
+
+	QMetaObject::Connection plot_added_connection_;
 };

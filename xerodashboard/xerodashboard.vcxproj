@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Callout.h" />
+    <ClInclude Include="JsonFieldNames.h" />
     <ClInclude Include="NTFormattingUtils.h" />
     <ClInclude Include="SingleChart.h" />
     <QtMoc Include="TabEditName.h" />

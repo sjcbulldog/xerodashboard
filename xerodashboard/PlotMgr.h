@@ -27,6 +27,7 @@ public:
 	QString processDeletedKey(const QString& keyname);
 
 signals:
+	void plotAdded(const QString &plotname);
 
 private:
 	QString extractPlotName(const QString& key);

@@ -1,8 +1,7 @@
-- Display a single item: double, string, boolean
-- Display an array of items: double, string, boolean
-- Display a plot of boolean or numeric key over time
-- Display an error code Xero Plot
-- Display a graphical widget
-- Display video
-- Field view: position of robot, desired position
+Resize right, bottom
+Hover over NTValueDisplayWidget title part to get full path of Network Table Entry
+Display an array of items: double, string, boolean
+Display robot position on field
+Bar display of specific NTValueDisplayWidget items
+Concept of currently selected item on dashboard
 

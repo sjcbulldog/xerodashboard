@@ -23,6 +23,8 @@ std::shared_ptr<Plot> PlotMgr::getAddPlot(const QString& name)
 	{
 		ret = std::make_shared<Plot>(ntmgr_, key_, name);
 		plots_.insert(name, ret);
+
+		emit plotAdded(name);
 	}
 
 	return ret;

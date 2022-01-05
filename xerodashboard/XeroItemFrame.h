@@ -14,6 +14,10 @@ public:
 		title_ = title;
 	}
 
+	const QString& title() const {
+		return title_;
+	}
+
 	void setWidget(QWidget* child) {
 		child_ = child;
 		child_->setVisible(true);

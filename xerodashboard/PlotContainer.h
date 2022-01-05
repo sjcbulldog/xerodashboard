@@ -7,14 +7,14 @@
 #include <vector>
 #include <memory>
 
-class Plot;
+class PlotMgr;
 
 class PlotContainer : public QWidget
 {
 	Q_OBJECT
 
 public:
-	PlotContainer(std::shared_ptr<Plot> plot, QWidget *parent = Q_NULLPTR);
+	PlotContainer(std::shared_ptr<PlotMgr> plotmgr, const QString &plotname, QWidget *parent = Q_NULLPTR);
 	~PlotContainer();
 
 	void childFocused(SingleChart*);
@@ -36,6 +36,11 @@ public:
 		return charts_[index];
 	}
 
+	QJsonArray getJSONDesc() const;
+	bool restoreFromJson(const QJsonArray& charts);
+
+	void removeAllCharts();
+
 protected:
 	virtual void keyPressEvent(QKeyEvent* ev) override;
 	virtual void paintEvent(QPaintEvent* ev) override;
@@ -43,9 +48,11 @@ protected:
 
 private:
 	void arrangeCharts();
+	void removeChart(SingleChart* ch);
 
 private:
-	std::shared_ptr<Plot> plot_;
+	std::shared_ptr<PlotMgr> plotmgr_;
+	QString plotname_;
 	QGridLayout* layout_;
 	SingleChart* selected_;
 	std::vector<SingleChart *> charts_;

@@ -29,6 +29,7 @@ protected:
 private:
     static constexpr const char* GeometrySettings = "geometry";
     static constexpr const char* WindowStateSettings = "windowstate";
+    static constexpr const char* LayoutSetting = "layout";
 
 private:
     void createWindows();

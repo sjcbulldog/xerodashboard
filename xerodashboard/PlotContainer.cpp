@@ -1,9 +1,11 @@
 #include "PlotContainer.h"
 #include <QtCore/QJsonObject>
+#include "JsonFieldNames.h"
 
-PlotContainer::PlotContainer(std::shared_ptr<Plot> plot, QWidget *parent) : QWidget(parent)
+PlotContainer::PlotContainer(std::shared_ptr<PlotMgr> plotmgr, const QString &plotname, QWidget *parent) : QWidget(parent)
 {
-	plot_ = plot;
+	plotmgr_ = plotmgr;
+	plotname_ = plotname;
 	selected_ = nullptr;
 	layout_ = new QGridLayout(this);
 
@@ -13,7 +15,7 @@ PlotContainer::PlotContainer(std::shared_ptr<Plot> plot, QWidget *parent) : QWid
 
 	units_ = "in";
 
-	SingleChart* ch = new SingleChart(units_, plot_, this);
+	SingleChart* ch = new SingleChart(units_, plotmgr_, plotname_, this);
 	charts_.push_back(ch);
 	layout_->addWidget(ch, 0, 0);
 	arrangeCharts();
@@ -21,6 +23,50 @@ PlotContainer::PlotContainer(std::shared_ptr<Plot> plot, QWidget *parent) : QWid
 
 PlotContainer::~PlotContainer()
 {
+}
+
+QJsonArray PlotContainer::getJSONDesc() const 
+{
+	QJsonArray arr;
+
+	for (int i = 0; i < charts_.size(); i++)
+	{
+		auto ch = charts_.at(i);
+		arr.push_back(ch->getJSONDesc());
+	}
+
+	return arr;
+}
+
+bool PlotContainer::restoreFromJson(const QJsonArray& charts)
+{
+	for (int i = 0; i < charts.size(); i++)
+	{
+		if (charts.at(i).isObject())
+		{
+			QJsonObject obj = charts.at(i).toObject();
+
+			SingleChart* ch = new SingleChart(units_, plotmgr_, plotname_, this);
+			charts_.push_back(ch);
+			layout_->addWidget(ch);
+			arrangeCharts();
+
+			if (obj.contains(JsonFieldNames::NodeList) && obj.value(JsonFieldNames::NodeList).isArray())
+			{
+				QJsonArray nodes = obj.value(JsonFieldNames::NodeList).toArray();
+				for (int j = 0; j < nodes.count(); j++)
+				{
+					qDebug() << "NODE " << j << ": " << nodes.at(j).toString();
+					if (nodes.at(j).isString())
+					{
+						ch->insertNode(nodes.at(j).toString());
+					}
+				}
+			}
+		}
+	}
+
+	return true;
 }
 
 void PlotContainer::setUnits(QString units)
@@ -44,6 +90,28 @@ void PlotContainer::childFocused(SingleChart* ch)
 	}
 }
 
+void PlotContainer::removeAllCharts()
+{
+	while (charts_.size() > 0)
+	{
+		SingleChart* ch = charts_.at(0);
+		removeChart(ch);
+	}
+}
+
+void PlotContainer::removeChart(SingleChart* ch)
+{
+	auto it = std::find(charts_.begin(), charts_.end(), ch);
+	if (it != charts_.end())
+	{
+		layout_->removeWidget(selected_);
+		charts_.erase(it);
+		delete ch;
+
+		arrangeCharts();
+	}
+}
+
 void PlotContainer::keyPressEvent(QKeyEvent *ev)
 {
 	if (ev->key() == Qt::Key::Key_Insert)
@@ -51,24 +119,17 @@ void PlotContainer::keyPressEvent(QKeyEvent *ev)
 		if (charts_.size() == 9)
 			return;
 
-		SingleChart* ch = new SingleChart(units_, plot_, this);
+		SingleChart* ch = new SingleChart(units_, plotmgr_, plotname_, this);
 		charts_.push_back(ch);
 		layout_->addWidget(ch);
 		arrangeCharts();
 	}
 	else if (ev->key() == Qt::Key::Key_Delete)
 	{
-		auto it = std::find(charts_.begin(), charts_.end(), selected_);
-		if (it != charts_.end())
+		removeChart(selected_);
+		if (charts_.size() > 0)
 		{
-			layout_->removeWidget(selected_);
-			charts_.erase(it);
-			delete selected_;
-			selected_ = nullptr;
-			if (charts_.size() > 0)
-				selected_ = charts_.front();
-
-			arrangeCharts();
+			selected_ = charts_.at(0);
 		}
 	}
 }

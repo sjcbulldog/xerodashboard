@@ -100,14 +100,15 @@ void XeroItemFrame::resizeEvent(QResizeEvent* ev)
 
 void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 {
-
 	if (ev->button() == Qt::LeftButton)
 	{
 		QRect r = closeBoxRect();
 		if (r.contains(ev->pos()))
 		{
-			child_->close();
+			if (child_ != nullptr)
+				child_->close();
 			close();
+			deleteLater();
 			return;
 		}
 
@@ -173,7 +174,7 @@ void XeroItemFrame::paintEvent(QPaintEvent* ev)
 		p.drawRect(r);
 	}
 	p.setBrush(Qt::BrushStyle::NoBrush);
-	r.adjust(2, 2, -2, -2);
+	r.adjust(4, 4, -4, -4);
 	p.drawRect(r);
 	if (is_maximized_)
 	{

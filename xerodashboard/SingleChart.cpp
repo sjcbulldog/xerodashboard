@@ -5,30 +5,93 @@
 #include <QtWidgets/QMessageBox>
 #include "PlotContainer.h"
 #include "Plot.h"
+#include "JsonFieldNames.h"
 
 using namespace QtCharts;
 
-SingleChart::SingleChart(QString units, std::shared_ptr<Plot> plot, QWidget *parent) : QChartView(parent)
+SingleChart::SingleChart(QString units, std::shared_ptr<PlotMgr> plotmgr, const QString &plotname, QWidget *parent) : QChartView(parent)
 {
-	plot_ = plot;
-
-	chart()->setDropShadowEnabled(false);
-	chart()->setAnimationOptions(QChart::AnimationOption::NoAnimation);
-
-	setAcceptDrops(true);
-
+	plotmgr_ = plotmgr;
+	plotname_ = plotname;
+	units_ = units;
 	time_ = nullptr;
 	legend_ = nullptr;
 
+	plot_added_connection_ = connect(plotmgr.get(), &PlotMgr::plotAdded, this, &SingleChart::plotAddedDetected);
+
+	initChart();
+	attachPlot();
+}
+
+SingleChart::~SingleChart()
+{
+	if (plot_ != nullptr)
+	{
+		disconnect(connection_);
+	}
+
+	disconnect(plot_added_connection_);
+}
+
+void SingleChart::plotAddedDetected(const QString& plotname)
+{
+	if (plotname_ == plotname)
+		attachPlot();
+}
+
+bool SingleChart::attachPlot()
+{
+	if (plot_ != nullptr && plot_->name() == plotname_)
+		return true;
+
+	assert(plot_ == nullptr);
+	plot_ = plotmgr_->getPlot(plotname_);
+	if (plot_ != nullptr)
+	{
+		is_complete_ = plot_->isComplete();
+		connection_ = connect(plot_.get(), &Plot::stateChanged, this, &SingleChart::plotStateChanged);
+	}
+
+	return plot_ != nullptr;
+}
+
+QJsonObject SingleChart::getJSONDesc() const
+{
+	QJsonObject obj;
+
+	obj[JsonFieldNames::NodeList] = QJsonArray::fromStringList(nodes_);
+
+	return obj;
+}
+
+bool SingleChart::restoreFromJson(const QJsonObject& obj)
+{
+	if (!obj.contains(JsonFieldNames::NodeList) || !obj.value(JsonFieldNames::NodeList).isArray())
+		return false;
+
+	nodes_.clear();
+
+	QJsonArray nodes = obj.value(JsonFieldNames::NodeList).toArray();
+	for (int i = 0; i < nodes.size(); i++)
+	{
+		if (nodes.at(i).isString())
+			nodes_.push_back(nodes.at(i).toString());
+	}
+
+	resetNodes();
+
+	return true;
+}
+
+void SingleChart::initChart()
+{
 	tminv_ = std::numeric_limits<double>::max();
 	tmaxv_ = std::numeric_limits<double>::min();
 
 	total_scroll_x_ = 0;
 	total_scroll_y_ = 0;
 
-	setRubberBand(QChartView::RectangleRubberBand);
 
-	units_ = units;
 	callout_ = nullptr;
 	first_ = nullptr;
 
@@ -44,12 +107,10 @@ SingleChart::SingleChart(QString units, std::shared_ptr<Plot> plot, QWidget *par
 
 	rect_item_ = nullptr;
 
-	connection_ = connect(plot.get(), &Plot::stateChanged, this, &SingleChart::plotStateChanged);
-}
-
-SingleChart::~SingleChart()
-{
-	disconnect(connection_);
+	chart()->setDropShadowEnabled(false);
+	chart()->setAnimationOptions(QChart::AnimationOption::NoAnimation);
+	setRubberBand(QChartView::RectangleRubberBand);
+	setAcceptDrops(true);
 }
 
 void SingleChart::highlight(bool b)
@@ -519,6 +580,12 @@ void SingleChart::createLegend()
 
 void SingleChart::insertNode(const QString &node)
 {
+	if (!nodes_.contains(node))
+		nodes_.push_back(node);
+
+	if (plot_ == nullptr)
+		return;
+
 	size_t colidx = plot_->getColumnIndex(node);
 	if (colidx == -1)
 	{
@@ -555,6 +622,7 @@ void SingleChart::insertNode(const QString &node)
 
 	if (legend_ == nullptr)
 		createLegend();
+
 
 	//
 	// Try to guess an axis name to keep all like value plotted against
@@ -782,6 +850,26 @@ void SingleChart::dataAdded()
 	}
 }
 
+void SingleChart::resetNodes()
+{
+	if (time_ != nullptr)
+	{
+		chart()->removeAxis(time_);
+		time_ = nullptr;
+	}
+
+	chart()->axes().clear();
+
+	for (const QString node : nodes_)
+		insertNode(node);
+}
+
 void SingleChart::plotStateChanged(Plot::State oldst, Plot::State newst)
 {
+	if (is_complete_ == false && plot_->isComplete())
+	{
+		resetNodes();
+	}
+
+	is_complete_ = plot_->isComplete();
 }

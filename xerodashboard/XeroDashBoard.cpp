@@ -1,4 +1,5 @@
 #include "xerodashboard.h"
+#include <QtCore/QJsonDocument>
 #include <QtWidgets/QMenuBar>
 #include "NetworkTableManager.h"
 #include "NetworkTableTreeWidget.h"
@@ -29,6 +30,18 @@ XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
 
     if (settings_.contains(WindowStateSettings))
         restoreState(settings_.value(WindowStateSettings).toByteArray());
+
+    if (settings_.contains(LayoutSetting))
+    {
+        QString layoutstr = settings_.value(LayoutSetting).toString();
+        QByteArray bytes = layoutstr.toUtf8();
+        QJsonDocument doc = QJsonDocument::fromJson(bytes);
+        if (doc.isArray())
+        {
+            auto arr = doc.array();
+            dash_view_->restoreLayout(arr);
+        }
+    }
 }
 
 XeroDashBoard::~XeroDashBoard()
@@ -37,6 +50,11 @@ XeroDashBoard::~XeroDashBoard()
 
 void XeroDashBoard::closeEvent(QCloseEvent* ev)
 {
+    QJsonArray arr = dash_view_->getJSONDesc();
+    QJsonDocument doc(arr);
+    QString layout = doc.toJson(QJsonDocument::Compact);
+    settings_.setValue(LayoutSetting, layout);
+
     settings_.setValue(GeometrySettings, saveGeometry());
     settings_.setValue(WindowStateSettings, saveState());
     QMainWindow::closeEvent(ev);
