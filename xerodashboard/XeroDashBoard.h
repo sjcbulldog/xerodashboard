@@ -37,7 +37,17 @@ private:
     void createStatus();
 
     void showEditMenu();
+    void showFileMenu();
+    void showAlignMenu();
+    void showSizeMenu();
+
+    void fileSave();
+    void fileSaveAs();
+    void fileLoad();
+    void fileExit();
+
     void editPreferences();
+ 
 
 private:
     void timerCallback();
@@ -50,7 +60,26 @@ private:
 
     std::shared_ptr<PlotMgr> plotmgr_;
 
+    QMenu* file_menu_;
+    QAction* file_save_action_;
+    QAction* file_save_as_action_;
+    QAction* file_load_action_;
+
     QMenu* edit_menu_;
+    QAction* edit_preferences_action_;
+
+    QMenu* align_menu_;
+    QAction* align_left_action_;
+    QAction* align_right_action_;
+    QAction* align_top_action_;
+    QAction* align_bottom_action_;
+    QAction* align_hcenter_action_;
+    QAction* align_vcenter_action_;
+
+    QMenu* size_menu_;
+    QAction* size_same_width_action_;
+    QAction* size_same_height_action_;
+    QAction* size_same_both_action_;
 
     DashView* dash_view_;
 

@@ -85,14 +85,82 @@ void XeroDashBoard::createWindows()
 
 void XeroDashBoard::createMenus()
 {
-    QAction* action;
+    //QMenu* align_menu_;
+    //QAction* align_left_action_;
+    //QAction* align_right_action_;
+    //QAction* align_top_action_;
+    //QAction* align_bottom_action_;
+    //QAction* align_hcenter_action_;
+    //QAction* align_vcenter_action_;
+
+    //QMenu* size_menu_;
+    //QAction* size_same_width_action_;
+    //QAction* size_same_height_action_;
+    //QAction* size_same_both_action_;
+
+    file_menu_ = new QMenu(tr("&File"));
+    (void)connect(file_menu_, &QMenu::aboutToShow, this, &XeroDashBoard::showFileMenu);
+    menuBar()->addMenu(file_menu_);
+
+    file_save_action_ = file_menu_->addAction(tr("Save"));
+    (void)connect(file_save_action_, &QAction::triggered, this, &XeroDashBoard::fileSave);
+
+    file_menu_->addSeparator();
+
+    file_save_as_action_ = file_menu_->addAction(tr("Save As"));
+    (void)connect(file_save_as_action_, &QAction::triggered, this, &XeroDashBoard::fileSaveAs);
+
+    file_menu_->addSeparator();
+
+    file_load_action_ = file_menu_->addAction(tr("Load"));
+    (void)connect(file_load_action_, &QAction::triggered, this, &XeroDashBoard::fileLoad);
+
+    file_menu_->addSeparator();
+
+    file_save_as_action_ = file_menu_->addAction(tr("Exit"));
+    (void)connect(file_save_as_action_, &QAction::triggered, this, &XeroDashBoard::fileExit);
 
     edit_menu_ = new QMenu(tr("&Edit"));
     (void)connect(edit_menu_, &QMenu::aboutToShow, this, &XeroDashBoard::showEditMenu);
     menuBar()->addMenu(edit_menu_);
 
-    action = edit_menu_->addAction(tr("Preferences"));
-    (void)connect(action, &QAction::triggered, this, &XeroDashBoard::editPreferences);
+    edit_preferences_action_ = edit_menu_->addAction(tr("Preferences"));
+    (void)connect(edit_preferences_action_, &QAction::triggered, this, &XeroDashBoard::editPreferences);
+
+    align_menu_ = new QMenu(tr("&Align"));
+    (void)connect(align_menu_, &QMenu::aboutToShow, this, &XeroDashBoard::showAlignMenu);
+    menuBar()->addMenu(align_menu_);
+
+    align_left_action_ = align_menu_->addAction(tr("Align Left Sides"));
+    (void)connect(align_left_action_, &QAction::triggered, dash_view_, &DashView::alignLeft);
+
+    align_right_action_ = align_menu_->addAction(tr("Align Right Sides"));
+    (void)connect(align_right_action_, &QAction::triggered, dash_view_, &DashView::alignRight);
+
+    align_top_action_ = align_menu_->addAction(tr("Align Top Sides"));
+    (void)connect(align_top_action_, &QAction::triggered, dash_view_, &DashView::alignTop);
+
+    align_bottom_action_ = align_menu_->addAction(tr("Align Bottom Sides"));
+    (void)connect(align_bottom_action_, &QAction::triggered, dash_view_, &DashView::alignBottom);
+
+    align_hcenter_action_ = align_menu_->addAction(tr("Align Horizontal Center"));
+    (void)connect(align_hcenter_action_, &QAction::triggered, dash_view_, &DashView::alignHCenter);
+
+    align_vcenter_action_ = align_menu_->addAction(tr("Align Vertical Center"));
+    (void)connect(align_vcenter_action_, &QAction::triggered, dash_view_, &DashView::alignVCentor);
+
+    size_menu_ = new QMenu(tr("&Size"));
+    (void)connect(size_menu_, &QMenu::aboutToShow, this, &XeroDashBoard::showSizeMenu);
+    menuBar()->addMenu(size_menu_);
+
+    size_same_width_action_ = align_menu_->addAction(tr("Make Same Width"));
+    (void)connect(size_same_width_action_, &QAction::triggered, dash_view_, &DashView::sizeWidth);
+
+    size_same_height_action_ = align_menu_->addAction(tr("Make Same Height"));
+    (void)connect(size_same_height_action_, &QAction::triggered, dash_view_, &DashView::sizeHeight);
+
+    size_same_both_action_ = align_menu_->addAction(tr("Make Same Size"));
+    (void)connect(size_same_both_action_, &QAction::triggered, dash_view_, &DashView::sizeBoth);
 }
 
 void XeroDashBoard::createStatus()
@@ -103,6 +171,35 @@ void XeroDashBoard::showEditMenu()
 {
 }
 
+void XeroDashBoard::showFileMenu()
+{
+}
+
+void XeroDashBoard::showAlignMenu()
+{
+}
+
+void XeroDashBoard::showSizeMenu()
+{
+}
+
+void XeroDashBoard::fileSave()
+{
+}
+
+void XeroDashBoard::fileSaveAs()
+{
+}
+
+void XeroDashBoard::fileLoad()
+{
+}
+
+void XeroDashBoard::fileExit()
+{
+}
+
 void XeroDashBoard::editPreferences()
 {
+
 }

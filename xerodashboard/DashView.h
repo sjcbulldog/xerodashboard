@@ -18,6 +18,17 @@ public:
 	QJsonArray getJSONDesc();
 	void restoreLayout(const QJsonArray &arr);
 
+	void alignLeft();
+	void alignRight();
+	void alignTop();
+	void alignBottom();
+	void alignHCenter();
+	void alignVCentor();
+
+	void sizeWidth();
+	void sizeHeight();
+	void sizeBoth();
+
 protected:
 	void paintEvent(QPaintEvent* ev) override;
 	void dragEnterEvent(QDragEnterEvent* ev) override;

@@ -312,3 +312,65 @@ void DashView::mousePressEvent(QMouseEvent* ev)
 		}
 	}
 }
+
+
+void DashView::alignLeft()
+{
+	XeroItemFrame* first = nullptr;
+
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				f->setGeometry(first->pos().x(), f->pos().y(), f->width(), f->height());
+			}
+		}
+	}
+}
+
+void DashView::alignRight()
+{
+
+}
+
+void DashView::alignTop()
+{
+
+}
+
+void DashView::alignHCenter()
+{
+
+}
+
+void DashView::alignVCentor()
+{
+
+}
+
+void DashView::alignBottom()
+{
+
+}
+
+void DashView::sizeWidth()
+{
+
+}
+
+void DashView::sizeHeight()
+{
+
+}
+
+void DashView::sizeBoth()
+{
+
+}
