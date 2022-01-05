@@ -26,6 +26,11 @@ public:
 
 	void layout();
 
+	void setSelected(bool b);
+
+signals:
+	void headerClicked(XeroItemFrame * which, bool shift);
+
 protected:
 	void paintEvent(QPaintEvent* ev);
 	void mousePressEvent(QMouseEvent* ev);
@@ -46,13 +51,23 @@ private:
 private:
 	static constexpr const int BorderThickness = 1;
 
+	enum class ResizeCursor
+	{
+		None,
+		Right,
+		Left,
+		Bottom,
+		BottomRight,
+		BottomLeft
+	};
+
 private:
 	QString title_;
 	QWidget* child_;
 	int header_height_;
 	bool dragging_;
-	bool resize_cursor_;
-	bool resizing_;
+	ResizeCursor resize_cursor_;
+	ResizeCursor resizing_;
 	bool close_highlighted_;
 	bool max_highlighted_;
 	bool is_maximized_;
@@ -60,6 +75,7 @@ private:
 	QPoint mouse_;
 	QPoint window_;
 	QSize winsize_;
+	QPoint winpos_;
 
 	QColor header_color_;
 	QColor hilite_color_;

@@ -5,6 +5,7 @@
 
 class NetworkTableManager;
 class PlotMgr;
+class XeroItemFrame;
 
 class DashView : public QWidget
 {
@@ -18,16 +19,18 @@ public:
 	void restoreLayout(const QJsonArray &arr);
 
 protected:
-	void paintEvent(QPaintEvent* ev);
-	void dragEnterEvent(QDragEnterEvent* ev);
-	void dropEvent(QDropEvent* ev);
+	void paintEvent(QPaintEvent* ev) override;
+	void dragEnterEvent(QDragEnterEvent* ev) override;
+	void dropEvent(QDropEvent* ev) override;
+	void mousePressEvent(QMouseEvent* ev) override;
 
 private:
 	void createNTWidget(const QJsonObject& obj);
 	void createPlot(const QJsonObject& obj);
+	void frameWindowHeaderClicked(XeroItemFrame*, bool shift);
 
 private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;
 	std::shared_ptr<PlotMgr> plotmgr_;
-	QList<QWidget*> children_;
+	QList<XeroItemFrame*> selected_;
 };

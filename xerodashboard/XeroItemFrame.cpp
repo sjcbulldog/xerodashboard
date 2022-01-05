@@ -10,8 +10,8 @@ XeroItemFrame::XeroItemFrame(QWidget *parent) : QWidget(parent)
 	setMinimumSize(10, 10);
 	child_ = nullptr;
 	dragging_ = false;
-	resizing_ = false;
-	resize_cursor_ = false;
+	resizing_ = ResizeCursor::None;
+	resize_cursor_ = ResizeCursor::None;
 
 	QFontMetrics fm(font());
 	header_height_ = fm.height() + BorderThickness * 2 ;
@@ -28,6 +28,16 @@ XeroItemFrame::XeroItemFrame(QWidget *parent) : QWidget(parent)
 
 XeroItemFrame::~XeroItemFrame()
 {
+}
+
+void XeroItemFrame::setSelected(bool b)
+{
+	if (b)
+		header_color_ = QColor(0, 191, 255);
+	else
+		header_color_ = QColor(135, 206, 250);
+
+	update();
 }
 
 void XeroItemFrame::layout()
@@ -135,14 +145,20 @@ void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 			dragging_ = true;
 			mouse_ = ev->globalPos();
 			window_ = frameGeometry().topLeft();
+
+			bool shift = false;
+			if ((ev->modifiers() & Qt::ShiftModifier) == Qt::ShiftModifier)
+				shift = true;
+			emit headerClicked(this, shift);
 			return;
 		}
 
-		if (resize_cursor_)
+		if (resize_cursor_ != ResizeCursor::None)
 		{
-			resizing_ = true;
+			resizing_ = resize_cursor_;
 			mouse_ = ev->globalPos();
 			winsize_ = size();
+			winpos_ = pos();
 			return;
 		}
 	}
@@ -215,12 +231,39 @@ void XeroItemFrame::mouseMoveEvent(QMouseEvent* ev)
 
 		move(dest);
 	}
-	else if (resizing_)
+	else if (resizing_ == ResizeCursor::BottomRight)
 	{
 		QPoint dist = ev->globalPos() - mouse_;
 		int w = winsize_.width() + dist.x();
 		int h = winsize_.height() + dist.y();
 		setGeometry(pos().x(), pos().y(), w, h);
+	}
+	else if (resizing_ == ResizeCursor::BottomLeft)
+	{
+		QPoint dist = ev->globalPos() - mouse_;
+		int w = winsize_.width() - dist.x();
+		int h = winsize_.height() + dist.y();
+		setGeometry(winpos_.x() + dist.x(), pos().y(), w, h);
+	}
+	else if (resizing_ == ResizeCursor::Right)
+	{
+		QPoint dist = ev->globalPos() - mouse_;
+		int w = winsize_.width() + dist.x();
+		setGeometry(pos().x(), pos().y(), w, winsize_.height());
+	}
+	else if (resizing_ == ResizeCursor::Left)
+	{
+		QPoint dist = ev->globalPos() - mouse_;
+		int w = winsize_.width() - dist.x();
+		setGeometry(winpos_.x() + dist.x(), pos().y(), w, winsize_.height());
+
+		qDebug() << dist;
+	}
+	else if (resizing_ == ResizeCursor::Bottom)
+	{
+		QPoint dist = ev->globalPos() - mouse_;
+		int h = winsize_.height() + dist.y();
+		setGeometry(pos().x(), pos().y(), winsize_.width(), h);
 	}
 	else
 	{
@@ -270,25 +313,51 @@ void XeroItemFrame::checkCursor()
 {
 	QPoint gpos = QCursor::pos();
 	QPoint wpos = mapFromGlobal(gpos);
-	QPoint diff = wpos - QPoint(width(), height());
-	if (std::abs(diff.x()) < 8 && std::abs(diff.y()) < 8)
+	QPoint brdiff = wpos - QPoint(width(), height());
+	QPoint bldiff = wpos - QPoint(0, height());
+
+	if (std::abs(brdiff.x()) < 8 && std::abs(brdiff.y()) < 8)
 	{
 		setCursor(Qt::SizeFDiagCursor);
-		resize_cursor_ = true;
+		resize_cursor_ = ResizeCursor::BottomRight;
+		grabMouse();
+	}
+	else if (std::abs(bldiff.x()) < 8 && std::abs(bldiff.y()) < 8)
+	{
+		setCursor(Qt::SizeBDiagCursor);
+		resize_cursor_ = ResizeCursor::BottomLeft;
+		grabMouse();
+	}
+	else if (std::abs(brdiff.x()) < 8)
+	{
+		setCursor(Qt::SizeHorCursor);
+		resize_cursor_ = ResizeCursor::Right;
+		grabMouse();
+	}
+	else if (std::abs(bldiff.x()) < 8)
+	{
+		setCursor(Qt::SizeHorCursor);
+		resize_cursor_ = ResizeCursor::Left;
+		grabMouse();
+	}
+	else if (std::abs(brdiff.y()) < 8)
+	{
+		setCursor(Qt::SizeVerCursor);
+		resize_cursor_ = ResizeCursor::Bottom; 
 		grabMouse();
 	}
 	else
 	{
 		releaseMouse();
 		setCursor(Qt::ArrowCursor);
-		resize_cursor_ = false;
+		resize_cursor_ = ResizeCursor::None;
 	}
 }
 
 void XeroItemFrame::mouseReleaseEvent(QMouseEvent* ev)
 {
 	dragging_ = false;
-	resizing_ = false;
+	resizing_ = ResizeCursor::None;;
 }
 
 void XeroItemFrame::enterEvent(QEvent* ev)
@@ -299,5 +368,5 @@ void XeroItemFrame::enterEvent(QEvent* ev)
 void XeroItemFrame::leaveEvent(QEvent* ev)
 {
 	setCursor(Qt::ArrowCursor);
-	resize_cursor_ = false;
+	resize_cursor_ = ResizeCursor::None;;
 }

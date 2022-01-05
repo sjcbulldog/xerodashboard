@@ -57,6 +57,8 @@ void DashView::createPlot(const QJsonObject& obj)
 		return;
 
 	XeroItemFrame* frame = new XeroItemFrame(this);
+	(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
+
 	QString value = obj[JsonFieldNames::PlotName].toString();
 
 	try {
@@ -91,23 +93,6 @@ void DashView::createPlot(const QJsonObject& obj)
 		if (y < 0)
 			y = 0;
 
-#ifdef NOTYET
-		if (x + w > width())
-		{
-			if (w < width())
-				x = width() - w;
-			else
-				w = width();
-		}
-
-		if (y + h > height())
-		{
-			if (h < height())
-				y = height() - h;
-			else
-				h = height();
-		}
-#endif
 		frame->setGeometry(x, y, w, h);
 	}
 
@@ -133,6 +118,8 @@ void DashView::createNTWidget(const QJsonObject& obj)
 		title = value.mid(pos + 1);
 
 	XeroItemFrame* frame = new XeroItemFrame(this);
+	(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
+	
 	NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value, frame);
 	frame->setWidget(vwid);
 	frame->setVisible(true);
@@ -255,6 +242,8 @@ void DashView::dropEvent(QDropEvent* ev)
 			title = value.mid(pos + 1);
 
 		XeroItemFrame* frame = new XeroItemFrame(this);
+		(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
+
 		NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value.mid(3), frame);
 		frame->setWidget(vwid);
 		frame->setVisible(true);
@@ -266,6 +255,7 @@ void DashView::dropEvent(QDropEvent* ev)
 	{
 		PlotWidget* vwid;
 		XeroItemFrame* frame = new XeroItemFrame(this);
+		(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 
 		try {
 			vwid = new PlotWidget(plotmgr_, ntmgr_, value.mid(5), frame);
@@ -283,5 +273,42 @@ void DashView::dropEvent(QDropEvent* ev)
 		frame->setTitle(value.mid(5));
 
 		frame->setGeometry(ev->pos().x(), ev->pos().y(), frame->width(), frame->height());
+	}
+}
+
+void DashView::frameWindowHeaderClicked(XeroItemFrame* frame, bool shift)
+{
+	if (!shift)
+	{
+		for (auto sframe : selected_)
+			sframe->setSelected(false);
+
+		selected_.clear();
+	}
+
+	selected_.push_back(frame);
+	frame->setSelected(true);
+}
+
+void DashView::mousePressEvent(QMouseEvent* ev)
+{
+	if ((ev->buttons() & Qt::LeftButton) == Qt::LeftButton)
+	{
+		for (auto sframe : selected_)
+			sframe->setSelected(false);
+
+		selected_.clear();
+	}
+	else if ((ev->buttons() & Qt::RightButton) == Qt::RightButton)
+	{
+		for (auto wid : children())
+		{
+			XeroItemFrame* sframe = dynamic_cast<XeroItemFrame*>(wid);
+			if (sframe != nullptr)
+			{
+				sframe->setSelected(false);
+				sframe->setGeometry(0, 0, sframe->width(), sframe->height());
+			}
+		}
 	}
 }
