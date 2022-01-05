@@ -219,7 +219,10 @@ void NTValueDisplayWidget::drawContentsBar(QPainter& p)
 		QColor c;
 		int left, right, bar;
 
-		d = 0.0;
+		if (d > 1.0)
+			d = 1.0;
+		else if (d < -1.0)
+			d = -1.0;
 
 		if (d < 0)
 		{
