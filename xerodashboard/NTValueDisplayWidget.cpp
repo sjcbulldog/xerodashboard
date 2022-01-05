@@ -3,6 +3,10 @@
 #include "NTFormattingUtils.h"
 #include "JsonFieldNames.h"
 #include <QtCore/QDebug>
+#include <QtCore/QEvent>
+#include <QtWidgets/QToolTip>
+#include <QtWidgets/QMenu>
+#include <QtGui/QHelpEvent>
 #include <QtGui/QPainter>
 
 NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> ntmgr, const QString& path, QWidget *parent): QWidget(parent)
@@ -17,7 +21,11 @@ NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> 
 	disconnect_connection_ = connect(ntmgr.get(), &NetworkTableManager::disconnected, this, &NTValueDisplayWidget::disconnectDetected);
 	connect_connection_ = connect(ntmgr.get(), &NetworkTableManager::connected, this, &NTValueDisplayWidget::connectDetected);
 
+	(void)connect(this, &QWidget::customContextMenuRequested, this, &NTValueDisplayWidget::customMenuRequested);
+
 	setMinimumSize(80, 20);
+
+	setContextMenuPolicy(Qt::CustomContextMenu);
 
 	display_type_ = "text";
 }
@@ -27,6 +35,44 @@ NTValueDisplayWidget::~NTValueDisplayWidget()
 	disconnect(update_connection_);
 	disconnect(disconnect_connection_);
 	disconnect(connect_connection_);
+}
+
+void NTValueDisplayWidget::displayAs(QString v)
+{
+	display_type_ = v;
+}
+
+void NTValueDisplayWidget::customMenuRequested(const QPoint& pos)
+{
+	QMenu menu;
+
+	QAction textDisplay("Display As Text", this);
+	auto fn = std::bind(&NTValueDisplayWidget::displayAs, this, QString("text"));
+	connect(&textDisplay, &QAction::triggered, fn);
+	menu.addAction(&textDisplay);
+
+	QAction colorDisplay("Display As Color", this);
+	fn = std::bind(&NTValueDisplayWidget::displayAs, this, QString("color"));
+	connect(&colorDisplay, &QAction::triggered, fn);
+	menu.addAction(&colorDisplay);
+
+	QAction barDisplay("Display As Bar", this);
+	fn = std::bind(&NTValueDisplayWidget::displayAs, this, QString("bar"));
+	connect(&barDisplay, &QAction::triggered, fn);
+	menu.addAction(&barDisplay);
+
+	menu.exec(mapToGlobal(pos));
+	update();
+}
+
+bool NTValueDisplayWidget::event(QEvent* ev)
+{
+	if (ev->type() == QEvent::ToolTip)
+	{
+		QHelpEvent* hev = static_cast<QHelpEvent*>(ev);
+		QToolTip::showText(hev->globalPos(), path_);
+	}
+	return QWidget::event(ev);
 }
 
 QJsonObject NTValueDisplayWidget::getJSONDesc() const
@@ -84,6 +130,7 @@ void NTValueDisplayWidget::newDetected(const QString& name)
 void NTValueDisplayWidget::paintEvent(QPaintEvent* ev)
 {
 	QPainter p(this);
+	p.setRenderHint(QPainter::Antialiasing);
 
 	auto value = entry_.GetValue();
 	if (value != nullptr && value->IsValid())
@@ -94,7 +141,18 @@ void NTValueDisplayWidget::paintEvent(QPaintEvent* ev)
 
 		if (value->IsBoolean())
 		{
-			drawContentsBoolean(p);
+			if (display_type_ == "color")
+				drawContentsBoolean(p);
+			else
+				drawContentsText(p);
+
+		}
+		else if (value->IsDouble())
+		{
+			if (display_type_ == "bar")
+				drawContentsBar(p);
+			else
+				drawContentsText(p);
 		}
 		else
 		{
@@ -116,9 +174,7 @@ void NTValueDisplayWidget::drawContentsBoolean(QPainter& p)
 	assert(value->IsValid());
 	assert(value->IsBoolean());
 
-
 	QColor color;
-	
 	if (!connected_)
 	{
 		color = QColor(128, 128, 128);
@@ -135,6 +191,58 @@ void NTValueDisplayWidget::drawContentsBoolean(QPainter& p)
 	QBrush brush(color);
 	p.setBrush(brush);
 	p.drawRect(0, 0, width(), height());
+}
+
+void NTValueDisplayWidget::drawContentsBar(QPainter& p)
+{
+	auto value = entry_.GetValue();
+	assert(value->IsValid());
+	assert(value->IsDouble());
+
+	int w = width() - 8;
+	int h = height() - 4;
+	int xrad = 4;
+	int yrad = 4;
+
+	QPen pen(QColor(0, 0, 0));
+	pen.setWidth(2);
+	p.setPen(pen);
+
+	if (!connected_)
+	{
+		p.setBrush(QBrush(QColor(128, 128, 128)));
+		p.drawRoundedRect(4, 2, w, h, xrad, yrad, Qt::SizeMode::AbsoluteSize);
+	}
+	else
+	{
+		double d = value->GetDouble();
+		QColor c;
+		int left, right, bar;
+
+		d = 0.0;
+
+		if (d < 0)
+		{
+			c = QColor(0xF5, 0xE0, 0x50);
+			left = width() / 2 * (1 + d);
+			right = width() / 2;
+			bar = left;
+		}
+		else
+		{
+			c = QColor(0, 255, 0);
+			left = width() / 2;
+			right = (width() / 2) * d + width() / 2;
+			bar = right;
+		}
+
+		p.setBrush(QBrush(QColor(0, 0, 0)));
+		p.drawRoundedRect(4, 2, w, h, xrad, yrad, Qt::SizeMode::AbsoluteSize);
+
+		p.setClipRect(left, 0, right - left, height());
+		p.setBrush(QBrush(c));
+		p.drawRoundedRect(4, 2, w, h, xrad, yrad, Qt::SizeMode::AbsoluteSize);
+	}
 }
 
 void NTValueDisplayWidget::drawContentsText(QPainter &p)

@@ -24,10 +24,16 @@ public:
 	void alignBottom();
 	void alignHCenter();
 	void alignVCentor();
+	void alignTileH();
+	void alignTileV();
 
 	void sizeWidth();
 	void sizeHeight();
 	void sizeBoth();
+
+	int numSelected() const {
+		return selected_.count();
+	}
 
 protected:
 	void paintEvent(QPaintEvent* ev) override;
@@ -39,6 +45,7 @@ private:
 	void createNTWidget(const QJsonObject& obj);
 	void createPlot(const QJsonObject& obj);
 	void frameWindowHeaderClicked(XeroItemFrame*, bool shift);
+	void removeAllFrames();
 
 private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;

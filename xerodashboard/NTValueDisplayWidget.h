@@ -23,7 +23,8 @@ public:
 	}
 
 protected:
-	void paintEvent(QPaintEvent* ev);
+	void paintEvent(QPaintEvent* ev) override;
+	bool event(QEvent* ev) override;
 
 private:
 	void newDetected(const QString& path);
@@ -33,6 +34,11 @@ private:
 
 	void drawContentsBoolean(QPainter& p);
 	void drawContentsText(QPainter& p);
+	void drawContentsBar(QPainter& p);
+
+	void customMenuRequested(const QPoint& pos);
+
+	void displayAs(QString value);
 
 private:
 	QString display_type_;

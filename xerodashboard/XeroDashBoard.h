@@ -2,6 +2,7 @@
 
 #include <QtCore/QTimer>
 #include <QtCore/QSettings>
+#include <QtCore/QDir>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QSplitter>
@@ -51,6 +52,7 @@ private:
 
 private:
     void timerCallback();
+    void saveJson();
 
 private:
     QSettings settings_;
@@ -75,6 +77,8 @@ private:
     QAction* align_bottom_action_;
     QAction* align_hcenter_action_;
     QAction* align_vcenter_action_;
+    QAction* align_tile_vertical_action_;
+    QAction* align_tile_horizontal_action_;
 
     QMenu* size_menu_;
     QAction* size_same_width_action_;
@@ -91,4 +95,7 @@ private:
 
     QString key_;
     QString ipaddr_;
+
+    QString filename_;
+    QDir homedir_;
 };

@@ -28,6 +28,8 @@ XeroItemFrame::XeroItemFrame(QWidget *parent) : QWidget(parent)
 
 XeroItemFrame::~XeroItemFrame()
 {
+	if (child_ != nullptr)
+		delete child_;
 }
 
 void XeroItemFrame::setSelected(bool b)

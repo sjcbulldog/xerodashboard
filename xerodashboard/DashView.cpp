@@ -21,8 +21,33 @@ DashView::~DashView()
 {
 }
 
+void DashView::removeAllFrames()
+{
+	QList<XeroItemFrame*> frames;
+
+	for(int i = 0 ; i < children().count() ; i++)
+	{
+		XeroItemFrame* frame = dynamic_cast<XeroItemFrame*>(children().at(i));
+
+		if (frame != nullptr)
+		{
+			frames.push_back(frame);
+		}
+	}
+
+	while (frames.size() > 0)
+	{
+		XeroItemFrame* frame = frames.first();
+		frames.pop_front();
+		frame->setParent(nullptr);
+		delete frame;
+	}
+}
+
 void DashView::restoreLayout(const QJsonArray &arr)
 {
+	removeAllFrames();
+
 	for (int i = 0; i < arr.size(); i++)
 	{
 		if (arr.at(i).isObject())
@@ -145,22 +170,6 @@ void DashView::createNTWidget(const QJsonObject& obj)
 			x = 0;
 		if (y < 0)
 			y = 0;
-
-		if (x + w > width())
-		{
-			if (w < width())
-				x = width() - w;
-			else
-				w = width();
-		}
-
-		if (y + h > height())
-		{
-			if (h < height())
-				y = height() - h;
-			else
-				h = height();
-		}
 
 		frame->setGeometry(x, y, w, h);
 	}
@@ -337,40 +346,225 @@ void DashView::alignLeft()
 
 void DashView::alignRight()
 {
+	XeroItemFrame* first = nullptr;
 
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				int left = first->geometry().right() - f->geometry().width();
+				f->setGeometry(left, f->pos().y(), f->width(), f->height());
+			}
+		}
+	}
 }
 
 void DashView::alignTop()
 {
+	XeroItemFrame* first = nullptr;
 
-}
-
-void DashView::alignHCenter()
-{
-
-}
-
-void DashView::alignVCentor()
-{
-
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				f->setGeometry(f->pos().x(), first->pos().y(), f->width(), f->height());
+			}
+		}
+	}
 }
 
 void DashView::alignBottom()
 {
+	XeroItemFrame* first = nullptr;
 
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				int top = first->geometry().bottom() - f->geometry().height();
+				f->setGeometry(f->pos().x(), top, f->width(), f->height());
+			}
+		}
+	}
 }
+
+void DashView::alignHCenter()
+{
+	XeroItemFrame* first = nullptr;
+
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				int left = first->geometry().center().x() - f->width() / 2;
+				f->setGeometry(left, f->pos().y(), f->width(), f->height());
+			}
+		}
+	}
+}
+
+void DashView::alignVCentor()
+{
+	XeroItemFrame* first = nullptr;
+
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				int top = first->geometry().center().y() - f->height() / 2;
+				f->setGeometry(f->pos().x(), top, f->width(), f->height());
+			}
+		}
+	}
+}
+
 
 void DashView::sizeWidth()
 {
+	XeroItemFrame* first = nullptr;
 
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				f->setGeometry(f->pos().x(), f->pos().y(), first->width(), f->height());
+			}
+		}
+	}
 }
 
 void DashView::sizeHeight()
 {
+	XeroItemFrame* first = nullptr;
 
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				f->setGeometry(f->pos().x(), f->pos().y(), f->width(), first->height());
+			}
+		}
+	}
 }
 
 void DashView::sizeBoth()
 {
+	XeroItemFrame* first = nullptr;
 
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+			}
+			else
+			{
+				f->setGeometry(f->pos().x(), f->pos().y(), first->width(), first->height());
+			}
+		}
+	}
+}
+
+void DashView::alignTileH()
+{
+	int margin = 2;
+	XeroItemFrame* first = nullptr;
+	XeroItemFrame* last = nullptr;
+
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+				last = f;
+			}
+			else
+			{
+				f->setGeometry(last->geometry().right() + margin, first->pos().y(), f->width(), f->height());
+
+				last = f;
+			}
+		}
+	}
+}
+
+void DashView::alignTileV()
+{
+	int margin = 2;
+	XeroItemFrame* first = nullptr;
+	XeroItemFrame* last = nullptr;
+
+	for (int i = 0; i < children().count(); i++)
+	{
+		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		if (f != nullptr)
+		{
+			if (first == nullptr)
+			{
+				first = f;
+				last = f;
+			}
+			else
+			{
+				f->setGeometry(first->pos().x(), last->geometry().bottom() + margin, f->width(), f->height());
+
+				last = f;
+			}
+		}
+	}
 }
