@@ -68,7 +68,9 @@
       <AdditionalDependencies>ntcored.lib;wpiutild.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\external\wpi\bin\$(Configuration)\*.dll $(OutDir)</Command>
+      <Command>$(QTDIR)\bin\windeployqt $(OutDir)$(ProjectName).exe
+copy $(SolutionDir)external\wpi\bin\$(Configuration)\*.dll $(OutDir)
+copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -81,7 +83,9 @@
       <AdditionalDependencies>ntcore.lib;wpiutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\external\wpi\bin\$(Configuration)\*.dll $(OutDir)</Command>
+      <Command>$(QTDIR)\bin\windeployqt $(OutDir)$(ProjectName).exe
+copy $(SolutionDir)external\wpi\bin\$(Configuration)\*.dll $(OutDir)
+copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">

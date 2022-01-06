@@ -11,5 +11,5 @@
 docs
 **/*.o
 .DS_Store
-installer/*.exe
+installer/xero*.exe
 
