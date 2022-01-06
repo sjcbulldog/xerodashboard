@@ -118,6 +118,7 @@
     <ClCompile Include="PlotContainer.cpp" />
     <ClCompile Include="PlotMgr.cpp" />
     <ClCompile Include="PlotWidget.cpp" />
+    <ClCompile Include="PreferencesDialog.cpp" />
     <ClCompile Include="SingleChart.cpp" />
     <ClCompile Include="TabEditName.cpp" />
     <ClCompile Include="XeroItemFrame.cpp" />
@@ -157,12 +158,16 @@
     <ClInclude Include="Callout.h" />
     <ClInclude Include="JsonFieldNames.h" />
     <ClInclude Include="NTFormattingUtils.h" />
+    <QtMoc Include="PreferencesDialog.h" />
     <ClInclude Include="SingleChart.h" />
     <QtMoc Include="TabEditName.h" />
     <QtMoc Include="PlotContainer.h" />
     <QtMoc Include="PlotWidget.h" />
     <QtMoc Include="NTValueDisplayWidget.h" />
     <QtMoc Include="XeroItemFrame.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="PreferencesDialog.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

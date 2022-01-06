@@ -31,6 +31,10 @@ private:
     static constexpr const char* GeometrySettings = "geometry";
     static constexpr const char* WindowStateSettings = "windowstate";
     static constexpr const char* LayoutSetting = "layout";
+    
+    static constexpr const char* IPAddrSettings = "ipaddr";
+    static constexpr const char* PlotKeySettings = "plotkey";
+    static constexpr const char* TileMarginSettings = "tilemargin";
 
 private:
     void createWindows();

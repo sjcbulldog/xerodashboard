@@ -82,6 +82,9 @@
     <ClCompile Include="TabEditName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PreferencesDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
@@ -123,6 +126,9 @@
     <QtMoc Include="TabEditName.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="PreferencesDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NTFormattingUtils.h">
@@ -137,5 +143,10 @@
     <ClInclude Include="JsonFieldNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="PreferencesDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>

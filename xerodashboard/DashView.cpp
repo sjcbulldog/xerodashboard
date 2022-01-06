@@ -519,7 +519,6 @@ void DashView::sizeBoth()
 
 void DashView::alignTileH()
 {
-	int margin = 2;
 	XeroItemFrame* first = nullptr;
 	XeroItemFrame* last = nullptr;
 
@@ -535,7 +534,7 @@ void DashView::alignTileH()
 			}
 			else
 			{
-				f->setGeometry(last->geometry().right() + margin, first->pos().y(), f->width(), f->height());
+				f->setGeometry(last->geometry().right() + tile_margin_, first->pos().y(), f->width(), f->height());
 
 				last = f;
 			}
@@ -545,7 +544,6 @@ void DashView::alignTileH()
 
 void DashView::alignTileV()
 {
-	int margin = 2;
 	XeroItemFrame* first = nullptr;
 	XeroItemFrame* last = nullptr;
 
@@ -561,7 +559,7 @@ void DashView::alignTileV()
 			}
 			else
 			{
-				f->setGeometry(first->pos().x(), last->geometry().bottom() + margin, f->width(), f->height());
+				f->setGeometry(first->pos().x(), last->geometry().bottom() + tile_margin_, f->width(), f->height());
 
 				last = f;
 			}

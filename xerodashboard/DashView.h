@@ -15,6 +15,14 @@ public:
 	DashView(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent = Q_NULLPTR);
 	~DashView();
 
+	int tileMargin() const {
+		return tile_margin_;
+	}
+
+	void setTileMargin(int m) {
+		tile_margin_ = m;
+	}
+
 	QJsonArray getJSONDesc();
 	void restoreLayout(const QJsonArray &arr);
 
@@ -51,4 +59,5 @@ private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;
 	std::shared_ptr<PlotMgr> plotmgr_;
 	QList<XeroItemFrame*> selected_;
+	int tile_margin_;
 };

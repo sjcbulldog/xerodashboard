@@ -4,6 +4,7 @@
 #include "PlotListWidget.h"
 #include "DashView.h"
 #include "PlotMgr.h"
+#include "PreferencesDialog.h"
 #include <QtCore/QFile>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QCoreApplication>
@@ -13,8 +14,15 @@
 
 XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
 {
-    key_ = "/XeroPlot/";
-    ipaddr_ = "127.0.0.1";
+    if (settings_.contains(PlotKeySettings))
+        key_ = settings_.value(PlotKeySettings).toString();
+    else
+        key_ = "/XeroPlot/";
+
+    if (settings_.contains(IPAddrSettings))
+        ipaddr_ = settings_.value(IPAddrSettings).toString();
+    else
+        ipaddr_ = "127.0.0.1";
 
     ntmgr_ = std::make_shared<NetworkTableManager>(ipaddr_);
     (void)connect(&timer_, &QTimer::timeout, this, &XeroDashBoard::timerCallback);
@@ -28,6 +36,11 @@ XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
     createWindows();
     createMenus();
     createStatus();
+
+    if (settings_.contains(TileMarginSettings))
+        dash_view_->setTileMargin(settings_.value(TileMarginSettings).toInt());
+    else
+        dash_view_->setTileMargin(2);
 
     if (settings_.contains(GeometrySettings))
         restoreGeometry(settings_.value(GeometrySettings).toByteArray());
@@ -172,6 +185,21 @@ void XeroDashBoard::showEditMenu()
 
 void XeroDashBoard::editPreferences()
 {
+    PreferencesDialog dialog;
+    dialog.setIPAddress(ipaddr_);
+    dialog.setPlotKey(key_);
+    dialog.setTileMargin(dash_view_->tileMargin());
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        ipaddr_ = dialog.ipaddr();
+        key_ = dialog.plotKey();
+        dash_view_->setTileMargin(dialog.tileMargin());
+
+        settings_.setValue(IPAddrSettings, ipaddr_);
+        settings_.setValue(PlotKeySettings, key_);
+        settings_.setValue(TileMarginSettings, dash_view_->tileMargin());
+    }
 }
 
 void XeroDashBoard::showFileMenu()
