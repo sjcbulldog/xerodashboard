@@ -111,6 +111,13 @@ bool PlotWidget::restoreFromJson(const QJsonObject& obj)
 			splitter_->setSizes(splitter_sizes_);
 	}
 
+	while(tabs_->count() > 0)
+	{
+		auto* gr = tabs_->widget(0);
+		tabs_->removeTab(0);
+		delete gr;
+	}
+
 	tabs_->clear();
 	QJsonArray arr = obj.value(JsonFieldNames::Constainers).toArray();
 	for (int i = 0; i < arr.size(); i++)
@@ -154,7 +161,8 @@ void PlotWidget::createWindows()
 	splitter_sizes_.push_back(splitter_->width() * 7 / 10);
 	splitter_->setSizes(splitter_sizes_);
 
-	PlotContainer* gr = new PlotContainer(plotmgr_, plotname_);;
+	PlotContainer* gr = new PlotContainer(plotmgr_, plotname_);
+	gr->createDefaultChart();
 	tabs_->addTab(gr, plotname_);
 
 	busy_ = new QLabel("No data");

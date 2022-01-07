@@ -43,11 +43,16 @@ public:
 		return selected_.count();
 	}
 
+signals:
+	void selectedCountChanged();
+
 protected:
 	void paintEvent(QPaintEvent* ev) override;
 	void dragEnterEvent(QDragEnterEvent* ev) override;
 	void dropEvent(QDropEvent* ev) override;
 	void mousePressEvent(QMouseEvent* ev) override;
+	void mouseReleaseEvent(QMouseEvent* ev) override;
+	void mouseMoveEvent(QMouseEvent* ev) override;
 
 private:
 	void createNTWidget(const QJsonObject& obj);
@@ -55,9 +60,17 @@ private:
 	void frameWindowHeaderClicked(XeroItemFrame*, bool shift);
 	void removeAllFrames();
 
+	void addToSelectedSet(XeroItemFrame* frame);
+	void removeFromSelectedSet(XeroItemFrame* frame);
+	void clearSelectedSet();
+
 private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;
 	std::shared_ptr<PlotMgr> plotmgr_;
 	QList<XeroItemFrame*> selected_;
 	int tile_margin_;
+
+	bool selecting_;
+	QPoint other_;
+	QPoint mouse_;
 };

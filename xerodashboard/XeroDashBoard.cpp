@@ -11,6 +11,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QStatusBar>
 
 XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
 {
@@ -177,6 +178,17 @@ void XeroDashBoard::createMenus()
 
 void XeroDashBoard::createStatus()
 {
+    status_selected_ = new QLabel("");
+    statusBar()->addWidget(status_selected_);
+    selectedSetCountChanged();
+
+    (void)connect(dash_view_, &DashView::selectedCountChanged, this, &XeroDashBoard::selectedSetCountChanged);
+}
+
+void XeroDashBoard::selectedSetCountChanged()
+{
+    QString txt = "Selected: " + QString::number(dash_view_->numSelected());
+    status_selected_->setText(txt);
 }
 
 void XeroDashBoard::showEditMenu()

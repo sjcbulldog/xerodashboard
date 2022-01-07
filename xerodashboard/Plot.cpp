@@ -9,6 +9,7 @@ Plot::Plot(std::shared_ptr<NetworkTableManager> ntmgr, const QString &key, const
 	key_ = key;
 	points_ = -1;
 	state_ = State::New;
+	connected_ = true;
 
 	disconnect_connection_ = connect(ntmgr.get(), &NetworkTableManager::disconnected, this, &Plot::disconnectDetected);
 }

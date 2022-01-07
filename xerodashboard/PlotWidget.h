@@ -22,6 +22,8 @@ public:
 	QJsonObject getJSONDesc() const ;
 	bool restoreFromJson(const QJsonObject& obj);
 
+	void createDefaultChart();
+
 private:
 	void createWindows();
 	void initPlot();

@@ -8,6 +8,7 @@
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QDockWidget>
+#include <QtWidgets/QLabel>
 #include <memory>
 
 class NetworkTableManager;
@@ -57,6 +58,7 @@ private:
 private:
     void timerCallback();
     void saveJson();
+    void selectedSetCountChanged();
 
 private:
     QSettings settings_;
@@ -88,6 +90,8 @@ private:
     QAction* size_same_width_action_;
     QAction* size_same_height_action_;
     QAction* size_same_both_action_;
+
+    QLabel* status_selected_;
 
     DashView* dash_view_;
 

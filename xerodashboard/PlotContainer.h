@@ -40,6 +40,7 @@ public:
 	bool restoreFromJson(const QJsonArray& charts);
 
 	void removeAllCharts();
+	void createDefaultChart();
 
 protected:
 	virtual void keyPressEvent(QKeyEvent* ev) override;

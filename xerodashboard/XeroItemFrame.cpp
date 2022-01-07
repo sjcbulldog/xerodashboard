@@ -223,13 +223,13 @@ void XeroItemFrame::mouseMoveEvent(QMouseEvent* ev)
 		QPoint dest = window_ + dist;
 		if (dest.x() < 0)
 			dest.setX(0);
-		else if (dest.x() > parentWidget()->width() - width())
-			dest.setX(parentWidget()->width() - width());
+		else if (dest.x() > parentWidget()->width() - 4)
+			dest.setX(parentWidget()->width() - 4);
 
 		if (dest.y() < 0)
 			dest.setY(0);
-		else if (dest.y() > parentWidget()->height() - height())
-			dest.setY(parentWidget()->height() - height());
+		else if (dest.y() > parentWidget()->height() - 4)
+			dest.setY(parentWidget()->height() - 4);
 
 		move(dest);
 	}

@@ -17,6 +17,8 @@ SingleChart::SingleChart(QString units, std::shared_ptr<PlotMgr> plotmgr, const 
 	time_ = nullptr;
 	legend_ = nullptr;
 
+	callno_ = 0;
+
 	plot_added_connection_ = connect(plotmgr.get(), &PlotMgr::plotAdded, this, &SingleChart::plotAddedDetected);
 
 	initChart();
@@ -623,7 +625,6 @@ void SingleChart::insertNode(const QString &node)
 	if (legend_ == nullptr)
 		createLegend();
 
-
 	//
 	// Try to guess an axis name to keep all like value plotted against
 	// a single axis.  For instance, all position values should be plotted
@@ -852,13 +853,20 @@ void SingleChart::dataAdded()
 
 void SingleChart::resetNodes()
 {
+	qDebug() << "resetNodes";
 	if (time_ != nullptr)
 	{
 		chart()->removeAxis(time_);
 		time_ = nullptr;
 	}
 
-	chart()->axes().clear();
+	auto alist = chart()->axes();
+	for (auto a : alist)
+		chart()->removeAxis(a);
+
+	auto slist = chart()->series();
+	for (auto s : slist)
+		chart()->removeSeries(s);
 
 	for (const QString node : nodes_)
 		insertNode(node);
@@ -866,6 +874,7 @@ void SingleChart::resetNodes()
 
 void SingleChart::plotStateChanged(Plot::State oldst, Plot::State newst)
 {
+	callno_++;
 	if (is_complete_ == false && plot_->isComplete())
 	{
 		resetNodes();

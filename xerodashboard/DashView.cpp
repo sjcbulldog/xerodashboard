@@ -88,7 +88,12 @@ void DashView::createPlot(const QJsonObject& obj)
 
 	try {
 		vwid = new PlotWidget(plotmgr_, ntmgr_, value, frame);
-		vwid->restoreFromJson(obj);
+		if (!vwid->restoreFromJson(obj))
+		{
+			delete vwid;
+			delete frame;
+			return;
+		}
 	}
 	catch (...)
 	{
@@ -119,12 +124,6 @@ void DashView::createPlot(const QJsonObject& obj)
 			y = 0;
 
 		frame->setGeometry(x, y, w, h);
-	}
-
-	if (!vwid->restoreFromJson(obj))
-	{
-		delete vwid;
-		delete frame;
 	}
 }
 
@@ -228,6 +227,20 @@ void DashView::paintEvent(QPaintEvent* ev)
 	QBrush br(QColor(192, 192, 192));
 	p.setBrush(br);
 	p.drawRect(0, 0, width(), height());
+
+	if (selecting_)
+	{
+		QPen pen(QColor(0, 0, 0));
+		p.setBrush(Qt::BrushStyle::NoBrush);
+		p.setPen(pen);
+
+		int x = std::min(other_.x(), mouse_.x());
+		int y = std::min(other_.y(), mouse_.y());
+		int w = std::abs(other_.x() - mouse_.x());
+		int h = std::abs(other_.y() - mouse_.y());
+
+		p.drawRect(x, y, w, h);
+	}
 }
 
 void DashView::dragEnterEvent(QDragEnterEvent* ev)
@@ -285,51 +298,100 @@ void DashView::dropEvent(QDropEvent* ev)
 	}
 }
 
+void DashView::addToSelectedSet(XeroItemFrame* frame)
+{
+	if (!selected_.contains(frame))
+	{
+		selected_.push_back(frame);
+		frame->setSelected(true);
+		emit selectedCountChanged();
+	}
+}
+
+void DashView::removeFromSelectedSet(XeroItemFrame* frame)
+{
+	if (selected_.contains(frame))
+	{
+		selected_.removeOne(frame);
+		frame->setSelected(false);
+		emit selectedCountChanged();
+	}
+}
+
+void DashView::clearSelectedSet()
+{
+	if (selected_.size() > 0)
+	{
+		for (auto* frame : selected_)
+		{
+			frame->setSelected(false);
+		}
+		selected_.clear();
+		emit selectedCountChanged();
+	}
+}
+
 void DashView::frameWindowHeaderClicked(XeroItemFrame* frame, bool shift)
 {
 	if (!shift)
 	{
-		for (auto sframe : selected_)
-			sframe->setSelected(false);
-
-		selected_.clear();
+		clearSelectedSet();
 	}
 
-	selected_.push_back(frame);
-	frame->setSelected(true);
+	addToSelectedSet(frame);
+}
+
+void DashView::mouseReleaseEvent(QMouseEvent* ev)
+{
+	clearSelectedSet();
+
+	int x = std::min(other_.x(), ev->pos().x());
+	int y = std::min(other_.y(), ev->pos().y());
+	int w = std::abs(other_.x() - ev->pos().x());
+	int h = std::abs(other_.y() - ev->pos().y());
+	QRect r(x, y, w, h);
+
+	for (auto obj : children())
+	{
+		auto frame = dynamic_cast<XeroItemFrame*>(obj);
+		if (frame != nullptr)
+		{
+			if (frame->geometry().intersects(r))
+			{
+				addToSelectedSet(frame);
+			}
+		}
+	}
+
+	selecting_ = 0;
+	update();
+}
+
+void DashView::mouseMoveEvent(QMouseEvent* ev)
+{
+	if (selecting_)
+	{
+		mouse_ = ev->pos();
+		update();
+	}
 }
 
 void DashView::mousePressEvent(QMouseEvent* ev)
 {
 	if ((ev->buttons() & Qt::LeftButton) == Qt::LeftButton)
 	{
-		for (auto sframe : selected_)
-			sframe->setSelected(false);
-
-		selected_.clear();
-	}
-	else if ((ev->buttons() & Qt::RightButton) == Qt::RightButton)
-	{
-		for (auto wid : children())
-		{
-			XeroItemFrame* sframe = dynamic_cast<XeroItemFrame*>(wid);
-			if (sframe != nullptr)
-			{
-				sframe->setSelected(false);
-				sframe->setGeometry(0, 0, sframe->width(), sframe->height());
-			}
-		}
+		selecting_ = true;
+		other_ = ev->pos();
 	}
 }
-
 
 void DashView::alignLeft()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -348,9 +410,9 @@ void DashView::alignRight()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -370,9 +432,9 @@ void DashView::alignTop()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -391,9 +453,9 @@ void DashView::alignBottom()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -413,9 +475,9 @@ void DashView::alignHCenter()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -435,9 +497,9 @@ void DashView::alignVCentor()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -458,9 +520,9 @@ void DashView::sizeWidth()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -479,9 +541,9 @@ void DashView::sizeHeight()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -500,9 +562,9 @@ void DashView::sizeBoth()
 {
 	XeroItemFrame* first = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -522,9 +584,9 @@ void DashView::alignTileH()
 	XeroItemFrame* first = nullptr;
 	XeroItemFrame* last = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)
@@ -547,9 +609,9 @@ void DashView::alignTileV()
 	XeroItemFrame* first = nullptr;
 	XeroItemFrame* last = nullptr;
 
-	for (int i = 0; i < children().count(); i++)
+	for (int i = 0; i < selected_.count(); i++)
 	{
-		XeroItemFrame* f = dynamic_cast<XeroItemFrame*>(children().at(i));
+		XeroItemFrame* f = selected_.at(i);
 		if (f != nullptr)
 		{
 			if (first == nullptr)

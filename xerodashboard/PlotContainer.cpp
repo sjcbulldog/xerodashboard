@@ -15,14 +15,23 @@ PlotContainer::PlotContainer(std::shared_ptr<PlotMgr> plotmgr, const QString &pl
 
 	units_ = "in";
 
-	SingleChart* ch = new SingleChart(units_, plotmgr_, plotname_, this);
-	charts_.push_back(ch);
-	layout_->addWidget(ch, 0, 0);
-	arrangeCharts();
 }
 
 PlotContainer::~PlotContainer()
 {
+	for (int i = 0; i < charts_.size(); i++)
+	{
+		delete charts_.at(i);
+	}
+	charts_.clear();
+}
+
+void PlotContainer::createDefaultChart()
+{
+	SingleChart* ch = new SingleChart(units_, plotmgr_, plotname_, this);
+	charts_.push_back(ch);
+	layout_->addWidget(ch, 0, 0);
+	arrangeCharts();
 }
 
 QJsonArray PlotContainer::getJSONDesc() const 

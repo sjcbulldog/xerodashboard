@@ -156,4 +156,6 @@ private:
 	bool is_complete_;
 
 	QMetaObject::Connection plot_added_connection_;
+
+	int callno_;
 };
