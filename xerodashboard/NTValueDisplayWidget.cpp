@@ -23,7 +23,7 @@ NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> 
 
 	(void)connect(this, &QWidget::customContextMenuRequested, this, &NTValueDisplayWidget::customMenuRequested);
 
-	setMinimumSize(80, 20);
+	setMinimumSize(40, 10);
 
 	setContextMenuPolicy(Qt::CustomContextMenu);
 

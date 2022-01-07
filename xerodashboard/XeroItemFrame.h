@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QLineEdit>
 
 class XeroItemFrame : public QWidget
 {
@@ -28,18 +29,35 @@ public:
 
 	void setSelected(bool b);
 
+	bool isMaximized() const {
+		return is_maximized_;
+	}
+
+	void maximize(bool storeprev);
+	void restore();
+
+	bool isPlot() const;
+	bool isNetworkTableEntry() const;
+
+	QWidget* child() {
+		return child_;
+	}
+
 signals:
 	void headerClicked(XeroItemFrame * which, bool shift);
+	void frameClosing();
 
 protected:
 	void paintEvent(QPaintEvent* ev);
 	void mousePressEvent(QMouseEvent* ev);
 	void mouseMoveEvent(QMouseEvent* ev);
 	void mouseReleaseEvent(QMouseEvent* ev);
+	void mouseDoubleClickEvent(QMouseEvent* ev);
 	void resizeEvent(QResizeEvent* ev);
 	void changeEvent(QEvent* ev);
 	void enterEvent(QEvent* ev);
 	void leaveEvent(QEvent* ev);
+	void closeEvent(QCloseEvent* ev);
 
 private:
 	QRect closeBoxRect();
@@ -47,6 +65,9 @@ private:
 	QRect headerRect();
 	void checkCursor();
 	void checkButtons(const QPoint &pt);
+
+	void titleEditInputRejected();
+	void titleEditEditingFinished();
 
 private:
 	static constexpr const int BorderThickness = 1;
@@ -76,6 +97,8 @@ private:
 	QPoint window_;
 	QSize winsize_;
 	QPoint winpos_;
+
+	QLineEdit* editor_;
 
 	QColor header_color_;
 	QColor hilite_color_;

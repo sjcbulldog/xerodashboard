@@ -1,4 +1,6 @@
 #include "XeroItemFrame.h"
+#include "NTValueDisplayWidget.h"
+#include "PlotWidget.h"
 #include <QtCore/QDebug>
 #include <QtGui/QPainter>
 #include <QtGui/QBrush>
@@ -30,6 +32,55 @@ XeroItemFrame::~XeroItemFrame()
 {
 	if (child_ != nullptr)
 		delete child_;
+}
+
+bool XeroItemFrame::isPlot() const
+{
+	return dynamic_cast<PlotWidget*>(child_) != nullptr;
+}
+
+bool XeroItemFrame::isNetworkTableEntry() const
+{
+	return dynamic_cast<NTValueDisplayWidget*>(child_) != nullptr;
+}
+
+void XeroItemFrame::closeEvent(QCloseEvent* ev)
+{
+	emit frameClosing();
+	QWidget::closeEvent(ev);
+}
+
+void XeroItemFrame::titleEditInputRejected()
+{
+	editor_->close();
+	editor_->deleteLater();
+	editor_ = nullptr;
+}
+
+void XeroItemFrame::titleEditEditingFinished()
+{
+	title_ = editor_->text();
+	editor_->close();
+	editor_->deleteLater();
+	editor_ = nullptr;
+	update();
+}
+
+void XeroItemFrame::mouseDoubleClickEvent(QMouseEvent* ev)
+{
+	if (!headerRect().contains(ev->pos()))
+		return;
+
+	editor_ = new QLineEdit(this);
+	editor_->setGeometry(headerRect());
+	editor_->setText(title_);
+	editor_->setVisible(true);
+	editor_->setEnabled(true);
+	editor_->setFocus();
+	editor_->setSelection(0, title_.length());
+
+	(void)connect(editor_, &QLineEdit::inputRejected, this, &XeroItemFrame::titleEditInputRejected);
+	(void)connect(editor_, &QLineEdit::editingFinished, this, &XeroItemFrame::titleEditEditingFinished);
 }
 
 void XeroItemFrame::setSelected(bool b)
@@ -110,6 +161,21 @@ void XeroItemFrame::resizeEvent(QResizeEvent* ev)
 	}
 }
 
+void XeroItemFrame::maximize(bool storeprev)
+{
+	if (storeprev)
+		prev_location_ = geometry();
+
+	setGeometry(0, 0, parentWidget()->width(), parentWidget()->height());
+	is_maximized_ = true;
+}
+
+void XeroItemFrame::restore()
+{
+	is_maximized_ = false;
+	setGeometry(prev_location_);
+}
+
 void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 {
 	if (ev->button() == Qt::LeftButton)
@@ -129,14 +195,11 @@ void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 		{
 			if (is_maximized_)
 			{
-				is_maximized_ = false;
-				setGeometry(prev_location_);
+				restore();
 			}
 			else
 			{
-				prev_location_ = geometry();
-				setGeometry(0, 0, parentWidget()->width(), parentWidget()->height());
-				is_maximized_ = true;
+				maximize(true);
 			}
 			return;
 		}

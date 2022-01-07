@@ -62,7 +62,8 @@ std::shared_ptr<Plot> PlotMgr::processNewKey(const QString& keyname)
 {
 	QString name = extractPlotName(keyname);
 	auto plot = getAddPlot(name);
-	plot->readData();
+	if (plot != nullptr)
+		plot->readData();
 
 	return plot;
 }
@@ -71,7 +72,8 @@ std::shared_ptr<Plot> PlotMgr::processUpdatedKey(const QString& keyname)
 {
 	QString name = extractPlotName(keyname);
 	auto plot = getAddPlot(name);
-	plot->readData();
+	if (plot != nullptr)
+		plot->readData();
 
 	return plot;
 }

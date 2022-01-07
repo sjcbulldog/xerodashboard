@@ -1,5 +1,6 @@
 #include "PlotWidget.h"
 #include <QtWidgets/QBoxLayout>
+#include <QtGui/QPainter>
 #include "PlotMgr.h"
 #include "Plot.h"
 #include "PlotContainer.h"
@@ -12,12 +13,13 @@ PlotWidget::PlotWidget(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<Network
 	ntmgr_ = ntmgr;
 	plotmgr_ = plotmgr;
 	plotname_ = plotname;
+	editor_ = nullptr;
 
 	// Watch for new plots when they are added
 	plot_added_connection_ = connect(plotmgr.get(), &PlotMgr::plotAdded, this, &PlotWidget::plotAddedDetected);
 
 	// Set the min size for this window, below this is not really useful
-	setMinimumSize(600, 400);
+	setMinimumSize(200, 100);
 
 	// Create the windows assocaited with the plot widget
 	createWindows();
@@ -42,6 +44,33 @@ PlotWidget::~PlotWidget()
 		disconnect(disconnect_connection_);
 
 	disconnect(plot_added_connection_);
+}
+
+void PlotWidget::addTab()
+{
+	PlotContainer* cont = new PlotContainer(plotmgr_, plotname_);
+	cont->createDefaultChart();
+	tabs_->addTab(cont, plotname_);
+}
+
+void PlotWidget::closeTab(int index)
+{
+	if (index == -1)
+		index = tabs_->currentIndex();
+
+	auto* gr = tabs_->widget(index);
+	tabs_->removeTab(index);
+	delete gr;
+}
+
+void PlotWidget::paintEvent(QPaintEvent* ev)
+{
+	QPainter p(this);
+	QBrush b(QColor(255, 255, 255));
+
+	p.setPen(Qt::PenStyle::NoPen);
+	p.setBrush(b);
+	p.drawRect(0, 0, width(), height());
 }
 
 void PlotWidget::plotAddedDetected(const QString &plotname)
@@ -84,7 +113,8 @@ QJsonObject PlotWidget::getJSONDesc() const
 		PlotContainer* plots = dynamic_cast<PlotContainer*>(tabs_->widget(i));
 		if (plots != nullptr)
 		{
-			QJsonArray chobj = plots->getJSONDesc();
+			QJsonObject chobj = plots->getJSONDesc();
+			chobj[JsonFieldNames::TabText] = tabs_->tabText(i);
 			containers.push_back(chobj);
 		}
 	}
@@ -122,17 +152,58 @@ bool PlotWidget::restoreFromJson(const QJsonObject& obj)
 	QJsonArray arr = obj.value(JsonFieldNames::Constainers).toArray();
 	for (int i = 0; i < arr.size(); i++)
 	{
-		if (arr.at(i).isArray())
+		if (arr.at(i).isObject())
 		{
+			QJsonObject cobj = arr.at(i).toObject();
 			PlotContainer* cont = new PlotContainer(plotmgr_, plotname_);
 			tabs_->addTab(cont, plotname_);
 
+			if (cobj.contains(JsonFieldNames::TabText) && cobj.value(JsonFieldNames::TabText).isString())
+				tabs_->setTabText(i, cobj.value(JsonFieldNames::TabText).toString());
+
 			cont->removeAllCharts();
-			cont->restoreFromJson(arr.at(i).toArray());
+			if (cobj.contains(JsonFieldNames::Charts) && cobj.value(JsonFieldNames::Charts).isArray())
+				cont->restoreFromJson(cobj.value(JsonFieldNames::Charts).toArray());
 		}
 	}
 
 	return true;
+}
+
+void PlotWidget::editTabText(int which)
+{
+	which_tab_ = which;
+
+	QTabBar* bar = tabs_->tabBar();
+
+	QRect r = bar->tabRect(which);
+
+	if (editor_ == nullptr)
+	{
+		editor_ = new TabEditName(bar);
+		(void)connect(editor_, &TabEditName::returnPressed, this, &PlotWidget::editTabDone);
+		(void)connect(editor_, &TabEditName::escapePressed, this, &PlotWidget::editTabAborted);
+	}
+
+	editor_->setGeometry(r);
+	editor_->setFocus(Qt::FocusReason::OtherFocusReason);
+	editor_->setVisible(true);
+	editor_->setText(bar->tabText(which));
+	editor_->selectAll();
+}
+
+void PlotWidget::editTabDone()
+{
+	QTabBar* bar = tabs_->tabBar();
+	QString txt = editor_->text();
+
+	editor_->setVisible(false);
+	bar->setTabText(which_tab_, txt);
+}
+
+void PlotWidget::editTabAborted()
+{
+	editor_->setVisible(false);
 }
 
 void PlotWidget::createWindows()
@@ -154,8 +225,10 @@ void PlotWidget::createWindows()
 	nodes_->setHeaderLabels(hdrs);
 	nodes_->setDragEnabled(true);
 
-	tabs_ = new QTabWidget();
+	tabs_ = new EditableTabWidget(splitter_);
 	splitter_->addWidget(tabs_);
+	(void)connect(tabs_->tabBar(), &QTabBar::tabBarDoubleClicked, this, &PlotWidget::editTabText);
+	(void)connect(tabs_, &QTabWidget::tabCloseRequested, this, &PlotWidget::closeTab);
 
 	splitter_sizes_.push_back(splitter_->width() * 3 / 10);
 	splitter_sizes_.push_back(splitter_->width() * 7 / 10);

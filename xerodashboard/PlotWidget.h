@@ -7,6 +7,8 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QStackedWidget>
 #include "Plot.h"
+#include "EditableTabWidget.h"
+#include "TabEditName.h"
 
 class NetworkTableManager;
 class PlotMgr;
@@ -22,7 +24,11 @@ public:
 	QJsonObject getJSONDesc() const ;
 	bool restoreFromJson(const QJsonObject& obj);
 
-	void createDefaultChart();
+	void addTab();
+	void closeTab(int index = -1);
+
+protected:
+	void paintEvent(QPaintEvent* ev) override ;
 
 private:
 	void createWindows();
@@ -34,6 +40,10 @@ private:
 	bool attachPlot();
 
 	void plotAddedDetected(const QString &plotname);
+
+	void editTabText(int which);
+	void editTabDone();
+	void editTabAborted();
 
 private:
 	QMetaObject::Connection plot_added_connection_;
@@ -47,8 +57,11 @@ private:
 	QStackedWidget* stack_;
 	QSplitter * splitter_;
 	QTreeWidget* nodes_;
-	QTabWidget* tabs_;
+	EditableTabWidget* tabs_;
 	QLabel* busy_;
 
 	QList<int> splitter_sizes_;
+
+	int which_tab_;
+	TabEditName* editor_;
 };

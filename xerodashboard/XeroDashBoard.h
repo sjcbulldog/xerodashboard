@@ -46,6 +46,7 @@ private:
     void showFileMenu();
     void showAlignMenu();
     void showSizeMenu();
+    void showWindowMenu();
 
     void fileSave();
     void fileSaveAs();
@@ -90,6 +91,10 @@ private:
     QAction* size_same_width_action_;
     QAction* size_same_height_action_;
     QAction* size_same_both_action_;
+
+    QMenu* window_menu_;
+    QAction* window_new_tab_;
+    QAction* window_close_tab_;
 
     QLabel* status_selected_;
 

@@ -85,6 +85,9 @@
     <ClCompile Include="PreferencesDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EditableTabWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
@@ -127,6 +130,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="PreferencesDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="EditableTabWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

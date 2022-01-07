@@ -174,6 +174,16 @@ void XeroDashBoard::createMenus()
 
     size_same_both_action_ = size_menu_->addAction(tr("Make Same Size"));
     (void)connect(size_same_both_action_, &QAction::triggered, dash_view_, &DashView::sizeBoth);
+
+    window_menu_ = new QMenu(tr("&Window"));
+    (void)connect(window_menu_, &QMenu::aboutToShow, this, &XeroDashBoard::showWindowMenu);
+    menuBar()->addMenu(window_menu_);
+
+    window_new_tab_ = window_menu_->addAction(tr("New Tab"));
+    (void)connect(window_new_tab_, &QAction::triggered, dash_view_, &DashView::addTab);
+
+    window_close_tab_ = window_menu_->addAction(tr("Close Tab"));
+    (void)connect(window_close_tab_, &QAction::triggered, dash_view_, &DashView::closeTab);
 }
 
 void XeroDashBoard::createStatus()
@@ -187,7 +197,7 @@ void XeroDashBoard::createStatus()
 
 void XeroDashBoard::selectedSetCountChanged()
 {
-    QString txt = "Selected: " + QString::number(dash_view_->numSelected());
+    QString txt = "Selected: " + QString::number(dash_view_->selectedCount()) ;
     status_selected_->setText(txt);
 }
 
@@ -217,7 +227,7 @@ void XeroDashBoard::editPreferences()
 void XeroDashBoard::showFileMenu()
 {
     bool b = true;
-    if (dash_view_->numSelected() == 0)
+    if (dash_view_->count() == 0)
         b = false;
 
     file_save_action_->setEnabled(b);
@@ -228,7 +238,7 @@ void XeroDashBoard::showAlignMenu()
 {
     bool b = true;
 
-    if (dash_view_->numSelected() < 2)
+    if (dash_view_->selectedCount() < 2)
         b = false;
 
     align_left_action_->setEnabled(b);
@@ -237,18 +247,27 @@ void XeroDashBoard::showAlignMenu()
     align_bottom_action_->setEnabled(b);
     align_vcenter_action_->setEnabled(b);
     align_hcenter_action_->setEnabled(b);
+    align_tile_vertical_action_->setEnabled(b);
+    align_tile_horizontal_action_->setEnabled(b);
 }
 
 void XeroDashBoard::showSizeMenu()
 {
     bool b = true;
 
-    if (dash_view_->numSelected() < 2)
+    if (dash_view_->selectedCount() < 2)
         b = false;
 
     size_same_height_action_->setEnabled(b);
     size_same_width_action_->setEnabled(b);
     size_same_both_action_->setEnabled(b);
+}
+
+void XeroDashBoard::showWindowMenu()
+{
+    bool b = dash_view_->isPlotSelected();
+    window_new_tab_->setEnabled(b);
+    window_close_tab_->setEnabled(b);
 }
 
 void XeroDashBoard::saveJson()

@@ -36,11 +36,13 @@ public:
 		return charts_[index];
 	}
 
-	QJsonArray getJSONDesc() const;
+	QJsonObject getJSONDesc() const;
 	bool restoreFromJson(const QJsonArray& charts);
 
 	void removeAllCharts();
 	void createDefaultChart();
+	void tabEditDone();
+	void tabEditAborted();
 
 protected:
 	virtual void keyPressEvent(QKeyEvent* ev) override;

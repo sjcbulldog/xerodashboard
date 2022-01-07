@@ -1,10 +1,4 @@
-Hover over NTValueDisplayWidget title part to get full path of Network Table Entry
+Icon
 Display an array of items: double, string, boolean
 Display robot position on field
-Bar display of specific NTValueDisplayWidget items
-Preferences
-  - Align/Tile margin
-  - IP Address Of Network Tables
-  - XeroPlot key text
-
-
+Bar display of specific NTValueDisplayWidget items - complete

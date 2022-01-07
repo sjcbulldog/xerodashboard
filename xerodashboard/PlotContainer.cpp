@@ -34,8 +34,9 @@ void PlotContainer::createDefaultChart()
 	arrangeCharts();
 }
 
-QJsonArray PlotContainer::getJSONDesc() const 
+QJsonObject PlotContainer::getJSONDesc() const 
 {
+	QJsonObject obj;
 	QJsonArray arr;
 
 	for (int i = 0; i < charts_.size(); i++)
@@ -44,7 +45,8 @@ QJsonArray PlotContainer::getJSONDesc() const
 		arr.push_back(ch->getJSONDesc());
 	}
 
-	return arr;
+	obj[JsonFieldNames::Charts] = arr;
+	return obj;
 }
 
 bool PlotContainer::restoreFromJson(const QJsonArray& charts)

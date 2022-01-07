@@ -2,6 +2,7 @@
 
 #include <QtCore/QJsonArray>
 #include <QtWidgets/QWidget>
+#include "XeroItemFrame.h"
 
 class NetworkTableManager;
 class PlotMgr;
@@ -39,9 +40,25 @@ public:
 	void sizeHeight();
 	void sizeBoth();
 
-	int numSelected() const {
+	void addTab();
+	void closeTab();
+
+	int selectedCount() const {
 		return selected_.count();
 	}
+
+	XeroItemFrame* selectedWidget(int index) {
+		return selected_.at(index);
+	}
+
+	bool isPlotSelected() const {
+		if (selected_.count() != 1)
+			return false;
+
+		return selected_.at(0)->isPlot();
+	}
+
+	int count() const;
 
 signals:
 	void selectedCountChanged();
@@ -53,6 +70,7 @@ protected:
 	void mousePressEvent(QMouseEvent* ev) override;
 	void mouseReleaseEvent(QMouseEvent* ev) override;
 	void mouseMoveEvent(QMouseEvent* ev) override;
+	void resizeEvent(QResizeEvent* ev) override;
 
 private:
 	void createNTWidget(const QJsonObject& obj);
@@ -63,6 +81,9 @@ private:
 	void addToSelectedSet(XeroItemFrame* frame);
 	void removeFromSelectedSet(XeroItemFrame* frame);
 	void clearSelectedSet();
+
+	XeroItemFrame* createNewFrame();
+	void frameClosing(XeroItemFrame* frame);
 
 private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;

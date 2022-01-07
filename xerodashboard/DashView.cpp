@@ -21,6 +21,79 @@ DashView::~DashView()
 {
 }
 
+void DashView::addTab()
+{
+	if (selected_.count() != 1)
+		return;
+
+	XeroItemFrame* frame = dynamic_cast<XeroItemFrame*>(selected_.at(0));
+	if (frame->isPlot())
+	{
+		PlotWidget* pwid = dynamic_cast<PlotWidget*>(frame->child());
+		if (pwid != nullptr)
+		{
+			pwid->addTab();
+		}
+	}
+}
+
+void DashView::closeTab()
+{
+	if (selected_.count() != 1)
+		return;
+
+	XeroItemFrame* frame = dynamic_cast<XeroItemFrame*>(selected_.at(0));
+	if (frame->isPlot())
+	{
+		PlotWidget* pwid = dynamic_cast<PlotWidget*>(frame->child());
+		if (pwid != nullptr)
+		{
+			pwid->closeTab();
+		}
+	}
+}
+
+int DashView::count() const
+{
+	int ret = 0;
+
+	for (auto child : children())
+	{
+		XeroItemFrame* frame = dynamic_cast<XeroItemFrame*>(child);
+		if (frame != nullptr)
+			ret++;
+	}
+
+	return ret;
+}
+
+XeroItemFrame* DashView::createNewFrame()
+{
+	XeroItemFrame* frame = new XeroItemFrame(this);
+	auto fn = std::bind(&DashView::frameClosing, this, frame);
+	(void)connect(frame, &XeroItemFrame::frameClosing, fn);
+
+	return frame;
+}
+
+void DashView::frameClosing(XeroItemFrame* frame)
+{
+	if (selected_.contains(frame))
+		selected_.removeOne(frame);
+}
+
+void DashView::resizeEvent(QResizeEvent* ev)
+{
+	for (auto child : children())
+	{
+		XeroItemFrame* frame = dynamic_cast<XeroItemFrame*>(child);
+		if (frame != nullptr && frame->isMaximized())
+		{
+			frame->maximize(false);
+		}
+	}
+}
+
 void DashView::removeAllFrames()
 {
 	QList<XeroItemFrame*> frames;
@@ -81,7 +154,7 @@ void DashView::createPlot(const QJsonObject& obj)
 	if (!obj.contains(JsonFieldNames::Constainers) || !obj.value(JsonFieldNames::Constainers).isArray())
 		return;
 
-	XeroItemFrame* frame = new XeroItemFrame(this);
+	XeroItemFrame* frame = createNewFrame();
 	(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 
 	QString value = obj[JsonFieldNames::PlotName].toString();
@@ -141,7 +214,7 @@ void DashView::createNTWidget(const QJsonObject& obj)
 	else
 		title = value.mid(pos + 1);
 
-	XeroItemFrame* frame = new XeroItemFrame(this);
+	XeroItemFrame* frame = createNewFrame();
 	(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 	
 	NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value, frame);
@@ -152,6 +225,11 @@ void DashView::createNTWidget(const QJsonObject& obj)
 	if (obj.contains(JsonFieldNames::Display) && obj.value(JsonFieldNames::Display).isString())
 	{
 		vwid->setDisplayType(obj.value(JsonFieldNames::Display).toString());
+	}
+
+	if (obj.contains(JsonFieldNames::Title) && obj.value(JsonFieldNames::Title).isString())
+	{
+		frame->setTitle(obj.value(JsonFieldNames::Title).toString());
 	}
 
 	if (obj.contains(JsonFieldNames::X) && obj.contains(JsonFieldNames::Y) && 
@@ -198,6 +276,7 @@ QJsonArray DashView::getJSONDesc()
 				desc[JsonFieldNames::Y] = r.top();
 				desc[JsonFieldNames::Width] = r.width();
 				desc[JsonFieldNames::Height] = r.height();
+				desc[JsonFieldNames::Title] = frame->title();
 				arr.push_back(desc);
 				continue;
 			}
@@ -211,6 +290,7 @@ QJsonArray DashView::getJSONDesc()
 				desc[JsonFieldNames::Y] = r.top();
 				desc[JsonFieldNames::Width] = r.width();
 				desc[JsonFieldNames::Height] = r.height();
+				desc[JsonFieldNames::Title] = frame->title();
 				arr.push_back(desc);
 				continue;
 			}
@@ -263,7 +343,7 @@ void DashView::dropEvent(QDropEvent* ev)
 		else
 			title = value.mid(pos + 1);
 
-		XeroItemFrame* frame = new XeroItemFrame(this);
+		XeroItemFrame* frame = createNewFrame();
 		(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 
 		NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value.mid(3), frame);
@@ -276,7 +356,7 @@ void DashView::dropEvent(QDropEvent* ev)
 	else if (value.startsWith("PLOT:"))
 	{
 		PlotWidget* vwid;
-		XeroItemFrame* frame = new XeroItemFrame(this);
+		XeroItemFrame* frame = createNewFrame();
 		(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 
 		try {

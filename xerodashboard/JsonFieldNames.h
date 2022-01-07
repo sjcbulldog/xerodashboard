@@ -11,12 +11,13 @@ public:
 	static constexpr const char* Y = "y";
 	static constexpr const char* Width = "width";
 	static constexpr const char* Height = "height";
+	static constexpr const char* Title = "title";
 	static constexpr const char* SplitterWidth = "splitter";
 	static constexpr const char* Charts = "charts";
 	static constexpr const char* Constainers = "containers";
 	static constexpr const char* NodeList = "nodes";
 	static constexpr const char* PlotName = "plot";
-
+	static constexpr const char* TabText = "tabtext";
 	static constexpr const char* TypeValueNTV = "NTV";
 	static constexpr const char* TypeValuePlot = "PLOT";
 
