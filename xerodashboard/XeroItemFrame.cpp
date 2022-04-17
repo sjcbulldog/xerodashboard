@@ -52,7 +52,6 @@ void XeroItemFrame::closeEvent(QCloseEvent* ev)
 
 void XeroItemFrame::titleEditInputRejected()
 {
-	editor_->close();
 	editor_->deleteLater();
 	editor_ = nullptr;
 }
@@ -71,7 +70,7 @@ void XeroItemFrame::mouseDoubleClickEvent(QMouseEvent* ev)
 	if (!headerRect().contains(ev->pos()))
 		return;
 
-	editor_ = new QLineEdit(this);
+	editor_ = new TabEditName(this);
 	editor_->setGeometry(headerRect());
 	editor_->setText(title_);
 	editor_->setVisible(true);
@@ -79,8 +78,8 @@ void XeroItemFrame::mouseDoubleClickEvent(QMouseEvent* ev)
 	editor_->setFocus();
 	editor_->setSelection(0, title_.length());
 
-	(void)connect(editor_, &QLineEdit::inputRejected, this, &XeroItemFrame::titleEditInputRejected);
-	(void)connect(editor_, &QLineEdit::editingFinished, this, &XeroItemFrame::titleEditEditingFinished);
+	(void)connect(editor_, &QLineEdit::returnPressed, this, &XeroItemFrame::titleEditEditingFinished);
+	(void)connect(editor_, &TabEditName::escapePressed, this, &XeroItemFrame::titleEditInputRejected);
 }
 
 void XeroItemFrame::setSelected(bool b)
@@ -207,14 +206,14 @@ void XeroItemFrame::mousePressEvent(QMouseEvent* ev)
 		r = headerRect();
 		if (r.contains(ev->pos()))
 		{
-			dragging_ = true;
-			mouse_ = ev->globalPos();
-			window_ = frameGeometry().topLeft();
-
 			bool shift = false;
 			if ((ev->modifiers() & Qt::ShiftModifier) == Qt::ShiftModifier)
 				shift = true;
+
 			emit headerClicked(this, shift);
+
+			dragging_ = true;
+			emit startDragWindows(ev->globalPos());
 			return;
 		}
 
@@ -281,20 +280,7 @@ void XeroItemFrame::mouseMoveEvent(QMouseEvent* ev)
 {
 	if (dragging_)
 	{
-		QPoint dist = ev->globalPos() - mouse_;
-
-		QPoint dest = window_ + dist;
-		if (dest.x() < 0)
-			dest.setX(0);
-		else if (dest.x() > parentWidget()->width() - 4)
-			dest.setX(parentWidget()->width() - 4);
-
-		if (dest.y() < 0)
-			dest.setY(0);
-		else if (dest.y() > parentWidget()->height() - 4)
-			dest.setY(parentWidget()->height() - 4);
-
-		move(dest);
+		emit continueDragWindows(ev->globalPos());
 	}
 	else if (resizing_ == ResizeCursor::BottomRight)
 	{

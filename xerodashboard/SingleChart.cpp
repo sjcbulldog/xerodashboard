@@ -3,6 +3,7 @@
 #include <QtWidgets/QListWidget>
 #include <QtCore/QDebug>
 #include <QtWidgets/QMessageBox>
+#include <QtGui/QWheelEvent>
 #include "PlotContainer.h"
 #include "Plot.h"
 #include "JsonFieldNames.h"
@@ -16,8 +17,9 @@ SingleChart::SingleChart(QString units, std::shared_ptr<PlotMgr> plotmgr, const 
 	units_ = units;
 	time_ = nullptr;
 	legend_ = nullptr;
+	hand_cursor_ = false;
 
-	callno_ = 0;
+	setRubberBand(QChartView::RectangleRubberBand);
 
 	plot_added_connection_ = connect(plotmgr.get(), &PlotMgr::plotAdded, this, &SingleChart::plotAddedDetected);
 
@@ -33,6 +35,64 @@ SingleChart::~SingleChart()
 	}
 
 	disconnect(plot_added_connection_);
+}
+
+void SingleChart::wheelEvent(QWheelEvent* ev)
+{
+	qreal factor = ev->angleDelta().y() > 0 ? 0.5 : 2.0;
+	chart()->zoom(factor);
+	ev->accept();
+
+	QChartView::wheelEvent(ev);
+
+}
+
+void SingleChart::mousePressEvent(QMouseEvent* ev)
+{
+#ifdef NOTYET
+	if (ev->button() == Qt::MiddleButton)
+	{
+		qDebug() << "MousePress";
+		setCursor(Qt::OpenHandCursor);
+		hand_cursor_ = false;
+		last_pos_ = ev->pos();
+		ev->accept();
+	}
+#endif
+	QChartView::mousePressEvent(ev);
+}
+
+void SingleChart::mouseMoveEvent(QMouseEvent* ev)
+{
+	mouse_ = chart()->mapToValue(QPointF(ev->x(), ev->y()));
+
+	// pan the chart with a middle mouse drag
+	if (hand_cursor_)
+	{
+		auto diff = this->chart()->mapToValue(ev->pos()) - this->chart()->mapToValue(last_pos_);
+		qDebug() << "MouseMove: " << diff;
+
+		this->chart()->scroll(diff.x(), diff.y());
+		total_scroll_x_ += diff.x();
+		total_scroll_y_ += diff.y();
+
+		last_pos_ = ev->pos();
+		ev->accept();
+	}
+
+	QChartView::mouseMoveEvent(ev);
+}
+
+void SingleChart::mouseReleaseEvent(QMouseEvent* ev)
+{
+	if (hand_cursor_)
+	{
+		setCursor(Qt::ArrowCursor);
+		hand_cursor_ = false;
+		ev->accept();
+	}
+
+	QChartView::mouseReleaseEvent(ev);
 }
 
 void SingleChart::plotAddedDetected(const QString& plotname)
@@ -139,10 +199,6 @@ void SingleChart::focusInEvent(QFocusEvent* ev)
 		c->childFocused(this);
 }
 
-void SingleChart::mouseMoveEvent(QMouseEvent* ev)
-{
-	mouse_ = chart()->mapToValue(QPointF(ev->x(), ev->y()));
-}
 
 void SingleChart::keyPressEvent(QKeyEvent* ev)
 {
@@ -530,32 +586,27 @@ QLineSeries* SingleChart::findSeries(QString node)
 
 QString SingleChart::nodeToAxis(QString node)
 {
-	if (node.contains("(p)")) 
-	{
-		return "Power (% pwm)";
-	}
-	else if (node.contains("(degs)"))
-	{
-		return "Angle (degrees)";
-	}
-	else if (node.contains("dist") || node.contains("pos"))
-		return "Distance (" + units_ + ")";
-	else if (node.contains("vel"))
-		return "Velocity (" + units_ + "/s)";
-	else if (node.contains("acc"))
-		return "Accel (" + units_ + "/s^2)";
-	else if (node.contains("jerk"))
-		return "Jerk (" + units_ + "/s^3)";
-	else if (node.contains("tick"))
-		return "Ticks (count)";
-	else if (node.contains("out"))
-		return "Power (% pwm)";
-	else if (node.contains("ang"))
-		return "Angle (degrees)";
-	else if (node.contains("head"))
-		return "Heading (degrees)";
+	QString ret;
 
-	return node;
+	int left = node.indexOf('(');
+	if (left == -1)
+	{
+		ret = node;
+	}
+	else
+	{
+		int right = node.indexOf(')', left + 1);
+		if (right == -1)
+		{
+			ret = node;
+		}
+		else
+		{
+			ret = node.mid(left + 1, right - left - 1);
+		}
+	}
+
+	return ret;
 }
 
 void SingleChart::createTimeAxis()
@@ -874,7 +925,6 @@ void SingleChart::resetNodes()
 
 void SingleChart::plotStateChanged(Plot::State oldst, Plot::State newst)
 {
-	callno_++;
 	if (is_complete_ == false && plot_->isComplete())
 	{
 		resetNodes();

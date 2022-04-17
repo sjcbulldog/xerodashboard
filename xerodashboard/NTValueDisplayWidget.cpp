@@ -17,7 +17,7 @@ NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> 
 	connected_ = true;
 
 	update_connection_ = connect(ntmgr.get(), &NetworkTableManager::updatedEntry, this, &NTValueDisplayWidget::entryUpdateDetected);
-	update_connection_ = connect(ntmgr.get(), &NetworkTableManager::newEntry, this, &NTValueDisplayWidget::newDetected);
+	new_connection_ = connect(ntmgr.get(), &NetworkTableManager::newEntry, this, &NTValueDisplayWidget::newDetected);
 	disconnect_connection_ = connect(ntmgr.get(), &NetworkTableManager::disconnected, this, &NTValueDisplayWidget::disconnectDetected);
 	connect_connection_ = connect(ntmgr.get(), &NetworkTableManager::connected, this, &NTValueDisplayWidget::connectDetected);
 
@@ -33,6 +33,7 @@ NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> 
 NTValueDisplayWidget::~NTValueDisplayWidget()
 {
 	disconnect(update_connection_);
+	disconnect(new_connection_);
 	disconnect(disconnect_connection_);
 	disconnect(connect_connection_);
 }

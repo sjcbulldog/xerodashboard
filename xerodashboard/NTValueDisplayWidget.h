@@ -22,6 +22,8 @@ public:
 		update();
 	}
 
+	void setUnits(const std::string& units);
+
 protected:
 	void paintEvent(QPaintEvent* ev) override;
 	bool event(QEvent* ev) override;
@@ -47,6 +49,7 @@ private:
 	QString path_;
 	bool connected_;
 	QMetaObject::Connection update_connection_;
+	QMetaObject::Connection new_connection_;
 	QMetaObject::Connection disconnect_connection_;
 	QMetaObject::Connection connect_connection_;
 };

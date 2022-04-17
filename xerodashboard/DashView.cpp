@@ -9,8 +9,9 @@
 #include "PlotWidget.h"
 #include "PlotMgr.h"
 #include "JsonFieldNames.h"
+#include "PathDisplayWidget.h"
 
-DashView::DashView(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent) : QWidget(parent)
+DashView::DashView(GameFieldManager &mgr, std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent) : QWidget(parent), field_mgr_(mgr)
 {
 	plotmgr_ = plotmgr;
 	ntmgr_ = ntmgr;
@@ -19,6 +20,18 @@ DashView::DashView(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTabl
 
 DashView::~DashView()
 {
+}
+
+void DashView::showPath()
+{
+	XeroItemFrame* frame = createNewFrame();
+
+	auto widget = new PathDisplayWidget(field_mgr_, ntmgr_);
+	frame->setWidget(widget);
+	frame->setVisible(true);
+	frame->setTitle("Path Plotter");
+
+	frame->setGeometry(0, 0, 100, 100);
 }
 
 void DashView::addTab()
@@ -72,8 +85,32 @@ XeroItemFrame* DashView::createNewFrame()
 	XeroItemFrame* frame = new XeroItemFrame(this);
 	auto fn = std::bind(&DashView::frameClosing, this, frame);
 	(void)connect(frame, &XeroItemFrame::frameClosing, fn);
+	(void)connect(frame, &XeroItemFrame::startDragWindows, this, &DashView::dragWindowsStart);
+	(void)connect(frame, &XeroItemFrame::continueDragWindows, this, &DashView::dragWindowsContinue);
+	(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 
 	return frame;
+}
+
+void DashView::dragWindowsStart(const QPoint& global)
+{
+	drag_mouse_start_ = global;
+
+	for (auto frame : selected_)
+	{
+		frame->setSavePos(frame->pos());
+	}
+}
+
+void DashView::dragWindowsContinue(const QPoint& global)
+{
+	QPoint diff = global - drag_mouse_start_;
+
+	for (auto frame : selected_)
+	{
+		QPoint newpos = frame->getSavePos() + diff;
+		frame->setGeometry(newpos.x(), newpos.y(), frame->width(), frame->height());
+	}
 }
 
 void DashView::frameClosing(XeroItemFrame* frame)
@@ -155,7 +192,7 @@ void DashView::createPlot(const QJsonObject& obj)
 		return;
 
 	XeroItemFrame* frame = createNewFrame();
-	(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
+
 
 	QString value = obj[JsonFieldNames::PlotName].toString();
 
@@ -215,7 +252,6 @@ void DashView::createNTWidget(const QJsonObject& obj)
 		title = value.mid(pos + 1);
 
 	XeroItemFrame* frame = createNewFrame();
-	(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 	
 	NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value, frame);
 	frame->setWidget(vwid);
@@ -344,7 +380,6 @@ void DashView::dropEvent(QDropEvent* ev)
 			title = value.mid(pos + 1);
 
 		XeroItemFrame* frame = createNewFrame();
-		(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 
 		NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value.mid(3), frame);
 		frame->setWidget(vwid);
@@ -357,7 +392,6 @@ void DashView::dropEvent(QDropEvent* ev)
 	{
 		PlotWidget* vwid;
 		XeroItemFrame* frame = createNewFrame();
-		(void)connect(frame, &XeroItemFrame::headerClicked, this, &DashView::frameWindowHeaderClicked);
 
 		try {
 			vwid = new PlotWidget(plotmgr_, ntmgr_, value.mid(5), frame);
@@ -413,11 +447,6 @@ void DashView::clearSelectedSet()
 
 void DashView::frameWindowHeaderClicked(XeroItemFrame* frame, bool shift)
 {
-	if (!shift)
-	{
-		clearSelectedSet();
-	}
-
 	addToSelectedSet(frame);
 }
 

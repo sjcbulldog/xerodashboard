@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QLineEdit>
+#include "TabEditName.h"
 
 class XeroItemFrame : public QWidget
 {
@@ -21,6 +21,7 @@ public:
 
 	void setWidget(QWidget* child) {
 		child_ = child;
+		child_->setParent(this);
 		child_->setVisible(true);
 		layout();
 	}
@@ -43,9 +44,19 @@ public:
 		return child_;
 	}
 
+	void setSavePos(const QPoint& pos) {
+		pos_ = pos;
+	}
+
+	const QPoint& getSavePos() {
+		return pos_;
+	}
+
 signals:
 	void headerClicked(XeroItemFrame * which, bool shift);
 	void frameClosing();
+	void startDragWindows(const QPoint& global);
+	void continueDragWindows(const QPoint& global);
 
 protected:
 	void paintEvent(QPaintEvent* ev);
@@ -98,8 +109,10 @@ private:
 	QSize winsize_;
 	QPoint winpos_;
 
-	QLineEdit* editor_;
+	TabEditName* editor_;
 
 	QColor header_color_;
 	QColor hilite_color_;
+
+	QPoint pos_;
 };

@@ -84,6 +84,7 @@ void PlotListWidget::updatePlotStatus(std::shared_ptr<Plot> plot)
 	{
 		item = new QTreeWidgetItem();
 		item->setText(0, plot->name());
+		item->setToolTip(0, plot->name());
 		addTopLevelItem(item);
 	}
 

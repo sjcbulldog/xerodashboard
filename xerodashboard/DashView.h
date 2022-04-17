@@ -7,13 +7,14 @@
 class NetworkTableManager;
 class PlotMgr;
 class XeroItemFrame;
+class GameFieldManager;
 
 class DashView : public QWidget
 {
 	Q_OBJECT
 
 public:
-	DashView(std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent = Q_NULLPTR);
+	DashView(GameFieldManager &mgr, std::shared_ptr<PlotMgr> plotmgr, std::shared_ptr<NetworkTableManager> ntmgr, QWidget *parent = Q_NULLPTR);
 	~DashView();
 
 	int tileMargin() const {
@@ -42,6 +43,8 @@ public:
 
 	void addTab();
 	void closeTab();
+
+	void showPath();
 
 	int selectedCount() const {
 		return selected_.count();
@@ -85,7 +88,11 @@ private:
 	XeroItemFrame* createNewFrame();
 	void frameClosing(XeroItemFrame* frame);
 
+	void dragWindowsStart(const QPoint& global);
+	void dragWindowsContinue(const QPoint& global);
+
 private:
+	GameFieldManager& field_mgr_;
 	std::shared_ptr<NetworkTableManager> ntmgr_;
 	std::shared_ptr<PlotMgr> plotmgr_;
 	QList<XeroItemFrame*> selected_;
@@ -94,4 +101,6 @@ private:
 	bool selecting_;
 	QPoint other_;
 	QPoint mouse_;
+
+	QPoint drag_mouse_start_;
 };

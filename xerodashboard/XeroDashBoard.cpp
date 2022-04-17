@@ -15,6 +15,11 @@
 
 XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
 {
+    QString exedir = QCoreApplication::applicationDirPath();
+    field_mgr_.addDefaultDirectory((exedir + "/fields").toStdString());
+    field_mgr_.copyDefaults("fields");
+    game_mgr_ = field_mgr_.initialize();
+
     if (settings_.contains(PlotKeySettings))
         key_ = settings_.value(PlotKeySettings).toString();
     else
@@ -85,7 +90,7 @@ void XeroDashBoard::timerCallback()
 
 void XeroDashBoard::createWindows()
 {
-    dash_view_ = new DashView(plotmgr_, ntmgr_);
+    dash_view_ = new DashView(field_mgr_, plotmgr_, ntmgr_);
     setCentralWidget(dash_view_);
 
     network_table_dock_ = new QDockWidget(tr("Network Table"), this);
@@ -184,6 +189,11 @@ void XeroDashBoard::createMenus()
 
     window_close_tab_ = window_menu_->addAction(tr("Close Tab"));
     (void)connect(window_close_tab_, &QAction::triggered, dash_view_, &DashView::closeTab);
+
+    window_menu_->addSeparator();
+
+    window_show_path_ = window_menu_->addAction(tr("Show Path"));
+    (void)connect(window_show_path_, &QAction::triggered, dash_view_, &DashView::showPath);
 }
 
 void XeroDashBoard::createStatus()
@@ -344,4 +354,3 @@ void XeroDashBoard::fileExit()
 {
     QCoreApplication::quit();
 }
-

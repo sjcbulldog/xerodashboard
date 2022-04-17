@@ -40,13 +40,16 @@ public:
 	void insertNode(const QString& node);
 
 protected:
-	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-	virtual void dragMoveEvent(QDragMoveEvent* event) override;
-	virtual void dragLeaveEvent(QDragLeaveEvent* event) override;
-	virtual void dropEvent(QDropEvent* ev) override;
-	virtual void keyPressEvent(QKeyEvent* ev) override;
-	virtual void mouseMoveEvent(QMouseEvent* ev) override;
-	virtual void focusInEvent(QFocusEvent* ev) override;
+	void dragEnterEvent(QDragEnterEvent* event) override;
+	void dragMoveEvent(QDragMoveEvent* event) override;
+	void dragLeaveEvent(QDragLeaveEvent* event) override;
+	void dropEvent(QDropEvent* ev) override;
+	void keyPressEvent(QKeyEvent* ev) override;
+	void focusInEvent(QFocusEvent* ev) override;
+	void wheelEvent(QWheelEvent* ev) override;
+	void mouseMoveEvent(QMouseEvent* ev) override;
+	void mousePressEvent(QMouseEvent* ev) override;
+	void mouseReleaseEvent(QMouseEvent* ev) override;
 
 private:
 	QtCharts::QValueAxis* findAxis(QString axisname);
@@ -157,5 +160,6 @@ private:
 
 	QMetaObject::Connection plot_added_connection_;
 
-	int callno_;
+	QPointF last_pos_;
+	bool hand_cursor_;
 };

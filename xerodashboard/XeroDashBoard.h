@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameFieldManager.h"
 #include <QtCore/QTimer>
 #include <QtCore/QSettings>
 #include <QtCore/QDir>
@@ -55,11 +56,11 @@ private:
 
     void editPreferences();
  
-
 private:
     void timerCallback();
     void saveJson();
     void selectedSetCountChanged();
+
 
 private:
     QSettings settings_;
@@ -95,6 +96,7 @@ private:
     QMenu* window_menu_;
     QAction* window_new_tab_;
     QAction* window_close_tab_;
+    QAction* window_show_path_;
 
     QLabel* status_selected_;
 
@@ -111,4 +113,7 @@ private:
 
     QString filename_;
     QDir homedir_;
+
+    GameFieldManager field_mgr_;
+    bool game_mgr_;
 };

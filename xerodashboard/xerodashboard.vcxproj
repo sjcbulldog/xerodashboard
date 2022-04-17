@@ -68,7 +68,9 @@
       <AdditionalDependencies>ntcored.lib;wpiutild.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>$(QTDIR)\bin\windeployqt $(OutDir)$(ProjectName).exe
+      <Command>if not exist "$(OutDir)fields" mkdir $(OutDir)fields
+copy $(SolutionDir)fields\*.* $(OutDir)fields
+$(QTDIR)\bin\windeployqt $(OutDir)$(ProjectName).exe
 copy $(SolutionDir)external\wpi\bin\$(Configuration)\*.dll $(OutDir)
 copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
     </PostBuildEvent>
@@ -83,7 +85,9 @@ copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
       <AdditionalDependencies>ntcore.lib;wpiutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>$(QTDIR)\bin\windeployqt $(OutDir)$(ProjectName).exe
+      <Command>if not exist "$(OutDir)fields" mkdir $(OutDir)fields
+copy $(SolutionDir)fields\*.* $(OutDir)fields
+$(QTDIR)\bin\windeployqt $(OutDir)$(ProjectName).exe
 copy $(SolutionDir)external\wpi\bin\$(Configuration)\*.dll $(OutDir)
 copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
     </PostBuildEvent>
@@ -117,15 +121,24 @@ copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
   <ItemGroup>
     <ClCompile Include="Callout.cpp" />
     <ClCompile Include="EditableTabWidget.cpp" />
+    <ClCompile Include="GameFieldManager.cpp" />
+    <ClCompile Include="ManagerBase.cpp" />
+    <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="NTFormattingUtils.cpp" />
     <ClCompile Include="NTValueDisplayWidget.cpp" />
+    <ClCompile Include="PathDisplayWidget.cpp" />
     <ClCompile Include="Plot.cpp" />
     <ClCompile Include="PlotContainer.cpp" />
     <ClCompile Include="PlotMgr.cpp" />
     <ClCompile Include="PlotWidget.cpp" />
+    <ClCompile Include="Pose2d.cpp" />
     <ClCompile Include="PreferencesDialog.cpp" />
+    <ClCompile Include="Rotation2d.cpp" />
     <ClCompile Include="SingleChart.cpp" />
     <ClCompile Include="TabEditName.cpp" />
+    <ClCompile Include="Translation2d.cpp" />
+    <ClCompile Include="Twist2d.cpp" />
+    <ClCompile Include="UnitConverter.cpp" />
     <ClCompile Include="XeroItemFrame.cpp" />
     <ClCompile Include="XeroTreeWidgetBase.cpp" />
     <QtRcc Include="xerodashboard.qrc" />
@@ -161,10 +174,20 @@ copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Callout.h" />
+    <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="Pose2d.h" />
+    <ClInclude Include="Rotation2d.h" />
+    <ClInclude Include="Translation2d.h" />
+    <ClInclude Include="Twist2d.h" />
+    <ClInclude Include="UnitConverter.h" />
     <QtMoc Include="EditableTabWidget.h" />
+    <ClInclude Include="GameField.h" />
+    <ClInclude Include="GameFieldManager.h" />
     <ClInclude Include="JsonFieldNames.h" />
+    <ClInclude Include="ManagerBase.h" />
     <ClInclude Include="NTFormattingUtils.h" />
     <QtMoc Include="PreferencesDialog.h" />
+    <QtMoc Include="PathDisplayWidget.h" />
     <ClInclude Include="SingleChart.h" />
     <QtMoc Include="TabEditName.h" />
     <QtMoc Include="PlotContainer.h" />
