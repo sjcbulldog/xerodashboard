@@ -1,4 +1,5 @@
 #include "PathDisplayWidget.h"
+#include "PathDisplayWidget.h"
 #include <QtGui/QPainter>
 #include <QtWidgets/QMenu>
 #include <QtGui/QContextMenuEvent>
@@ -58,8 +59,6 @@ void PathDisplayWidget::connectDetected()
 
 void PathDisplayWidget::entryUpdateDetected(const QString& name)
 {
-	qDebug() << name;
-
 	if (name == RobotLocationNetworkTableEntry)
 	{
 		auto pos = robot_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
@@ -72,7 +71,7 @@ void PathDisplayWidget::entryUpdateDetected(const QString& name)
 	}
 	else if (name == PathLocationNetworkTableEntry)
 	{
-		auto pos = robot_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
+		auto pos = path_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
 		if (pos.at(0) > -1000.0 && pos.at(1) > -1000 && pos.at(2) > -1000)
 		{
 			Pose2d pose(pos.at(0), pos.at(1), Rotation2d::fromDegrees(pos.at(2)));
@@ -84,7 +83,6 @@ void PathDisplayWidget::entryUpdateDetected(const QString& name)
 
 void PathDisplayWidget::newDetected(const QString& name)
 {
-	qDebug() << name;
 	if (name == RobotLocationNetworkTableEntry)
 	{
 		auto pos = robot_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
@@ -146,27 +144,51 @@ void PathDisplayWidget::setFieldFromMenu(bool checked, std::shared_ptr<GameField
 
 void PathDisplayWidget::doPaint(QPainter& paint)
 {
-	static const int rsize = 10;
+	QBrush background(QColor(64, 64, 64));
+	paint.setBrush(background);
+	paint.drawRect(0, 0, width(), height());
+
+	static const int rsize = 8;
 	QRectF rect(0.0f, 0.0f, field_image_.width() * image_scale_, field_image_.height() * image_scale_);
 	paint.drawImage(rect, field_image_);
 
-	QBrush b(QColor(255, 0, 0));
+	QBrush b(QColor(0, 255, 0));
 	paint.save();
+
+	QPointF p1(0, 0);
+	QPointF p2(rsize, 0);
+
+	double size = window_to_world_.map(p1).x() - window_to_world_.map(p2).x();
+
 	paint.setBrush(b);
 	for (const Pose2d& rpos : robot_track_) {
-		QRectF r(rpos.getTranslation().getX() - rsize / 2, rpos.getTranslation().getY() - rsize / 2, rsize, rsize);
-		paint.drawRect(r);
+		QPointF ptf = world_to_window_.map(QPointF(rpos.getTranslation().getX(), rpos.getTranslation().getY()));
+		QRectF r(ptf.x() - rsize / 2, ptf.y()- rsize / 2, rsize, rsize);
+		paint.drawEllipse(r);
 
-		qDebug() << "robot " << r;
+		QTransform mm;
+		mm.translate(rpos.getTranslation().getX(), rpos.getTranslation().getY());
+		double ang = rpos.getRotation().toRadians();
+		mm.rotateRadians(ang);
+		QPointF pt1(0, 0);
+		QPointF pt2(-size * 2, 0);
+		QPointF ptf1 = world_to_window_.map(mm.map(pt1));
+		QPointF ptf2 = world_to_window_.map(mm.map(pt2));
+
+		paint.save();
+		QPen pen(QColor(255, 0, 0));
+		paint.setPen(pen);
+		paint.drawLine(ptf1, ptf2);
+
+		paint.restore();
 	}
 
 	b = QBrush(QColor(0, 0, 255));
 	paint.setBrush(b);
-	for (const Pose2d& rpos : robot_track_) {
-		QRectF r(rpos.getTranslation().getX() - rsize / 2, rpos.getTranslation().getY() - rsize / 2, rsize, rsize);
-		paint.drawRect(r);
-
-		qDebug() << "path " << r;
+	for (const Pose2d& rpos : path_track_) {
+		QPointF ptf = world_to_window_.map(QPointF(rpos.getTranslation().getX(), rpos.getTranslation().getY()));
+		QRectF r(ptf.x() - rsize / 2, ptf.y() - rsize / 2, rsize, rsize);
+		paint.drawEllipse(r);
 	}
 	paint.restore();
 }

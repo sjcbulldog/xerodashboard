@@ -28,6 +28,8 @@ UnitConverter::conversion UnitConverter::convert_[] =
 {
 	{ "ft", "in", 12.0},
 	{ "feet", "in", 12.0},
+	{ "feet", "m", 0.3048},
+	{ "foot", "m", 0.3048},
 	{ "foot", "in", 12.0},
 	{ "ft", "inches", 12.0},
 	{ "feet", "inches", 12.0},

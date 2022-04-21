@@ -19,6 +19,8 @@ XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
     field_mgr_.addDefaultDirectory((exedir + "/fields").toStdString());
     field_mgr_.copyDefaults("fields");
     game_mgr_ = field_mgr_.initialize();
+    if (game_mgr_)
+        field_mgr_.convert("m");
 
     if (settings_.contains(PlotKeySettings))
         key_ = settings_.value(PlotKeySettings).toString();
