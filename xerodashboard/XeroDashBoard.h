@@ -1,6 +1,10 @@
 #pragma once
 
 #include "GameFieldManager.h"
+#include "NetworkTableTreeWidget.h"
+#include "PlotListWidget.h"
+#include "DriverStationLogTreeWidget.h"
+#include "DriverStationDataModel.h"
 #include <QtCore/QTimer>
 #include <QtCore/QSettings>
 #include <QtCore/QDir>
@@ -107,6 +111,10 @@ private:
 
     QDockWidget* plot_list_dock_;
     PlotListWidget* plot_list_view_;
+
+    QDockWidget* driver_station_dock_;
+    DriverStationLogTreeWidget* driver_station_view_;
+    DriverStationDataModel driver_station_model_;
 
     QString key_;
     QString ipaddr_;

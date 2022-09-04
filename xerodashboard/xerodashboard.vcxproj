@@ -120,6 +120,11 @@ copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Callout.cpp" />
+    <ClCompile Include="DriverStationDataModel.cpp" />
+    <ClCompile Include="DriverStationLogTreeWidget.cpp" />
+    <ClCompile Include="DSEventFile.cpp" />
+    <ClCompile Include="DSFile.cpp" />
+    <ClCompile Include="DSLogFile.cpp" />
     <ClCompile Include="EditableTabWidget.cpp" />
     <ClCompile Include="GameFieldManager.cpp" />
     <ClCompile Include="ManagerBase.cpp" />
@@ -174,6 +179,11 @@ copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Callout.h" />
+    <ClInclude Include="DriverStationDataModel.h" />
+    <QtMoc Include="DriverStationLogTreeWidget.h" />
+    <ClInclude Include="DSEventFile.h" />
+    <QtMoc Include="DSFile.h" />
+    <ClInclude Include="DSLogFile.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Pose2d.h" />
     <ClInclude Include="Rotation2d.h" />

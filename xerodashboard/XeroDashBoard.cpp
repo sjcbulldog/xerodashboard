@@ -67,6 +67,8 @@ XeroDashBoard::XeroDashBoard(QWidget *parent) : QMainWindow(parent)
             dash_view_->restoreLayout(arr);
         }
     }
+
+    driver_station_model_.init("D:/cygwin64/home/bwg/robottools/xerodashboard/logs");
 }
 
 XeroDashBoard::~XeroDashBoard()
@@ -106,6 +108,12 @@ void XeroDashBoard::createWindows()
     plot_list_view_ = new PlotListWidget(ntmgr_, plotmgr_, key_, plot_list_dock_);
     plot_list_dock_->setWidget(plot_list_view_);
     addDockWidget(Qt::LeftDockWidgetArea, plot_list_dock_);
+
+    driver_station_dock_ = new QDockWidget(tr("Driver Station Logs"), this);
+    driver_station_dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    driver_station_view_ = new DriverStationLogTreeWidget(driver_station_model_, driver_station_dock_);
+    driver_station_dock_->setWidget(driver_station_view_);
+    addDockWidget(Qt::LeftDockWidgetArea, driver_station_dock_);
 }
 
 void XeroDashBoard::createMenus()
