@@ -1,0 +1,107 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreBaseWindowsx86-64DebugStaticLibraryNtcoreBaseCpp/output.txt for all output for compileNtcoreBaseWindowsx86-64DebugStaticLibraryNtcoreBaseCpp.
+compiling ConnectionList.cpp successful.
+ConnectionList.cpp
+
+compiling InstanceImpl.cpp successful.
+InstanceImpl.cpp
+
+compiling ListenerStorage.cpp successful.
+ListenerStorage.cpp
+
+compiling LocalStorage.cpp successful.
+LocalStorage.cpp
+
+compiling LoggerImpl.cpp successful.
+LoggerImpl.cpp
+
+compiling ClientImpl.cpp successful.
+ClientImpl.cpp
+
+compiling NetworkLoopQueue.cpp successful.
+NetworkLoopQueue.cpp
+
+compiling NetworkPing.cpp successful.
+NetworkPing.cpp
+
+compiling ServerImpl.cpp successful.
+ServerImpl.cpp
+
+compiling WebSocketConnection.cpp successful.
+WebSocketConnection.cpp
+
+compiling WireDecoder.cpp successful.
+WireDecoder.cpp
+
+compiling WireEncoder.cpp successful.
+WireEncoder.cpp
+
+compiling ClientImpl3.cpp successful.
+ClientImpl3.cpp
+
+compiling UvStreamConnection3.cpp successful.
+UvStreamConnection3.cpp
+
+compiling WireDecoder3.cpp successful.
+WireDecoder3.cpp
+
+compiling WireEncoder3.cpp successful.
+WireEncoder3.cpp
+
+compiling NetworkClient.cpp successful.
+NetworkClient.cpp
+
+compiling NetworkServer.cpp successful.
+NetworkServer.cpp
+
+compiling NetworkTable.cpp successful.
+NetworkTable.cpp
+
+compiling NetworkTableEntry.cpp successful.
+NetworkTableEntry.cpp
+
+compiling NTSendable.cpp successful.
+NTSendable.cpp
+
+compiling ntcore_meta_c.cpp successful.
+ntcore_meta_c.cpp
+
+compiling ntcore_test.cpp successful.
+ntcore_test.cpp
+
+compiling Value_internal.cpp successful.
+Value_internal.cpp
+
+compiling ntcore_meta.cpp successful.
+ntcore_meta.cpp
+
+compiling ValueCircularBuffer.cpp successful.
+ValueCircularBuffer.cpp
+
+compiling Value.cpp successful.
+Value.cpp
+
+compiling ntcore_c_types.cpp successful.
+ntcore_c_types.cpp
+
+compiling NTSendableBuilder.cpp successful.
+NTSendableBuilder.cpp
+
+compiling ntcore_c.cpp successful.
+ntcore_c.cpp
+
+compiling Topic.cpp successful.
+Topic.cpp
+
+compiling NetworkTableInstance.cpp successful.
+NetworkTableInstance.cpp
+
+compiling Types_internal.cpp successful.
+Types_internal.cpp
+
+compiling ntcore_cpp.cpp successful.
+ntcore_cpp.cpp
+
+compiling ntcore_cpp_types.cpp successful.
+ntcore_cpp_types.cpp
+
+Finished compileNtcoreBaseWindowsx86-64DebugStaticLibraryNtcoreBaseCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreBaseWindowsx86-64DebugStaticLibraryNtcoreBaseCpp/output.txt.

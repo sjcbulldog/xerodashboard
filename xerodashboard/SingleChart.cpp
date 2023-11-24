@@ -8,8 +8,6 @@
 #include "Plot.h"
 #include "JsonFieldNames.h"
 
-using namespace QtCharts;
-
 SingleChart::SingleChart(QString units, std::shared_ptr<PlotMgr> plotmgr, const QString &plotname, QWidget *parent) : QChartView(parent)
 {
 	plotmgr_ = plotmgr;
@@ -49,16 +47,6 @@ void SingleChart::wheelEvent(QWheelEvent* ev)
 
 void SingleChart::mousePressEvent(QMouseEvent* ev)
 {
-#ifdef NOTYET
-	if (ev->button() == Qt::MiddleButton)
-	{
-		qDebug() << "MousePress";
-		setCursor(Qt::OpenHandCursor);
-		hand_cursor_ = false;
-		last_pos_ = ev->pos();
-		ev->accept();
-	}
-#endif
 	QChartView::mousePressEvent(ev);
 }
 
@@ -153,8 +141,10 @@ void SingleChart::initChart()
 	total_scroll_x_ = 0;
 	total_scroll_y_ = 0;
 
-
+#ifdef CALLOUT_DEFINED
 	callout_ = nullptr;
+#endif
+
 	first_ = nullptr;
 
 	left_axis_count_ = 0;
@@ -262,9 +252,11 @@ void SingleChart::keyPressEvent(QKeyEvent* ev)
 		chart()->zoomReset();
 		total_scroll_x_ = 0;
 		total_scroll_y_ = 0;
+#ifdef CALLOUT_DEFINED
 		for (auto callout : callouts_)
 			delete callout;
 		callouts_.clear();
+#endif
 		first_valid_ = false;
 		second_valid_ = false;
 		first_point_ = true;
@@ -535,7 +527,7 @@ void SingleChart::dragMoveEvent(QDragMoveEvent* ev)
 
 void SingleChart::dragLeaveEvent(QDragLeaveEvent* ev)
 {
-	setBackgroundRole(QPalette::Background);
+	setBackgroundRole(QPalette::ColorRole::NoRole);
 }
 
 void SingleChart::dropEvent(QDropEvent* ev)
@@ -559,7 +551,7 @@ void SingleChart::dropEvent(QDropEvent* ev)
 			insertNode(v.toString());
 		}
 	}
-	setBackgroundRole(QPalette::Background);
+	setBackgroundRole(QPalette::ColorRole::NoRole);
 }
 
 QValueAxis* SingleChart::findAxis(QString node)
@@ -774,28 +766,31 @@ void SingleChart::dataReset()
 
 void SingleChart::seriesHover(QLineSeries* ser, const QPointF& pt, bool state)
 {
-	QPointF npt = chart()->mapToPosition(pt, ser);
-	npt = chart()->mapToValue(npt, first_);
-
-	(void)ser;
-	if (callout_ == nullptr)
-		callout_ = new Callout(chart());
-
+#ifdef CALLOUT_DEFINED
 	if (state)
 	{
+		if (callout_ == nullptr)
+			callout_ = new Callout(chart());
+
+		QPointF cpos = chart()->mapToPosition(pt, ser);
+
 		QString text;
 
 		text += "Time: " + QString::number(pt.x(), 'f', 2) + "\n";
-		text += ser->name() + ": " + QString::number(pt.y(), 'f', 1);
+		text += ser->name() + ": " + QString::number(pt.y(), 'f', 3);
 
+		cpos = QPointF(100, 100);
 		callout_->setText(text);
-		callout_->setAnchor(npt);
+		callout_->setAnchor(pt);
 		callout_->setZValue(11);
-		callout_->updateGeometry();
 		callout_->show();
 	}
 	else
-		callout_->hide();
+	{
+		if (callout_ != nullptr)
+			callout_->hide();
+	}
+#endif
 }
 
 void SingleChart::seriesClick(QLineSeries* ser, const QPointF& pt)
@@ -803,8 +798,11 @@ void SingleChart::seriesClick(QLineSeries* ser, const QPointF& pt)
 	(void)ser;
 	(void)pt;
 
+#ifdef CALLOUT_DEFINED
+
 	callouts_.push_back(callout_);
 	callout_ = nullptr;
+#endif
 }
 
 void SingleChart::editTitle()

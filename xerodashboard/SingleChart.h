@@ -8,12 +8,12 @@
 #include <string>
 #include <map>
 #include <memory>
-#include "Callout.h"
 #include "TabEditName.h"
 #include "PlotMgr.h"
 #include "Plot.h"
+#include "Callout.h"
 
-class SingleChart : public QtCharts::QChartView
+class SingleChart : public QChartView
 {
 public:
 	SingleChart(QString units, std::shared_ptr<PlotMgr> plot, const QString &plotname, QWidget *parent = Q_NULLPTR);
@@ -52,8 +52,8 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* ev) override;
 
 private:
-	QtCharts::QValueAxis* findAxis(QString axisname);
-	QtCharts::QLineSeries* findSeries(QString node);
+	QValueAxis* findAxis(QString axisname);
+	QLineSeries* findSeries(QString node);
 	QString nodeToAxis(QString node);
 
 	void initChart();
@@ -67,8 +67,8 @@ private:
 	void createTimeAxis();
 	void createLegend();
 
-	void seriesHover(QtCharts::QLineSeries* series, const QPointF& point, bool state);
-	void seriesClick(QtCharts::QLineSeries* series, const QPointF& point);
+	void seriesHover(QLineSeries* series, const QPointF& point, bool state);
+	void seriesClick(QLineSeries* series, const QPointF& point);
 
 	void editorDone();
 	void editorAborted();
@@ -97,13 +97,13 @@ private:
 	QString plotname_;
 
 	// The time axis for the graph
-	QtCharts::QValueAxis* time_;
+	QValueAxis* time_;
 
 	// The first series for the graph
-	QtCharts::QAbstractSeries* first_;
+	QAbstractSeries* first_;
 
 	// The legend for the graph
-	QtCharts::QLegend* legend_;
+	QLegend* legend_;
 
 	// The time min and max values
 	double tminv_, tmaxv_;
@@ -114,11 +114,15 @@ private:
 	int total_scroll_x_;
 	int total_scroll_y_;
 
+#ifdef CALLOUT_DEFINED
+
 	// The current callout
 	Callout* callout_;
 
 	// The list of callouts displayed
 	std::list<Callout*> callouts_;
+
+#endif
 
 	// The units for position, velocity, and acceleration units
 	QString units_;

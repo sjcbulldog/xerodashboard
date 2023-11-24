@@ -14,7 +14,7 @@
     <ProjectGuid>{2E02C92B-745E-43C0-950D-A9B51DDE6E13}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -31,12 +31,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>5.15.2_msvc2019_64</QtInstall>
+    <QtInstall>6.6.0_msvc2019_64</QtInstall>
     <QtModules>core;gui;widgets;charts</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>5.15.2_msvc2019_64</QtInstall>
+    <QtInstall>6.6.0_msvc2019_64</QtInstall>
     <QtModules>core;gui;widgets;charts</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -60,12 +60,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external/wpi/include/networktables_XXX;$(SolutionDir)external/wpi/include/tables_XXX;$(SolutionDir)external/wpi/include;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\ntcore\gen\include;$(SolutionDir)external\ntcore\include;$(SolutionDir)external\wpiutil\include;$(SolutionDir)external\wpiutil\thirdparty\json\include;$(SolutionDir)external\wpiutil\thirdparty\llvm\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <PreprocessorDefinitions>CALLOUT_DEFINED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\wpi\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ntcored.lib;wpiutild.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\ntcore\build\libs\ntcore\static\windowsx86-64/$(Configuration);$(SolutionDir)external\wpiutil\libs\wpiutil\static\windowsx86-64/$(Configuration);$(SolutionDir)external\wpiutil\libs\wpiutilBase\static\windowsx86-64/$(Configuration);$(SolutionDir)external\wpinet\libs\wpinet\static\windowsx86-64/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ntcored.lib;wpinetd.lib;wpiutild.lib;wpiutilBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(OutDir)fields" mkdir $(OutDir)fields
@@ -77,11 +78,11 @@ copy $(SolutionDir)installer\VC_redist.x64.exe $(OutDir)</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external/wpi/include/networktables_XXX;$(SolutionDir)external/wpi/include/tables_XXX;$(SolutionDir)external/wpi/include;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\ntcore\gen\include;$(SolutionDir)external\ntcore\include;$(SolutionDir)external\wpiutil\include;$(SolutionDir)external\wpiutil\thirdparty\json\include;$(SolutionDir)external\wpiutil\thirdparty\llvm\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\wpi\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\ntcore\build\libs\ntcore\static\windowsx86-64/$(Configuration);$(SolutionDir)external\wpiutil\libs\wpiutil\static\windowsx86-64/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ntcore.lib;wpiutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>

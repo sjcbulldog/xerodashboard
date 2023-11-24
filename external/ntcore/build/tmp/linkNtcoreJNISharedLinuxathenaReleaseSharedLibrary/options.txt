@@ -1,0 +1,15 @@
+-shared
+-Wl,-soname,libntcorejni.so
+-o
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\libs\\ntcoreJNIShared\\shared\\linuxathena\\release\\libntcorejni.so
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\objs\\ntcoreJNIShared\\shared\\linuxathena\\release\\ntcoreJNISharedCpp\\6r3yqjpu8yncp7s3uw4qm85vq\\NetworkTablesJNI.o
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\objs\\ntcoreJNIShared\\shared\\linuxathena\\release\\ntcoreJNISharedCpp\\ddwaxlscg31g5ay9a7oros1sc\\types_jni.o
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\libs\\ntcore\\shared\\linuxathena\\release\\libntcore.so
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\wpiutil\\build\\libs\\wpiutil\\shared\\linuxathena\\release\\libwpiutil.so
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\wpinet\\build\\libs\\wpinet\\shared\\linuxathena\\release\\libwpinet.so
+-rdynamic
+-pthread
+-ldl
+-latomic
+-Wl,-rpath,'$ORIGIN'
+-Wl,--fatal-warnings

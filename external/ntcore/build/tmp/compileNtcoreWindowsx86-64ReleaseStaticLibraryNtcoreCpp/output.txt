@@ -1,0 +1,5 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreWindowsx86-64ReleaseStaticLibraryNtcoreCpp/output.txt for all output for compileNtcoreWindowsx86-64ReleaseStaticLibraryNtcoreCpp.
+compiling singlelib.cpp successful.
+singlelib.cpp
+
+Finished compileNtcoreWindowsx86-64ReleaseStaticLibraryNtcoreCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreWindowsx86-64ReleaseStaticLibraryNtcoreCpp/output.txt.

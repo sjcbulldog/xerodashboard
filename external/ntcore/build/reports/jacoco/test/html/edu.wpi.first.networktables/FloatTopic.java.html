@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FloatTopic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">FloatTopic.java</span></div><h1>FloatTopic.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** NetworkTables Float topic. */
+public final class FloatTopic extends Topic {
+  /** The default type string for this topic type. */
+  public static final String kTypeString = &quot;float&quot;;
+
+  /**
+   * Construct from a generic topic.
+   *
+   * @param topic Topic
+   */
+  public FloatTopic(Topic topic) {
+<span class="nc" id="L18">    super(topic.m_inst, topic.m_handle);</span>
+<span class="nc" id="L19">  }</span>
+
+  /**
+   * Constructor; use NetworkTableInstance.getFloatTopic() instead.
+   *
+   * @param inst Instance
+   * @param handle Native handle
+   */
+  public FloatTopic(NetworkTableInstance inst, int handle) {
+<span class="nc" id="L28">    super(inst, handle);</span>
+<span class="nc" id="L29">  }</span>
+
+  /**
+   * Create a new subscriber to the topic.
+   *
+   * &lt;p&gt;The subscriber is only active as long as the returned object
+   * is not closed.
+   *
+   * &lt;p&gt;Subscribers that do not match the published data type do not return
+   * any values. To determine if the data type matches, use the appropriate
+   * Topic functions.
+   *
+   * @param defaultValue default value used when a default is not provided to a
+   *        getter function
+   * @param options subscribe options
+   * @return subscriber
+   */
+  public FloatSubscriber subscribe(
+      float defaultValue,
+      PubSubOption... options) {
+<span class="nc" id="L49">    return new FloatEntryImpl(</span>
+        this,
+<span class="nc" id="L51">        NetworkTablesJNI.subscribe(</span>
+<span class="nc" id="L52">            m_handle, NetworkTableType.kFloat.getValue(),</span>
+            &quot;float&quot;, options),
+        defaultValue);
+  }
+
+  /**
+   * Create a new subscriber to the topic, with specified type string.
+   *
+   * &lt;p&gt;The subscriber is only active as long as the returned object
+   * is not closed.
+   *
+   * &lt;p&gt;Subscribers that do not match the published data type do not return
+   * any values. To determine if the data type matches, use the appropriate
+   * Topic functions.
+   *
+   * @param typeString type string
+   * @param defaultValue default value used when a default is not provided to a
+   *        getter function
+   * @param options subscribe options
+   * @return subscriber
+   */
+  public FloatSubscriber subscribeEx(
+      String typeString,
+      float defaultValue,
+      PubSubOption... options) {
+<span class="nc" id="L77">    return new FloatEntryImpl(</span>
+        this,
+<span class="nc" id="L79">        NetworkTablesJNI.subscribe(</span>
+<span class="nc" id="L80">            m_handle, NetworkTableType.kFloat.getValue(),</span>
+            typeString, options),
+        defaultValue);
+  }
+
+  /**
+   * Create a new publisher to the topic.
+   *
+   * &lt;p&gt;The publisher is only active as long as the returned object
+   * is not closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same
+   * topic. Conflicts between publishers are typically resolved by the server on
+   * a first-come, first-served basis. Any published values that do not match
+   * the topic's data type are dropped (ignored). To determine if the data type
+   * matches, use the appropriate Topic functions.
+   *
+   * @param options publish options
+   * @return publisher
+   */
+  public FloatPublisher publish(
+      PubSubOption... options) {
+<span class="nc" id="L102">    return new FloatEntryImpl(</span>
+        this,
+<span class="nc" id="L104">        NetworkTablesJNI.publish(</span>
+<span class="nc" id="L105">            m_handle, NetworkTableType.kFloat.getValue(),</span>
+            &quot;float&quot;, options),
+        0);
+  }
+
+  /**
+   * Create a new publisher to the topic, with type string and initial properties.
+   *
+   * &lt;p&gt;The publisher is only active as long as the returned object
+   * is not closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same
+   * topic. Conflicts between publishers are typically resolved by the server on
+   * a first-come, first-served basis. Any published values that do not match
+   * the topic's data type are dropped (ignored). To determine if the data type
+   * matches, use the appropriate Topic functions.
+   *
+   * @param typeString type string
+   * @param properties JSON properties
+   * @param options publish options
+   * @return publisher
+   * @throws IllegalArgumentException if properties is not a JSON object
+   */
+  public FloatPublisher publishEx(
+      String typeString,
+      String properties,
+      PubSubOption... options) {
+<span class="nc" id="L132">    return new FloatEntryImpl(</span>
+        this,
+<span class="nc" id="L134">        NetworkTablesJNI.publishEx(</span>
+<span class="nc" id="L135">            m_handle, NetworkTableType.kFloat.getValue(),</span>
+            typeString, properties, options),
+        0);
+  }
+
+  /**
+   * Create a new entry for the topic.
+   *
+   * &lt;p&gt;Entries act as a combination of a subscriber and a weak publisher. The
+   * subscriber is active as long as the entry is not closed. The publisher is
+   * created when the entry is first written to, and remains active until either
+   * unpublish() is called or the entry is closed.
+   *
+   * &lt;p&gt;It is not possible to use two different data types with the same
+   * topic. Conflicts between publishers are typically resolved by the server on
+   * a first-come, first-served basis. Any published values that do not match
+   * the topic's data type are dropped (ignored), and the entry will show no new
+   * values if the data type does not match. To determine if the data type
+   * matches, use the appropriate Topic functions.
+   *
+   * @param defaultValue default value used when a default is not provided to a
+   *        getter function
+   * @param options publish and/or subscribe options
+   * @return entry
+   */
+  public FloatEntry getEntry(
+      float defaultValue,
+      PubSubOption... options) {
+<span class="nc" id="L163">    return new FloatEntryImpl(</span>
+        this,
+<span class="nc" id="L165">        NetworkTablesJNI.getEntry(</span>
+<span class="nc" id="L166">            m_handle, NetworkTableType.kFloat.getValue(),</span>
+            &quot;float&quot;, options),
+        defaultValue);
+  }
+
+  /**
+   * Create a new entry for the topic, with specified type string.
+   *
+   * &lt;p&gt;Entries act as a combination of a subscriber and a weak publisher. The
+   * subscriber is active as long as the entry is not closed. The publisher is
+   * created when the entry is first written to, and remains active until either
+   * unpublish() is called or the entry is closed.
+   *
+   * &lt;p&gt;It is not possible to use two different data types with the same
+   * topic. Conflicts between publishers are typically resolved by the server on
+   * a first-come, first-served basis. Any published values that do not match
+   * the topic's data type are dropped (ignored), and the entry will show no new
+   * values if the data type does not match. To determine if the data type
+   * matches, use the appropriate Topic functions.
+   *
+   * @param typeString type string
+   * @param defaultValue default value used when a default is not provided to a
+   *        getter function
+   * @param options publish and/or subscribe options
+   * @return entry
+   */
+  public FloatEntry getEntryEx(
+      String typeString,
+      float defaultValue,
+      PubSubOption... options) {
+<span class="nc" id="L196">    return new FloatEntryImpl(</span>
+        this,
+<span class="nc" id="L198">        NetworkTablesJNI.getEntry(</span>
+<span class="nc" id="L199">            m_handle, NetworkTableType.kFloat.getValue(),</span>
+            typeString, options),
+        defaultValue);
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

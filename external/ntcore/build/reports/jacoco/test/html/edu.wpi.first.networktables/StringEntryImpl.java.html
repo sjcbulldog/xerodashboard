@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringEntryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">StringEntryImpl.java</span></div><h1>StringEntryImpl.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** NetworkTables String implementation. */
+@SuppressWarnings(&quot;PMD.ArrayIsStoredDirectly&quot;)
+final class StringEntryImpl extends EntryBase implements StringEntry {
+  /**
+   * Constructor.
+   *
+   * @param topic Topic
+   * @param handle Native handle
+   * @param defaultValue Default value for get()
+   */
+  StringEntryImpl(StringTopic topic, int handle, String defaultValue) {
+<span class="nc" id="L18">    super(handle);</span>
+<span class="nc" id="L19">    m_topic = topic;</span>
+<span class="nc" id="L20">    m_defaultValue = defaultValue;</span>
+<span class="nc" id="L21">  }</span>
+
+  @Override
+  public StringTopic getTopic() {
+<span class="nc" id="L25">    return m_topic;</span>
+  }
+
+  @Override
+  public String get() {
+<span class="nc" id="L30">    return NetworkTablesJNI.getString(m_handle, m_defaultValue);</span>
+  }
+
+  @Override
+  public String get(String defaultValue) {
+<span class="nc" id="L35">    return NetworkTablesJNI.getString(m_handle, defaultValue);</span>
+  }
+
+  @Override
+  public TimestampedString getAtomic() {
+<span class="nc" id="L40">    return NetworkTablesJNI.getAtomicString(m_handle, m_defaultValue);</span>
+  }
+
+  @Override
+  public TimestampedString getAtomic(String defaultValue) {
+<span class="nc" id="L45">    return NetworkTablesJNI.getAtomicString(m_handle, defaultValue);</span>
+  }
+
+  @Override
+  public TimestampedString[] readQueue() {
+<span class="nc" id="L50">    return NetworkTablesJNI.readQueueString(m_handle);</span>
+  }
+
+  @Override
+  public String[] readQueueValues() {
+<span class="nc" id="L55">    return NetworkTablesJNI.readQueueValuesString(m_handle);</span>
+  }
+
+  @Override
+  public void set(String value, long time) {
+<span class="nc" id="L60">    NetworkTablesJNI.setString(m_handle, time, value);</span>
+<span class="nc" id="L61">  }</span>
+
+  @Override
+  public void setDefault(String value) {
+<span class="nc" id="L65">    NetworkTablesJNI.setDefaultString(m_handle, 0, value);</span>
+<span class="nc" id="L66">  }</span>
+
+  @Override
+  public void unpublish() {
+<span class="nc" id="L70">    NetworkTablesJNI.unpublish(m_handle);</span>
+<span class="nc" id="L71">  }</span>
+
+  private final StringTopic m_topic;
+  private final String m_defaultValue;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

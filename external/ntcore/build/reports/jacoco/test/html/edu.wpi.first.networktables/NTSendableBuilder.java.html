@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NTSendableBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">NTSendableBuilder.java</span></div><h1>NTSendableBuilder.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+import edu.wpi.first.util.sendable.SendableBuilder;
+
+public interface NTSendableBuilder extends SendableBuilder {
+  /**
+   * Set the function that should be called to update the network table for things other than
+   * properties. Note this function is not passed the network table object; instead it should use
+   * the entry handles returned by getEntry().
+   *
+   * @param func function
+   */
+  void setUpdateTable(Runnable func);
+
+  /**
+   * Add a property without getters or setters. This can be used to get entry handles for the
+   * function called by setUpdateTable().
+   *
+   * @param key property name
+   * @return Network table topic
+   */
+  Topic getTopic(String key);
+
+  /**
+   * Get the network table.
+   *
+   * @return The network table
+   */
+  NetworkTable getTable();
+
+  @Override
+  default BackendKind getBackendKind() {
+<span class="nc" id="L37">    return BackendKind.kNetworkTables;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MultiSubscriber.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">MultiSubscriber.java</span></div><h1>MultiSubscriber.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/**
+ * Subscribe to multiple topics based on one or more topic name prefixes. Can be used in combination
+ * with ValueListenerPoller to listen for value changes across all matching topics.
+ */
+public final class MultiSubscriber implements AutoCloseable {
+  /**
+   * Create a multiple subscriber.
+   *
+   * @param inst instance
+   * @param prefixes topic name prefixes
+   * @param options subscriber options
+   */
+<span class="nc" id="L19">  public MultiSubscriber(NetworkTableInstance inst, String[] prefixes, PubSubOption... options) {</span>
+<span class="nc" id="L20">    m_inst = inst;</span>
+<span class="nc" id="L21">    m_handle = NetworkTablesJNI.subscribeMultiple(inst.getHandle(), prefixes, options);</span>
+<span class="nc" id="L22">  }</span>
+
+  @Override
+  public synchronized void close() {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">    if (m_handle != 0) {</span>
+<span class="nc" id="L27">      NetworkTablesJNI.unsubscribeMultiple(m_handle);</span>
+<span class="nc" id="L28">      m_handle = 0;</span>
+    }
+<span class="nc" id="L30">  }</span>
+
+  /**
+   * Gets the instance for the subscriber.
+   *
+   * @return Instance
+   */
+  public NetworkTableInstance getInstance() {
+<span class="nc" id="L38">    return m_inst;</span>
+  }
+
+  /**
+   * Determines if the native handle is valid.
+   *
+   * @return True if the native handle is valid, false otherwise.
+   */
+  public boolean isValid() {
+<span class="nc bnc" id="L47" title="All 2 branches missed.">    return m_handle != 0;</span>
+  }
+
+  /**
+   * Gets the native handle.
+   *
+   * @return Handle
+   */
+  public int getHandle() {
+<span class="nc" id="L56">    return m_handle;</span>
+  }
+
+  private final NetworkTableInstance m_inst;
+  private int m_handle;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

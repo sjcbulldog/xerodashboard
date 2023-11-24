@@ -17,12 +17,12 @@ public:
 	~PlotListWidget();
 
 protected:
-	QMimeData* mimeData(const QList<QTreeWidgetItem*> items) const;
+	QMimeData* mimeData(const QList<QTreeWidgetItem*> &items) const override;
 
 private:
-	void newEntryDetected(const QString& name);
-	void updatedEntryDetected(const QString& name);
-	void deletedEntryDetected(const QString& name);
+	void newEntryDetected(const nt::TopicInfo &info);
+	void updatedEntryDetected(const nt::ValueEventData &data);
+	void deletedEntryDetected(const nt::TopicInfo& infoe);
 
 	bool processPlotKeyString(const QString& str, QString& plotname, QStringList& key);
 
@@ -34,4 +34,5 @@ private:
 	QString plot_key_;
 	std::shared_ptr<NetworkTableManager> ntmgr_;
 	std::shared_ptr<PlotMgr> plotmgr_;
+	QMap<NT_Topic, QString> topics_;
 };

@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreLinuxarm32DebugSharedLibrary/output.txt for all output for linkNtcoreLinuxarm32DebugSharedLibrary.
+linking libntcored.so successful.
+
+Finished linkNtcoreLinuxarm32DebugSharedLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreLinuxarm32DebugSharedLibrary/output.txt.

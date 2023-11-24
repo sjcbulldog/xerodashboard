@@ -2,7 +2,6 @@
 #include <QtCore/QDebug>
 #include <QtCore/QMimeData>
 #include <QtWidgets/QHeaderView>
-#include <networktables/EntryListenerFlags.h>
 #include "NetworkTableManager.h"
 #include "NTFormattingUtils.h"
 
@@ -51,7 +50,8 @@ QMimeData* NetworkTableTreeWidget::mimeData(const QList<QTreeWidgetItem*> items)
 		}
 
 		data = new QMimeData();
-		data->setText("NT:/" + path);
+		int topic = item->data(0, Qt::UserRole).toInt();
+		data->setText("NT:/" + path + "$$$" + QString::number(topic));
 	}
 
 	return data;
@@ -71,9 +71,11 @@ void NetworkTableTreeWidget::disconnectDetected()
 	}
 }
 
-void NetworkTableTreeWidget::newEntryDetected(const QString &name)
+void NetworkTableTreeWidget::newEntryDetected(const nt::TopicInfo &info)
 {
+	QString name = QString::fromStdString(info.name);
 	QTreeWidgetItem* item = createItem(name);
+	item->setData(0, Qt::UserRole, info.topic);
 	sortItems(0, Qt::SortOrder::AscendingOrder);
 
 	nt::NetworkTableEntry entry = ntmgr_->getEntry(name);
@@ -81,16 +83,20 @@ void NetworkTableTreeWidget::newEntryDetected(const QString &name)
 	item->setText(1, text);
 }
 
-void NetworkTableTreeWidget::updatedEntryDetected(const QString & name)
+void NetworkTableTreeWidget::updatedEntryDetected(const nt::ValueEventData &value)
 {
-	QTreeWidgetItem* item = createItem(name);
-	sortItems(0, Qt::SortOrder::AscendingOrder);
+	if (name_from_handle_.contains(value.topic)) {
+		QString name = name_from_handle_[value.topic];
+		QTreeWidgetItem* item = createItem(name);
+		sortItems(0, Qt::SortOrder::AscendingOrder);
 
-	nt::NetworkTableEntry entry = ntmgr_->getEntry(name);
-	QString text = NTFormattingUtils::toString(entry);
-	item->setText(1, text);
+		nt::NetworkTableEntry entry = ntmgr_->getEntry(name);
+		QString text = NTFormattingUtils::toString(entry);
+		item->setText(1, text);
+	}
 }
 
-void NetworkTableTreeWidget::deletedEntryDetected(const QString& name)
+void NetworkTableTreeWidget::deletedEntryDetected(const nt::TopicInfo& info)
 {
+	name_from_handle_.remove(info.topic);
 }

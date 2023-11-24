@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetworkTableType.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">NetworkTableType.java</span></div><h1>NetworkTableType.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** Network table data types. */
+<span class="fc" id="L8">public enum NetworkTableType {</span>
+<span class="fc" id="L9">  kUnassigned(0, &quot;&quot;),</span>
+<span class="fc" id="L10">  kBoolean(0x01, &quot;boolean&quot;),</span>
+<span class="fc" id="L11">  kDouble(0x02, &quot;double&quot;),</span>
+<span class="fc" id="L12">  kString(0x04, &quot;string&quot;),</span>
+<span class="fc" id="L13">  kRaw(0x08, &quot;raw&quot;),</span>
+<span class="fc" id="L14">  kBooleanArray(0x10, &quot;boolean[]&quot;),</span>
+<span class="fc" id="L15">  kDoubleArray(0x20, &quot;double[]&quot;),</span>
+<span class="fc" id="L16">  kStringArray(0x40, &quot;string[]&quot;),</span>
+<span class="fc" id="L17">  kInteger(0x100, &quot;int&quot;),</span>
+<span class="fc" id="L18">  kFloat(0x200, &quot;float&quot;),</span>
+<span class="fc" id="L19">  kIntegerArray(0x400, &quot;int[]&quot;),</span>
+<span class="fc" id="L20">  kFloatArray(0x800, &quot;float[]&quot;);</span>
+
+  private final int m_value;
+  private final String m_valueStr;
+
+<span class="fc" id="L25">  NetworkTableType(int value, String valueStr) {</span>
+<span class="fc" id="L26">    m_value = value;</span>
+<span class="fc" id="L27">    m_valueStr = valueStr;</span>
+<span class="fc" id="L28">  }</span>
+
+  public int getValue() {
+<span class="fc" id="L31">    return m_value;</span>
+  }
+
+  public String getValueStr() {
+<span class="nc" id="L35">    return m_valueStr;</span>
+  }
+
+  /**
+   * Convert from the numerical representation of type to an enum type.
+   *
+   * @param value The numerical representation of kind
+   * @return The kind
+   */
+  public static NetworkTableType getFromInt(int value) {
+<span class="pc bpc" id="L45" title="11 of 12 branches missed.">    switch (value) {</span>
+      case 0x01:
+<span class="nc" id="L47">        return kBoolean;</span>
+      case 0x02:
+<span class="fc" id="L49">        return kDouble;</span>
+      case 0x04:
+<span class="nc" id="L51">        return kString;</span>
+      case 0x08:
+<span class="nc" id="L53">        return kRaw;</span>
+      case 0x10:
+<span class="nc" id="L55">        return kBooleanArray;</span>
+      case 0x20:
+<span class="nc" id="L57">        return kDoubleArray;</span>
+      case 0x40:
+<span class="nc" id="L59">        return kStringArray;</span>
+      case 0x100:
+<span class="nc" id="L61">        return kInteger;</span>
+      case 0x200:
+<span class="nc" id="L63">        return kFloat;</span>
+      case 0x400:
+<span class="nc" id="L65">        return kIntegerArray;</span>
+      case 0x800:
+<span class="nc" id="L67">        return kFloatArray;</span>
+      default:
+<span class="nc" id="L69">        return kUnassigned;</span>
+    }
+  }
+
+  /**
+   * Convert from a type string to an enum type.
+   *
+   * @param typeString type string
+   * @return The kind
+   */
+  public static NetworkTableType getFromString(String typeString) {
+<span class="pc bpc" id="L80" title="11 of 12 branches missed.">    switch (typeString) {</span>
+      case &quot;boolean&quot;:
+<span class="nc" id="L82">        return kBoolean;</span>
+      case &quot;double&quot;:
+<span class="nc" id="L84">        return kDouble;</span>
+      case &quot;float&quot;:
+<span class="nc" id="L86">        return kFloat;</span>
+      case &quot;int&quot;:
+<span class="nc" id="L88">        return kInteger;</span>
+      case &quot;string&quot;:
+      case &quot;json&quot;:
+<span class="nc" id="L91">        return kString;</span>
+      case &quot;boolean[]&quot;:
+<span class="nc" id="L93">        return kBooleanArray;</span>
+      case &quot;double[]&quot;:
+<span class="nc" id="L95">        return kDoubleArray;</span>
+      case &quot;float[]&quot;:
+<span class="nc" id="L97">        return kFloatArray;</span>
+      case &quot;int[]&quot;:
+<span class="nc" id="L99">        return kIntegerArray;</span>
+      case &quot;string[]&quot;:
+<span class="nc" id="L101">        return kStringArray;</span>
+      case &quot;&quot;:
+<span class="nc" id="L103">        return kUnassigned;</span>
+      default:
+<span class="fc" id="L105">        return kRaw;</span>
+    }
+  }
+
+  /**
+   * Gets string from generic data value.
+   *
+   * @param data the data to check
+   * @return type string of the data, or empty string if no match
+   */
+  public static String getStringFromObject(Object data) {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">    if (data instanceof Boolean) {</span>
+<span class="nc" id="L117">      return &quot;boolean&quot;;</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">    } else if (data instanceof Float) {</span>
+<span class="nc" id="L119">      return &quot;float&quot;;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">    } else if (data instanceof Long) {</span>
+      // Checking Long because NT supports 64-bit integers
+<span class="nc" id="L122">      return &quot;int&quot;;</span>
+<span class="nc bnc" id="L123" title="All 4 branches missed.">    } else if (data instanceof Double || data instanceof Number) {</span>
+      // If typeof Number class, return &quot;double&quot; as the type. Functions as a &quot;catch-all&quot;.
+<span class="nc" id="L125">      return &quot;double&quot;;</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">    } else if (data instanceof String) {</span>
+<span class="nc" id="L127">      return &quot;string&quot;;</span>
+<span class="nc bnc" id="L128" title="All 4 branches missed.">    } else if (data instanceof boolean[] || data instanceof Boolean[]) {</span>
+<span class="nc" id="L129">      return &quot;boolean[]&quot;;</span>
+<span class="nc bnc" id="L130" title="All 4 branches missed.">    } else if (data instanceof float[] || data instanceof Float[]) {</span>
+<span class="nc" id="L131">      return &quot;float[]&quot;;</span>
+<span class="nc bnc" id="L132" title="All 4 branches missed.">    } else if (data instanceof long[] || data instanceof Long[]) {</span>
+<span class="nc" id="L133">      return &quot;int[]&quot;;</span>
+<span class="nc bnc" id="L134" title="All 6 branches missed.">    } else if (data instanceof double[] || data instanceof Double[] || data instanceof Number[]) {</span>
+      // If typeof Number class, return &quot;double[]&quot; as the type. Functions as a &quot;catch-all&quot;.
+<span class="nc" id="L136">      return &quot;double[]&quot;;</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">    } else if (data instanceof String[]) {</span>
+<span class="nc" id="L138">      return &quot;string[]&quot;;</span>
+<span class="nc bnc" id="L139" title="All 4 branches missed.">    } else if (data instanceof byte[] || data instanceof Byte[]) {</span>
+<span class="nc" id="L140">      return &quot;raw&quot;;</span>
+    } else {
+<span class="nc" id="L142">      return &quot;&quot;;</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

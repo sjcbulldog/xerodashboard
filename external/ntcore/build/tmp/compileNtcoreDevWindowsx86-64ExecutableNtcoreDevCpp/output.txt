@@ -1,0 +1,5 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreDevWindowsx86-64ExecutableNtcoreDevCpp/output.txt for all output for compileNtcoreDevWindowsx86-64ExecutableNtcoreDevCpp.
+compiling main.cpp successful.
+main.cpp
+
+Finished compileNtcoreDevWindowsx86-64ExecutableNtcoreDevCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreDevWindowsx86-64ExecutableNtcoreDevCpp/output.txt.

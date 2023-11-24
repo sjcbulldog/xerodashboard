@@ -1,0 +1,5 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreJNIWindowsx86-64ReleaseSharedLibrary/output.txt for all output for linkNtcoreJNIWindowsx86-64ReleaseSharedLibrary.
+linking ntcorejni.dll successful.
+   Creating library D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcoreJNI\shared\windowsx86-64\release\ntcorejni.lib and object D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcoreJNI\shared\windowsx86-64\release\ntcorejni.exp
+
+Finished linkNtcoreJNIWindowsx86-64ReleaseSharedLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreJNIWindowsx86-64ReleaseSharedLibrary/output.txt.

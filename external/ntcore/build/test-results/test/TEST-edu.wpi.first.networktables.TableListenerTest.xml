@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="edu.wpi.first.networktables.TableListenerTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2023-11-22T18:03:47" hostname="STRIDER" time="0.019">
+  <properties/>
+  <testcase name="testAddSubTableListener()" classname="edu.wpi.first.networktables.TableListenerTest" time="0.016"/>
+  <testcase name="testAddListener()" classname="edu.wpi.first.networktables.TableListenerTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

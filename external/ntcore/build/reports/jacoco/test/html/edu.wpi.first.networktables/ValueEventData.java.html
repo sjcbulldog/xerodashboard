@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValueEventData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">ValueEventData.java</span></div><h1>ValueEventData.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** NetworkTables value event data. */
+@SuppressWarnings(&quot;MemberName&quot;)
+public final class ValueEventData {
+  /** Topic handle. Topic.getHandle() can be used to map this to the corresponding Topic object. */
+  public final int topic;
+
+  /**
+   * Subscriber/entry handle. Subscriber.getHandle() or entry.getHandle() can be used to map this to
+   * the corresponding Subscriber or Entry object.
+   */
+  public final int subentry;
+
+  /** The new value. */
+  public final NetworkTableValue value;
+
+  /**
+   * Constructor. This should generally only be used internally to NetworkTables.
+   *
+   * @param inst Instance
+   * @param topic Topic handle
+   * @param subentry Subscriber/entry handle
+   * @param value The new value
+   */
+  public ValueEventData(
+<span class="nc" id="L31">      NetworkTableInstance inst, int topic, int subentry, NetworkTableValue value) {</span>
+<span class="nc" id="L32">    this.m_inst = inst;</span>
+<span class="nc" id="L33">    this.topic = topic;</span>
+<span class="nc" id="L34">    this.subentry = subentry;</span>
+<span class="nc" id="L35">    this.value = value;</span>
+<span class="nc" id="L36">  }</span>
+
+  /* Cached topic object. */
+  private Topic m_topicObject;
+
+  private final NetworkTableInstance m_inst;
+
+  /**
+   * Get the topic as an object.
+   *
+   * @return Topic for this notification.
+   */
+  public Topic getTopic() {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">    if (m_topicObject == null) {</span>
+<span class="nc" id="L50">      m_topicObject = new Topic(m_inst, topic);</span>
+    }
+<span class="nc" id="L52">    return m_topicObject;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

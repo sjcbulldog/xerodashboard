@@ -1,0 +1,1552 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetworkTableInstance.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">NetworkTableInstance.java</span></div><h1>NetworkTableInstance.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.util.concurrent.Event;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.protobuf.Protobuf;
+import edu.wpi.first.util.struct.Struct;
+import java.nio.charset.StandardCharsets;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.OptionalLong;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import us.hebi.quickbuf.ProtoMessage;
+
+/**
+ * NetworkTables Instance.
+ *
+ * &lt;p&gt;Instances are completely independent from each other. Table operations on one instance will
+ * not be visible to other instances unless the instances are connected via the network. The main
+ * limitation on instances is that you cannot have two servers on the same network port. The main
+ * utility of instances is for unit testing, but they can also enable one program to connect to two
+ * different NetworkTables networks.
+ *
+ * &lt;p&gt;The global &quot;default&quot; instance (as returned by {@link #getDefault()}) is always available, and
+ * is intended for the common case when there is only a single NetworkTables instance being used in
+ * the program.
+ *
+ * &lt;p&gt;Additional instances can be created with the {@link #create()} function. A reference must be
+ * kept to the NetworkTableInstance returned by this function to keep it from being garbage
+ * collected.
+ */
+@SuppressWarnings(&quot;PMD.CouplingBetweenObjects&quot;)
+public final class NetworkTableInstance implements AutoCloseable {
+  /** Client/server mode flag values (as returned by {@link #getNetworkMode()}). */
+<span class="fc" id="L47">  public enum NetworkMode {</span>
+    /** Running in server mode. */
+<span class="fc" id="L49">    kServer(0x01),</span>
+
+    /** Running in NT3 client mode. */
+<span class="fc" id="L52">    kClient3(0x02),</span>
+
+    /** Running in NT4 client mode. */
+<span class="fc" id="L55">    kClient4(0x04),</span>
+
+    /** Currently starting up (either client or server). */
+<span class="fc" id="L58">    kStarting(0x08),</span>
+
+    /** Running in local-only mode. */
+<span class="fc" id="L61">    kLocal(0x10);</span>
+
+    private final int value;
+
+<span class="fc" id="L65">    NetworkMode(int value) {</span>
+<span class="fc" id="L66">      this.value = value;</span>
+<span class="fc" id="L67">    }</span>
+
+    public int getValue() {
+<span class="fc" id="L70">      return value;</span>
+    }
+  }
+
+  /** The default port that network tables operates on for NT3. */
+  public static final int kDefaultPort3 = 1735;
+
+  /** The default port that network tables operates on for NT4. */
+  public static final int kDefaultPort4 = 5810;
+
+  /**
+   * Construct from native handle.
+   *
+   * @param handle Native handle
+   */
+<span class="fc" id="L85">  private NetworkTableInstance(int handle) {</span>
+<span class="fc" id="L86">    m_owned = false;</span>
+<span class="fc" id="L87">    m_handle = handle;</span>
+<span class="fc" id="L88">  }</span>
+
+  /** Destroys the instance (if created by {@link #create()}). */
+  @Override
+  public synchronized void close() {
+<span class="pc bpc" id="L93" title="2 of 4 branches missed.">    if (m_owned &amp;&amp; m_handle != 0) {</span>
+<span class="fc" id="L94">      m_listeners.close();</span>
+<span class="pc" id="L95">      m_schemas.forEach((k, v) -&gt; v.close());</span>
+<span class="fc" id="L96">      NetworkTablesJNI.destroyInstance(m_handle);</span>
+<span class="fc" id="L97">      m_handle = 0;</span>
+    }
+<span class="fc" id="L99">  }</span>
+
+  /**
+   * Determines if the native handle is valid.
+   *
+   * @return True if the native handle is valid, false otherwise.
+   */
+  public boolean isValid() {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">    return m_handle != 0;</span>
+  }
+
+  /* The default instance. */
+  private static NetworkTableInstance s_defaultInstance;
+
+  /**
+   * Get global default instance.
+   *
+   * @return Global default instance
+   */
+  public static synchronized NetworkTableInstance getDefault() {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">    if (s_defaultInstance == null) {</span>
+<span class="nc" id="L120">      s_defaultInstance = new NetworkTableInstance(NetworkTablesJNI.getDefaultInstance());</span>
+    }
+<span class="nc" id="L122">    return s_defaultInstance;</span>
+  }
+
+  /**
+   * Create an instance. Note: A reference to the returned instance must be retained to ensure the
+   * instance is not garbage collected.
+   *
+   * @return Newly created instance
+   */
+  public static NetworkTableInstance create() {
+<span class="fc" id="L132">    NetworkTableInstance inst = new NetworkTableInstance(NetworkTablesJNI.createInstance());</span>
+<span class="fc" id="L133">    inst.m_owned = true;</span>
+<span class="fc" id="L134">    return inst;</span>
+  }
+
+  /**
+   * Gets the native handle for the instance.
+   *
+   * @return Native handle
+   */
+  public int getHandle() {
+<span class="fc" id="L143">    return m_handle;</span>
+  }
+
+  /**
+   * Get (generic) topic.
+   *
+   * @param name topic name
+   * @return Topic
+   */
+  public Topic getTopic(String name) {
+<span class="fc" id="L153">    Topic topic = m_topics.get(name);</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">    if (topic == null) {</span>
+<span class="fc" id="L155">      int handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+<span class="fc" id="L156">      topic = new Topic(this, handle);</span>
+<span class="fc" id="L157">      Topic oldTopic = m_topics.putIfAbsent(name, topic);</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">      if (oldTopic != null) {</span>
+<span class="nc" id="L159">        topic = oldTopic;</span>
+      }
+      // also cache by handle
+<span class="fc" id="L162">      m_topicsByHandle.putIfAbsent(handle, topic);</span>
+    }
+<span class="fc" id="L164">    return topic;</span>
+  }
+
+  /**
+   * Get boolean topic.
+   *
+   * @param name topic name
+   * @return BooleanTopic
+   */
+  public BooleanTopic getBooleanTopic(String name) {
+<span class="nc" id="L174">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">    if (topic instanceof BooleanTopic) {</span>
+<span class="nc" id="L176">      return (BooleanTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L180" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L181">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L183">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L186">    BooleanTopic wrapTopic = new BooleanTopic(this, handle);</span>
+<span class="nc" id="L187">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L190">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L192">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get long topic.
+   *
+   * @param name topic name
+   * @return IntegerTopic
+   */
+  public IntegerTopic getIntegerTopic(String name) {
+<span class="nc" id="L202">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">    if (topic instanceof IntegerTopic) {</span>
+<span class="nc" id="L204">      return (IntegerTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L208" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L209">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L211">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L214">    IntegerTopic wrapTopic = new IntegerTopic(this, handle);</span>
+<span class="nc" id="L215">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L218">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L220">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get float topic.
+   *
+   * @param name topic name
+   * @return FloatTopic
+   */
+  public FloatTopic getFloatTopic(String name) {
+<span class="nc" id="L230">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">    if (topic instanceof FloatTopic) {</span>
+<span class="nc" id="L232">      return (FloatTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L236" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L237">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L239">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L242">    FloatTopic wrapTopic = new FloatTopic(this, handle);</span>
+<span class="nc" id="L243">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L246">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L248">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get double topic.
+   *
+   * @param name topic name
+   * @return DoubleTopic
+   */
+  public DoubleTopic getDoubleTopic(String name) {
+<span class="fc" id="L258">    Topic topic = m_topics.get(name);</span>
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">    if (topic instanceof DoubleTopic) {</span>
+<span class="nc" id="L260">      return (DoubleTopic) topic;</span>
+    }
+
+    int handle;
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">    if (topic == null) {</span>
+<span class="fc" id="L265">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L267">      handle = topic.getHandle();</span>
+    }
+
+<span class="fc" id="L270">    DoubleTopic wrapTopic = new DoubleTopic(this, handle);</span>
+<span class="fc" id="L271">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="fc" id="L274">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="fc" id="L276">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get String topic.
+   *
+   * @param name topic name
+   * @return StringTopic
+   */
+  public StringTopic getStringTopic(String name) {
+<span class="nc" id="L286">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">    if (topic instanceof StringTopic) {</span>
+<span class="nc" id="L288">      return (StringTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L292" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L293">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L295">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L298">    StringTopic wrapTopic = new StringTopic(this, handle);</span>
+<span class="nc" id="L299">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L302">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L304">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get byte[] topic.
+   *
+   * @param name topic name
+   * @return RawTopic
+   */
+  public RawTopic getRawTopic(String name) {
+<span class="fc" id="L314">    Topic topic = m_topics.get(name);</span>
+<span class="pc bpc" id="L315" title="1 of 2 branches missed.">    if (topic instanceof RawTopic) {</span>
+<span class="nc" id="L316">      return (RawTopic) topic;</span>
+    }
+
+    int handle;
+<span class="pc bpc" id="L320" title="1 of 2 branches missed.">    if (topic == null) {</span>
+<span class="fc" id="L321">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L323">      handle = topic.getHandle();</span>
+    }
+
+<span class="fc" id="L326">    RawTopic wrapTopic = new RawTopic(this, handle);</span>
+<span class="fc" id="L327">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="fc" id="L330">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="fc" id="L332">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get boolean[] topic.
+   *
+   * @param name topic name
+   * @return BooleanArrayTopic
+   */
+  public BooleanArrayTopic getBooleanArrayTopic(String name) {
+<span class="nc" id="L342">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">    if (topic instanceof BooleanArrayTopic) {</span>
+<span class="nc" id="L344">      return (BooleanArrayTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L348" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L349">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L351">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L354">    BooleanArrayTopic wrapTopic = new BooleanArrayTopic(this, handle);</span>
+<span class="nc" id="L355">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L358">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L360">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get long[] topic.
+   *
+   * @param name topic name
+   * @return IntegerArrayTopic
+   */
+  public IntegerArrayTopic getIntegerArrayTopic(String name) {
+<span class="nc" id="L370">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">    if (topic instanceof IntegerArrayTopic) {</span>
+<span class="nc" id="L372">      return (IntegerArrayTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L376" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L377">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L379">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L382">    IntegerArrayTopic wrapTopic = new IntegerArrayTopic(this, handle);</span>
+<span class="nc" id="L383">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L386">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L388">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get float[] topic.
+   *
+   * @param name topic name
+   * @return FloatArrayTopic
+   */
+  public FloatArrayTopic getFloatArrayTopic(String name) {
+<span class="nc" id="L398">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">    if (topic instanceof FloatArrayTopic) {</span>
+<span class="nc" id="L400">      return (FloatArrayTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L404" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L405">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L407">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L410">    FloatArrayTopic wrapTopic = new FloatArrayTopic(this, handle);</span>
+<span class="nc" id="L411">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L414">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L416">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get double[] topic.
+   *
+   * @param name topic name
+   * @return DoubleArrayTopic
+   */
+  public DoubleArrayTopic getDoubleArrayTopic(String name) {
+<span class="nc" id="L426">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">    if (topic instanceof DoubleArrayTopic) {</span>
+<span class="nc" id="L428">      return (DoubleArrayTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L432" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L433">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L435">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L438">    DoubleArrayTopic wrapTopic = new DoubleArrayTopic(this, handle);</span>
+<span class="nc" id="L439">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L442">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L444">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get String[] topic.
+   *
+   * @param name topic name
+   * @return StringArrayTopic
+   */
+  public StringArrayTopic getStringArrayTopic(String name) {
+<span class="nc" id="L454">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">    if (topic instanceof StringArrayTopic) {</span>
+<span class="nc" id="L456">      return (StringArrayTopic) topic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L460" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L461">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L463">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L466">    StringArrayTopic wrapTopic = new StringArrayTopic(this, handle);</span>
+<span class="nc" id="L467">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L470">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L472">    return wrapTopic;</span>
+  }
+
+
+  /**
+   * Get protobuf-encoded value topic.
+   *
+   * @param &lt;T&gt; value class (inferred from proto)
+   * @param &lt;MessageType&gt; protobuf message type (inferred from proto)
+   * @param name topic name
+   * @param proto protobuf serialization implementation
+   * @return ProtobufTopic
+   */
+  public &lt;T, MessageType extends ProtoMessage&lt;?&gt;&gt;
+      ProtobufTopic&lt;T&gt; getProtobufTopic(String name, Protobuf&lt;T, MessageType&gt; proto) {
+<span class="nc" id="L487">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">    if (topic instanceof ProtobufTopic&lt;?&gt;</span>
+<span class="nc bnc" id="L489" title="All 2 branches missed.">        &amp;&amp; ((ProtobufTopic&lt;?&gt;) topic).getProto().equals(proto)) {</span>
+      @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L491">      ProtobufTopic&lt;T&gt; wrapTopic = (ProtobufTopic&lt;T&gt;) topic;</span>
+<span class="nc" id="L492">      return wrapTopic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L496" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L497">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L499">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L502">    ProtobufTopic&lt;T&gt; wrapTopic = ProtobufTopic.wrap(this, handle, proto);</span>
+<span class="nc" id="L503">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L506">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L508">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get struct-encoded value topic.
+   *
+   * @param &lt;T&gt; value class (inferred from struct)
+   * @param name topic name
+   * @param struct struct serialization implementation
+   * @return StructTopic
+   */
+  public &lt;T&gt;
+      StructTopic&lt;T&gt; getStructTopic(String name, Struct&lt;T&gt; struct) {
+<span class="nc" id="L521">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L522" title="All 2 branches missed.">    if (topic instanceof StructTopic&lt;?&gt;</span>
+<span class="nc bnc" id="L523" title="All 2 branches missed.">        &amp;&amp; ((StructTopic&lt;?&gt;) topic).getStruct().equals(struct)) {</span>
+      @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L525">      StructTopic&lt;T&gt; wrapTopic = (StructTopic&lt;T&gt;) topic;</span>
+<span class="nc" id="L526">      return wrapTopic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L530" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L531">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L533">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L536">    StructTopic&lt;T&gt; wrapTopic = StructTopic.wrap(this, handle, struct);</span>
+<span class="nc" id="L537">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L540">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L542">    return wrapTopic;</span>
+  }
+
+  /**
+   * Get struct-encoded value array topic.
+   *
+   * @param &lt;T&gt; value class (inferred from struct)
+   * @param name topic name
+   * @param struct struct serialization implementation
+   * @return StructArrayTopic
+   */
+  public &lt;T&gt;
+      StructArrayTopic&lt;T&gt; getStructArrayTopic(String name, Struct&lt;T&gt; struct) {
+<span class="nc" id="L555">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">    if (topic instanceof StructArrayTopic&lt;?&gt;</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">        &amp;&amp; ((StructArrayTopic&lt;?&gt;) topic).getStruct().equals(struct)) {</span>
+      @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L559">      StructArrayTopic&lt;T&gt; wrapTopic = (StructArrayTopic&lt;T&gt;) topic;</span>
+<span class="nc" id="L560">      return wrapTopic;</span>
+    }
+
+    int handle;
+<span class="nc bnc" id="L564" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L565">      handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+    } else {
+<span class="nc" id="L567">      handle = topic.getHandle();</span>
+    }
+
+<span class="nc" id="L570">    StructArrayTopic&lt;T&gt; wrapTopic = StructArrayTopic.wrap(this, handle, struct);</span>
+<span class="nc" id="L571">    m_topics.put(name, wrapTopic);</span>
+
+    // also cache by handle
+<span class="nc" id="L574">    m_topicsByHandle.put(handle, wrapTopic);</span>
+
+<span class="nc" id="L576">    return wrapTopic;</span>
+  }
+
+  private Topic[] topicHandlesToTopics(int[] handles) {
+<span class="nc" id="L580">    Topic[] topics = new Topic[handles.length];</span>
+<span class="nc bnc" id="L581" title="All 2 branches missed.">    for (int i = 0; i &lt; handles.length; i++) {</span>
+<span class="nc" id="L582">      topics[i] = getCachedTopic(handles[i]);</span>
+    }
+<span class="nc" id="L584">    return topics;</span>
+  }
+
+  /**
+   * Get all published topics.
+   *
+   * @return Array of topics.
+   */
+  public Topic[] getTopics() {
+<span class="nc" id="L593">    return topicHandlesToTopics(NetworkTablesJNI.getTopics(m_handle, &quot;&quot;, 0));</span>
+  }
+
+  /**
+   * Get published topics starting with the given prefix. The results are optionally filtered by
+   * string prefix to only return a subset of all topics.
+   *
+   * @param prefix topic name required prefix; only topics whose name starts with this string are
+   *     returned
+   * @return Array of topic information.
+   */
+  public Topic[] getTopics(String prefix) {
+<span class="nc" id="L605">    return topicHandlesToTopics(NetworkTablesJNI.getTopics(m_handle, prefix, 0));</span>
+  }
+
+  /**
+   * Get published topics starting with the given prefix. The results are optionally filtered by
+   * string prefix and data type to only return a subset of all topics.
+   *
+   * @param prefix topic name required prefix; only topics whose name starts with this string are
+   *     returned
+   * @param types bitmask of data types; 0 is treated as a &quot;don't care&quot;
+   * @return Array of topic information.
+   */
+  public Topic[] getTopics(String prefix, int types) {
+<span class="nc" id="L618">    return topicHandlesToTopics(NetworkTablesJNI.getTopics(m_handle, prefix, types));</span>
+  }
+
+  /**
+   * Get published topics starting with the given prefix. The results are optionally filtered by
+   * string prefix and data type to only return a subset of all topics.
+   *
+   * @param prefix topic name required prefix; only topics whose name starts with this string are
+   *     returned
+   * @param types array of data type strings
+   * @return Array of topic information.
+   */
+  public Topic[] getTopics(String prefix, String[] types) {
+<span class="nc" id="L631">    return topicHandlesToTopics(NetworkTablesJNI.getTopicsStr(m_handle, prefix, types));</span>
+  }
+
+  /**
+   * Get information about all topics.
+   *
+   * @return Array of topic information.
+   */
+  public TopicInfo[] getTopicInfo() {
+<span class="nc" id="L640">    return NetworkTablesJNI.getTopicInfos(this, m_handle, &quot;&quot;, 0);</span>
+  }
+
+  /**
+   * Get information about topics starting with the given prefix. The results are optionally
+   * filtered by string prefix to only return a subset of all topics.
+   *
+   * @param prefix topic name required prefix; only topics whose name starts with this string are
+   *     returned
+   * @return Array of topic information.
+   */
+  public TopicInfo[] getTopicInfo(String prefix) {
+<span class="nc" id="L652">    return NetworkTablesJNI.getTopicInfos(this, m_handle, prefix, 0);</span>
+  }
+
+  /**
+   * Get information about topics starting with the given prefix. The results are optionally
+   * filtered by string prefix and data type to only return a subset of all topics.
+   *
+   * @param prefix topic name required prefix; only topics whose name starts with this string are
+   *     returned
+   * @param types bitmask of data types; 0 is treated as a &quot;don't care&quot;
+   * @return Array of topic information.
+   */
+  public TopicInfo[] getTopicInfo(String prefix, int types) {
+<span class="nc" id="L665">    return NetworkTablesJNI.getTopicInfos(this, m_handle, prefix, types);</span>
+  }
+
+  /**
+   * Get information about topics starting with the given prefix. The results are optionally
+   * filtered by string prefix and data type to only return a subset of all topics.
+   *
+   * @param prefix topic name required prefix; only topics whose name starts with this string are
+   *     returned
+   * @param types array of data type strings
+   * @return Array of topic information.
+   */
+  public TopicInfo[] getTopicInfo(String prefix, String[] types) {
+<span class="nc" id="L678">    return NetworkTablesJNI.getTopicInfosStr(this, m_handle, prefix, types);</span>
+  }
+
+  /* Cache of created entries. */
+<span class="fc" id="L682">  private final ConcurrentMap&lt;String, NetworkTableEntry&gt; m_entries = new ConcurrentHashMap&lt;&gt;();</span>
+
+  /**
+   * Gets the entry for a key.
+   *
+   * @param name Key
+   * @return Network table entry.
+   */
+  public NetworkTableEntry getEntry(String name) {
+<span class="nc" id="L691">    NetworkTableEntry entry = m_entries.get(name);</span>
+<span class="nc bnc" id="L692" title="All 2 branches missed.">    if (entry == null) {</span>
+<span class="nc" id="L693">      entry = new NetworkTableEntry(this, NetworkTablesJNI.getEntry(m_handle, name));</span>
+<span class="nc" id="L694">      NetworkTableEntry oldEntry = m_entries.putIfAbsent(name, entry);</span>
+<span class="nc bnc" id="L695" title="All 2 branches missed.">      if (oldEntry != null) {</span>
+<span class="nc" id="L696">        entry = oldEntry;</span>
+      }
+    }
+<span class="nc" id="L699">    return entry;</span>
+  }
+
+  /* Cache of created topics. */
+<span class="fc" id="L703">  private final ConcurrentMap&lt;String, Topic&gt; m_topics = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="fc" id="L704">  private final ConcurrentMap&lt;Integer, Topic&gt; m_topicsByHandle = new ConcurrentHashMap&lt;&gt;();</span>
+
+  Topic getCachedTopic(String name) {
+<span class="nc" id="L707">    Topic topic = m_topics.get(name);</span>
+<span class="nc bnc" id="L708" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L709">      int handle = NetworkTablesJNI.getTopic(m_handle, name);</span>
+<span class="nc" id="L710">      topic = new Topic(this, handle);</span>
+<span class="nc" id="L711">      Topic oldTopic = m_topics.putIfAbsent(name, topic);</span>
+<span class="nc bnc" id="L712" title="All 2 branches missed.">      if (oldTopic != null) {</span>
+<span class="nc" id="L713">        topic = oldTopic;</span>
+      }
+      // also cache by handle
+<span class="nc" id="L716">      m_topicsByHandle.putIfAbsent(handle, topic);</span>
+    }
+<span class="nc" id="L718">    return topic;</span>
+  }
+
+  Topic getCachedTopic(int handle) {
+<span class="nc" id="L722">    Topic topic = m_topicsByHandle.get(handle);</span>
+<span class="nc bnc" id="L723" title="All 2 branches missed.">    if (topic == null) {</span>
+<span class="nc" id="L724">      topic = new Topic(this, handle);</span>
+<span class="nc" id="L725">      Topic oldTopic = m_topicsByHandle.putIfAbsent(handle, topic);</span>
+<span class="nc bnc" id="L726" title="All 2 branches missed.">      if (oldTopic != null) {</span>
+<span class="nc" id="L727">        topic = oldTopic;</span>
+      }
+    }
+<span class="nc" id="L730">    return topic;</span>
+  }
+
+  /* Cache of created tables. */
+<span class="fc" id="L734">  private final ConcurrentMap&lt;String, NetworkTable&gt; m_tables = new ConcurrentHashMap&lt;&gt;();</span>
+
+  /**
+   * Gets the table with the specified key.
+   *
+   * @param key the key name
+   * @return The network table
+   */
+  public NetworkTable getTable(String key) {
+    // prepend leading / if not present
+    String theKey;
+<span class="pc bpc" id="L745" title="2 of 4 branches missed.">    if (key.isEmpty() || &quot;/&quot;.equals(key)) {</span>
+<span class="nc" id="L746">      theKey = &quot;&quot;;</span>
+<span class="pc bpc" id="L747" title="1 of 2 branches missed.">    } else if (key.charAt(0) == NetworkTable.PATH_SEPARATOR) {</span>
+<span class="fc" id="L748">      theKey = key;</span>
+    } else {
+<span class="nc" id="L750">      theKey = NetworkTable.PATH_SEPARATOR + key;</span>
+    }
+
+    // cache created tables
+<span class="fc" id="L754">    NetworkTable table = m_tables.get(theKey);</span>
+<span class="pc bpc" id="L755" title="1 of 2 branches missed.">    if (table == null) {</span>
+<span class="fc" id="L756">      table = new NetworkTable(this, theKey);</span>
+<span class="fc" id="L757">      NetworkTable oldTable = m_tables.putIfAbsent(theKey, table);</span>
+<span class="pc bpc" id="L758" title="1 of 2 branches missed.">      if (oldTable != null) {</span>
+<span class="nc" id="L759">        table = oldTable;</span>
+      }
+    }
+<span class="fc" id="L762">    return table;</span>
+  }
+
+  /*
+   * Callback Creation Functions
+   */
+
+  private static class ListenerStorage implements AutoCloseable {
+<span class="fc" id="L770">    private final ReentrantLock m_lock = new ReentrantLock();</span>
+<span class="fc" id="L771">    private final Map&lt;Integer, Consumer&lt;NetworkTableEvent&gt;&gt; m_listeners = new HashMap&lt;&gt;();</span>
+    private Thread m_thread;
+    private int m_poller;
+    private boolean m_waitQueue;
+<span class="fc" id="L775">    private final Event m_waitQueueEvent = new Event();</span>
+<span class="fc" id="L776">    private final Condition m_waitQueueCond = m_lock.newCondition();</span>
+    private final NetworkTableInstance m_inst;
+
+<span class="fc" id="L779">    ListenerStorage(NetworkTableInstance inst) {</span>
+<span class="fc" id="L780">      m_inst = inst;</span>
+<span class="fc" id="L781">    }</span>
+
+    int add(
+        String[] prefixes,
+        EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds,
+        Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="fc" id="L787">      m_lock.lock();</span>
+      try {
+<span class="pc bpc" id="L789" title="1 of 2 branches missed.">        if (m_poller == 0) {</span>
+<span class="fc" id="L790">          m_poller = NetworkTablesJNI.createListenerPoller(m_inst.getHandle());</span>
+<span class="fc" id="L791">          startThread();</span>
+        }
+<span class="fc" id="L793">        int h = NetworkTablesJNI.addListener(m_poller, prefixes, eventKinds);</span>
+<span class="fc" id="L794">        m_listeners.put(h, listener);</span>
+<span class="fc" id="L795">        return h;</span>
+      } finally {
+<span class="fc" id="L797">        m_lock.unlock();</span>
+      }
+    }
+
+    int add(
+        int handle,
+        EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds,
+        Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="fc" id="L805">      m_lock.lock();</span>
+      try {
+<span class="pc bpc" id="L807" title="1 of 2 branches missed.">        if (m_poller == 0) {</span>
+<span class="fc" id="L808">          m_poller = NetworkTablesJNI.createListenerPoller(m_inst.getHandle());</span>
+<span class="fc" id="L809">          startThread();</span>
+        }
+<span class="fc" id="L811">        int h = NetworkTablesJNI.addListener(m_poller, handle, eventKinds);</span>
+<span class="fc" id="L812">        m_listeners.put(h, listener);</span>
+<span class="fc" id="L813">        return h;</span>
+      } finally {
+<span class="fc" id="L815">        m_lock.unlock();</span>
+      }
+    }
+
+    int addLogger(int minLevel, int maxLevel, Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="fc" id="L820">      m_lock.lock();</span>
+      try {
+<span class="pc bpc" id="L822" title="1 of 2 branches missed.">        if (m_poller == 0) {</span>
+<span class="fc" id="L823">          m_poller = NetworkTablesJNI.createListenerPoller(m_inst.getHandle());</span>
+<span class="fc" id="L824">          startThread();</span>
+        }
+<span class="fc" id="L826">        int h = NetworkTablesJNI.addLogger(m_poller, minLevel, maxLevel);</span>
+<span class="fc" id="L827">        m_listeners.put(h, listener);</span>
+<span class="fc" id="L828">        return h;</span>
+      } finally {
+<span class="fc" id="L830">        m_lock.unlock();</span>
+      }
+    }
+
+    void remove(int listener) {
+<span class="nc" id="L835">      m_lock.lock();</span>
+      try {
+<span class="nc" id="L837">        m_listeners.remove(listener);</span>
+      } finally {
+<span class="nc" id="L839">        m_lock.unlock();</span>
+      }
+<span class="nc" id="L841">      NetworkTablesJNI.removeListener(listener);</span>
+<span class="nc" id="L842">    }</span>
+
+    @Override
+    public void close() {
+<span class="fc bfc" id="L846" title="All 2 branches covered.">      if (m_poller != 0) {</span>
+<span class="fc" id="L847">        NetworkTablesJNI.destroyListenerPoller(m_poller);</span>
+      }
+<span class="fc" id="L849">      m_poller = 0;</span>
+<span class="fc" id="L850">    }</span>
+
+    private void startThread() {
+<span class="fc" id="L853">      m_thread =</span>
+          new Thread(
+              () -&gt; {
+<span class="fc" id="L856">                boolean wasInterrupted = false;</span>
+<span class="fc" id="L857">                int[] handles = new int[] { m_poller, m_waitQueueEvent.getHandle() };</span>
+<span class="pc bpc" id="L858" title="1 of 2 branches missed.">                while (!Thread.interrupted()) {</span>
+                  try {
+<span class="fc" id="L860">                    WPIUtilJNI.waitForObjects(handles);</span>
+<span class="nc" id="L861">                  } catch (InterruptedException ex) {</span>
+<span class="nc" id="L862">                    m_lock.lock();</span>
+                    try {
+<span class="nc bnc" id="L864" title="All 2 branches missed.">                      if (m_waitQueue) {</span>
+<span class="nc" id="L865">                        m_waitQueue = false;</span>
+<span class="nc" id="L866">                        m_waitQueueCond.signalAll();</span>
+                      }
+                    } finally {
+<span class="nc" id="L869">                      m_lock.unlock();</span>
+                    }
+<span class="nc" id="L871">                    Thread.currentThread().interrupt();</span>
+                    // don't try to destroy poller, as its handle is likely no longer valid
+<span class="nc" id="L873">                    wasInterrupted = true;</span>
+<span class="nc" id="L874">                    break;</span>
+<span class="fc" id="L875">                  }</span>
+                  for (NetworkTableEvent event :
+<span class="fc bfc" id="L877" title="All 2 branches covered.">                      NetworkTablesJNI.readListenerQueue(m_inst, m_poller)) {</span>
+                    Consumer&lt;NetworkTableEvent&gt; listener;
+<span class="fc" id="L879">                    m_lock.lock();</span>
+                    try {
+<span class="fc" id="L881">                      listener = m_listeners.get(event.listener);</span>
+                    } finally {
+<span class="fc" id="L883">                      m_lock.unlock();</span>
+                    }
+<span class="pc bpc" id="L885" title="1 of 2 branches missed.">                    if (listener != null) {</span>
+                      try {
+<span class="fc" id="L887">                        listener.accept(event);</span>
+<span class="nc" id="L888">                      } catch (Throwable throwable) {</span>
+<span class="nc" id="L889">                        System.err.println(</span>
+                            &quot;Unhandled exception during listener callback: &quot;
+<span class="nc" id="L891">                            + throwable.toString());</span>
+<span class="nc" id="L892">                        throwable.printStackTrace();</span>
+<span class="fc" id="L893">                      }</span>
+                    }
+                  }
+<span class="fc" id="L896">                  m_lock.lock();</span>
+                  try {
+<span class="fc bfc" id="L898" title="All 2 branches covered.">                    if (m_waitQueue) {</span>
+<span class="fc" id="L899">                      m_waitQueue = false;</span>
+<span class="fc" id="L900">                      m_waitQueueCond.signalAll();</span>
+                    }
+                  } finally {
+<span class="fc" id="L903">                    m_lock.unlock();</span>
+<span class="fc" id="L904">                  }</span>
+                }
+<span class="nc" id="L906">                m_lock.lock();</span>
+                try {
+<span class="nc bnc" id="L908" title="All 2 branches missed.">                  if (!wasInterrupted) {</span>
+<span class="nc" id="L909">                    NetworkTablesJNI.destroyListenerPoller(m_poller);</span>
+                  }
+<span class="nc" id="L911">                  m_poller = 0;</span>
+                } finally {
+<span class="nc" id="L913">                  m_lock.unlock();</span>
+                }
+<span class="nc" id="L915">              },</span>
+              &quot;NTListener&quot;);
+<span class="fc" id="L917">      m_thread.setDaemon(true);</span>
+<span class="fc" id="L918">      m_thread.start();</span>
+<span class="fc" id="L919">    }</span>
+
+    boolean waitForQueue(double timeout) {
+<span class="fc" id="L922">      m_lock.lock();</span>
+      try {
+<span class="pc bpc" id="L924" title="1 of 2 branches missed.">        if (m_poller != 0) {</span>
+<span class="fc" id="L925">          m_waitQueue = true;</span>
+<span class="fc" id="L926">          m_waitQueueEvent.set();</span>
+<span class="pc bpc" id="L927" title="1 of 2 branches missed.">          while (m_waitQueue) {</span>
+            try {
+<span class="pc bpc" id="L929" title="1 of 2 branches missed.">              if (timeout &lt; 0) {</span>
+<span class="nc" id="L930">                m_waitQueueCond.await();</span>
+              } else {
+<span class="fc" id="L932">                return m_waitQueueCond.await((long) (timeout * 1e9), TimeUnit.NANOSECONDS);</span>
+              }
+<span class="nc" id="L934">            } catch (InterruptedException ex) {</span>
+<span class="nc" id="L935">              Thread.currentThread().interrupt();</span>
+<span class="nc" id="L936">              return true;</span>
+<span class="nc" id="L937">            }</span>
+          }
+        }
+      } finally {
+<span class="fc" id="L941">        m_lock.unlock();</span>
+      }
+<span class="nc" id="L943">      return true;</span>
+    }
+  }
+
+<span class="fc" id="L947">  private final ListenerStorage m_listeners = new ListenerStorage(this);</span>
+
+  /**
+   * Remove a connection listener.
+   *
+   * @param listener Listener handle to remove
+   */
+  public void removeListener(int listener) {
+<span class="nc" id="L955">    m_listeners.remove(listener);</span>
+<span class="nc" id="L956">  }</span>
+
+  /**
+   * Wait for the listener queue to be empty. This is primarily useful for deterministic
+   * testing. This blocks until either the listener queue is empty (e.g. there are no
+   * more events that need to be passed along to callbacks or poll queues) or the timeout expires.
+   *
+   * @param timeout timeout, in seconds. Set to 0 for non-blocking behavior, or a negative value to
+   *     block indefinitely
+   * @return False if timed out, otherwise true.
+   */
+  public boolean waitForListenerQueue(double timeout) {
+<span class="fc" id="L968">    return m_listeners.waitForQueue(timeout);</span>
+  }
+
+  /**
+   * Add a connection listener. The callback function is called asynchronously on a separate
+   * thread, so it's important to use synchronization or atomics when accessing any shared state
+   * from the callback function.
+   *
+   * @param immediateNotify Notify listener of all existing connections
+   * @param listener Listener to add
+   * @return Listener handle
+   */
+  public int addConnectionListener(
+      boolean immediateNotify, Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="fc" id="L982">    EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds = EnumSet.of(NetworkTableEvent.Kind.kConnection);</span>
+<span class="pc bpc" id="L983" title="1 of 2 branches missed.">    if (immediateNotify) {</span>
+<span class="nc" id="L984">      eventKinds.add(NetworkTableEvent.Kind.kImmediate);</span>
+    }
+<span class="fc" id="L986">    return m_listeners.add(m_handle, eventKinds, listener);</span>
+  }
+
+  /**
+   * Add a time synchronization listener. The callback function is called asynchronously on a
+   * separate thread, so it's important to use synchronization or atomics when accessing any shared
+   * state from the callback function.
+   *
+   * @param immediateNotify Notify listener of current time synchronization value
+   * @param listener Listener to add
+   * @return Listener handle
+   */
+  public int addTimeSyncListener(
+      boolean immediateNotify, Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="nc" id="L1000">    EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds = EnumSet.of(NetworkTableEvent.Kind.kTimeSync);</span>
+<span class="nc bnc" id="L1001" title="All 2 branches missed.">    if (immediateNotify) {</span>
+<span class="nc" id="L1002">      eventKinds.add(NetworkTableEvent.Kind.kImmediate);</span>
+    }
+<span class="nc" id="L1004">    return m_listeners.add(m_handle, eventKinds, listener);</span>
+  }
+
+  /**
+   * Add a listener for changes on a particular topic. The callback function is called
+   * asynchronously on a separate thread, so it's important to use synchronization or atomics when
+   * accessing any shared state from the callback function.
+   *
+   * &lt;p&gt;This creates a corresponding internal subscriber with the lifetime of the
+   * listener.
+   *
+   * @param topic Topic
+   * @param eventKinds set of event kinds to listen to
+   * @param listener Listener function
+   * @return Listener handle
+   */
+  public int addListener(
+      Topic topic,
+      EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds,
+      Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="nc bnc" id="L1024" title="All 2 branches missed.">    if (topic.getInstance().getHandle() != m_handle) {</span>
+<span class="nc" id="L1025">      throw new IllegalArgumentException(&quot;topic is not from this instance&quot;);</span>
+    }
+<span class="nc" id="L1027">    return m_listeners.add(topic.getHandle(), eventKinds, listener);</span>
+  }
+
+  /**
+   * Add a listener for changes on a subscriber. The callback function is called
+   * asynchronously on a separate thread, so it's important to use synchronization or atomics when
+   * accessing any shared state from the callback function. This does NOT keep the subscriber
+   * active.
+   *
+   * @param subscriber Subscriber
+   * @param eventKinds set of event kinds to listen to
+   * @param listener Listener function
+   * @return Listener handle
+   */
+  public int addListener(
+      Subscriber subscriber,
+      EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds,
+      Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="nc bnc" id="L1045" title="All 2 branches missed.">    if (subscriber.getTopic().getInstance().getHandle() != m_handle) {</span>
+<span class="nc" id="L1046">      throw new IllegalArgumentException(&quot;subscriber is not from this instance&quot;);</span>
+    }
+<span class="nc" id="L1048">    return m_listeners.add(subscriber.getHandle(), eventKinds, listener);</span>
+  }
+
+  /**
+   * Add a listener for changes on a subscriber. The callback function is called
+   * asynchronously on a separate thread, so it's important to use synchronization or atomics when
+   * accessing any shared state from the callback function. This does NOT keep the subscriber
+   * active.
+   *
+   * @param subscriber Subscriber
+   * @param eventKinds set of event kinds to listen to
+   * @param listener Listener function
+   * @return Listener handle
+   */
+  public int addListener(
+      MultiSubscriber subscriber,
+      EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds,
+      Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="nc bnc" id="L1066" title="All 2 branches missed.">    if (subscriber.getInstance().getHandle() != m_handle) {</span>
+<span class="nc" id="L1067">      throw new IllegalArgumentException(&quot;subscriber is not from this instance&quot;);</span>
+    }
+<span class="nc" id="L1069">    return m_listeners.add(subscriber.getHandle(), eventKinds, listener);</span>
+  }
+
+  /**
+   * Add a listener for changes on an entry. The callback function is called
+   * asynchronously on a separate thread, so it's important to use synchronization or atomics when
+   * accessing any shared state from the callback function.
+   *
+   * @param entry Entry
+   * @param eventKinds set of event kinds to listen to
+   * @param listener Listener function
+   * @return Listener handle
+   */
+  public int addListener(
+      NetworkTableEntry entry,
+      EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds,
+      Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="nc bnc" id="L1086" title="All 2 branches missed.">    if (entry.getTopic().getInstance().getHandle() != m_handle) {</span>
+<span class="nc" id="L1087">      throw new IllegalArgumentException(&quot;entry is not from this instance&quot;);</span>
+    }
+<span class="nc" id="L1089">    return m_listeners.add(entry.getHandle(), eventKinds, listener);</span>
+  }
+
+  /**
+   * Add a listener for changes to topics with names that start with any of the given
+   * prefixes. The callback function is called asynchronously on a separate thread, so it's
+   * important to use synchronization or atomics when accessing any shared state from the callback
+   * function.
+   *
+   * &lt;p&gt;This creates a corresponding internal subscriber with the lifetime of the
+   * listener.
+   *
+   * @param prefixes Topic name string prefixes
+   * @param eventKinds set of event kinds to listen to
+   * @param listener Listener function
+   * @return Listener handle
+   */
+  public int addListener(
+      String[] prefixes,
+      EnumSet&lt;NetworkTableEvent.Kind&gt; eventKinds,
+      Consumer&lt;NetworkTableEvent&gt; listener) {
+<span class="fc" id="L1110">    return m_listeners.add(prefixes, eventKinds, listener);</span>
+  }
+
+  /*
+   * Client/Server Functions
+   */
+
+  /**
+   * Get the current network mode.
+   *
+   * @return Enum set of NetworkMode.
+   */
+  public EnumSet&lt;NetworkMode&gt; getNetworkMode() {
+<span class="fc" id="L1123">    int flags = NetworkTablesJNI.getNetworkMode(m_handle);</span>
+<span class="fc" id="L1124">    EnumSet&lt;NetworkMode&gt; rv = EnumSet.noneOf(NetworkMode.class);</span>
+<span class="fc bfc" id="L1125" title="All 2 branches covered.">    for (NetworkMode mode : NetworkMode.values()) {</span>
+<span class="fc bfc" id="L1126" title="All 2 branches covered.">      if ((flags &amp; mode.getValue()) != 0) {</span>
+<span class="fc" id="L1127">        rv.add(mode);</span>
+      }
+    }
+<span class="fc" id="L1130">    return rv;</span>
+  }
+
+  /**
+   * Starts local-only operation. Prevents calls to startServer or startClient from taking effect.
+   * Has no effect if startServer or startClient has already been called.
+   */
+  public void startLocal() {
+<span class="nc" id="L1138">    NetworkTablesJNI.startLocal(m_handle);</span>
+<span class="nc" id="L1139">  }</span>
+
+  /**
+   * Stops local-only operation. startServer or startClient can be called after this call to start
+   * a server or client.
+   */
+  public void stopLocal() {
+<span class="nc" id="L1146">    NetworkTablesJNI.stopLocal(m_handle);</span>
+<span class="nc" id="L1147">  }</span>
+
+  /**
+   * Starts a server using the networktables.json as the persistent file, using the default
+   * listening address and port.
+   */
+  public void startServer() {
+<span class="nc" id="L1154">    startServer(&quot;networktables.json&quot;);</span>
+<span class="nc" id="L1155">  }</span>
+
+  /**
+   * Starts a server using the specified persistent filename, using the default listening address
+   * and port.
+   *
+   * @param persistFilename the name of the persist file to use
+   */
+  public void startServer(String persistFilename) {
+<span class="nc" id="L1164">    startServer(persistFilename, &quot;&quot;);</span>
+<span class="nc" id="L1165">  }</span>
+
+  /**
+   * Starts a server using the specified filename and listening address, using the default port.
+   *
+   * @param persistFilename the name of the persist file to use
+   * @param listenAddress the address to listen on, or empty to listen on any address
+   */
+  public void startServer(String persistFilename, String listenAddress) {
+<span class="nc" id="L1174">    startServer(persistFilename, listenAddress, kDefaultPort3, kDefaultPort4);</span>
+<span class="nc" id="L1175">  }</span>
+
+  /**
+   * Starts a server using the specified filename, listening address, and port.
+   *
+   * @param persistFilename the name of the persist file to use
+   * @param listenAddress the address to listen on, or empty to listen on any address
+   * @param port3 port to communicate over (NT3)
+   */
+  public void startServer(String persistFilename, String listenAddress, int port3) {
+<span class="nc" id="L1185">    startServer(persistFilename, listenAddress, port3, kDefaultPort4);</span>
+<span class="nc" id="L1186">  }</span>
+
+  /**
+   * Starts a server using the specified filename, listening address, and port.
+   *
+   * @param persistFilename the name of the persist file to use
+   * @param listenAddress the address to listen on, or empty to listen on any address
+   * @param port3 port to communicate over (NT3)
+   * @param port4 port to communicate over (NT4)
+   */
+  public void startServer(String persistFilename, String listenAddress, int port3, int port4) {
+<span class="fc" id="L1197">    NetworkTablesJNI.startServer(m_handle, persistFilename, listenAddress, port3, port4);</span>
+<span class="fc" id="L1198">  }</span>
+
+  /** Stops the server if it is running. */
+  public void stopServer() {
+<span class="fc" id="L1202">    NetworkTablesJNI.stopServer(m_handle);</span>
+<span class="fc" id="L1203">  }</span>
+
+  /**
+   * Starts a NT3 client. Use SetServer or SetServerTeam to set the server name and port.
+   *
+   * @param identity network identity to advertise (cannot be empty string)
+   */
+  public void startClient3(String identity) {
+<span class="fc" id="L1211">    NetworkTablesJNI.startClient3(m_handle, identity);</span>
+<span class="fc" id="L1212">  }</span>
+
+  /**
+   * Starts a NT4 client. Use SetServer or SetServerTeam to set the server name and port.
+   *
+   * @param identity network identity to advertise (cannot be empty string)
+   */
+  public void startClient4(String identity) {
+<span class="fc" id="L1220">    NetworkTablesJNI.startClient4(m_handle, identity);</span>
+<span class="fc" id="L1221">  }</span>
+
+  /** Stops the client if it is running. */
+  public void stopClient() {
+<span class="fc" id="L1225">    NetworkTablesJNI.stopClient(m_handle);</span>
+<span class="fc" id="L1226">  }</span>
+
+  /**
+   * Sets server address and port for client (without restarting client). Changes the port to the
+   * default port.
+   *
+   * @param serverName server name
+   */
+  public void setServer(String serverName) {
+<span class="nc" id="L1235">    setServer(serverName, 0);</span>
+<span class="nc" id="L1236">  }</span>
+
+  /**
+   * Sets server address and port for client (without restarting client).
+   *
+   * @param serverName server name
+   * @param port port to communicate over (0=default)
+   */
+  public void setServer(String serverName, int port) {
+<span class="fc" id="L1245">    NetworkTablesJNI.setServer(m_handle, serverName, port);</span>
+<span class="fc" id="L1246">  }</span>
+
+  /**
+   * Sets server addresses and port for client (without restarting client). Changes the port to the
+   * default port. The client will attempt to connect to each server in round robin fashion.
+   *
+   * @param serverNames array of server names
+   */
+  public void setServer(String[] serverNames) {
+<span class="nc" id="L1255">    setServer(serverNames, 0);</span>
+<span class="nc" id="L1256">  }</span>
+
+  /**
+   * Sets server addresses and port for client (without restarting client). The client will attempt
+   * to connect to each server in round robin fashion.
+   *
+   * @param serverNames array of server names
+   * @param port port to communicate over (0=default)
+   */
+  public void setServer(String[] serverNames, int port) {
+<span class="nc" id="L1266">    int[] ports = new int[serverNames.length];</span>
+<span class="nc bnc" id="L1267" title="All 2 branches missed.">    for (int i = 0; i &lt; serverNames.length; i++) {</span>
+<span class="nc" id="L1268">      ports[i] = port;</span>
+    }
+<span class="nc" id="L1270">    setServer(serverNames, ports);</span>
+<span class="nc" id="L1271">  }</span>
+
+  /**
+   * Sets server addresses and ports for client (without restarting client). The client will
+   * attempt to connect to each server in round robin fashion.
+   *
+   * @param serverNames array of server names
+   * @param ports array of port numbers (0=default)
+   */
+  public void setServer(String[] serverNames, int[] ports) {
+<span class="nc" id="L1281">    NetworkTablesJNI.setServer(m_handle, serverNames, ports);</span>
+<span class="nc" id="L1282">  }</span>
+
+  /**
+   * Sets server addresses and port for client (without restarting client). Changes the port to the
+   * default port. The client will attempt to connect to each server in round robin fashion.
+   *
+   * @param team team number
+   */
+  public void setServerTeam(int team) {
+<span class="nc" id="L1291">    setServerTeam(team, 0);</span>
+<span class="nc" id="L1292">  }</span>
+
+  /**
+   * Sets server addresses and port for client (without restarting client). Connects using commonly
+   * known robot addresses for the specified team.
+   *
+   * @param team team number
+   * @param port port to communicate over (0=default)
+   */
+  public void setServerTeam(int team, int port) {
+<span class="nc" id="L1302">    NetworkTablesJNI.setServerTeam(m_handle, team, port);</span>
+<span class="nc" id="L1303">  }</span>
+
+  /**
+   * Disconnects the client if it's running and connected. This will automatically start
+   * reconnection attempts to the current server list.
+   */
+  public void disconnect() {
+<span class="nc" id="L1310">    NetworkTablesJNI.disconnect(m_handle);</span>
+<span class="nc" id="L1311">  }</span>
+
+  /**
+   * Starts requesting server address from Driver Station. This connects to the Driver Station
+   * running on localhost to obtain the server IP address, and connects with the default port.
+   */
+  public void startDSClient() {
+<span class="nc" id="L1318">    startDSClient(0);</span>
+<span class="nc" id="L1319">  }</span>
+
+  /**
+   * Starts requesting server address from Driver Station. This connects to the Driver Station
+   * running on localhost to obtain the server IP address.
+   *
+   * @param port server port to use in combination with IP from DS (0=default)
+   */
+  public void startDSClient(int port) {
+<span class="nc" id="L1328">    NetworkTablesJNI.startDSClient(m_handle, port);</span>
+<span class="nc" id="L1329">  }</span>
+
+  /** Stops requesting server address from Driver Station. */
+  public void stopDSClient() {
+<span class="nc" id="L1333">    NetworkTablesJNI.stopDSClient(m_handle);</span>
+<span class="nc" id="L1334">  }</span>
+
+  /**
+   * Flushes all updated values immediately to the local client/server. This does not flush to the
+   * network.
+   */
+  public void flushLocal() {
+<span class="nc" id="L1341">    NetworkTablesJNI.flushLocal(m_handle);</span>
+<span class="nc" id="L1342">  }</span>
+
+  /**
+   * Flushes all updated values immediately to the network. Note: This is rate-limited to protect
+   * the network from flooding. This is primarily useful for synchronizing network updates with
+   * user code.
+   */
+  public void flush() {
+<span class="nc" id="L1350">    NetworkTablesJNI.flush(m_handle);</span>
+<span class="nc" id="L1351">  }</span>
+
+  /**
+   * Gets information on the currently established network connections. If operating as a client,
+   * this will return either zero or one values.
+   *
+   * @return array of connection information
+   */
+  public ConnectionInfo[] getConnections() {
+<span class="nc" id="L1360">    return NetworkTablesJNI.getConnections(m_handle);</span>
+  }
+
+  /**
+   * Return whether or not the instance is connected to another node.
+   *
+   * @return True if connected.
+   */
+  public boolean isConnected() {
+<span class="fc" id="L1369">    return NetworkTablesJNI.isConnected(m_handle);</span>
+  }
+
+  /**
+   * Get the time offset between server time and local time. Add this value to local time to get
+   * the estimated equivalent server time. In server mode, this always returns 0. In client mode,
+   * this returns the time offset only if the client and server are connected and have exchanged
+   * synchronization messages. Note the time offset may change over time as it is periodically
+   * updated; to receive updates as events, add a listener to the &quot;time sync&quot; event.
+   *
+   * @return Time offset in microseconds (optional)
+   */
+  public OptionalLong getServerTimeOffset() {
+<span class="fc" id="L1382">    return NetworkTablesJNI.getServerTimeOffset(m_handle);</span>
+  }
+
+  /**
+   * Starts logging entry changes to a DataLog.
+   *
+   * @param log data log object; lifetime must extend until StopEntryDataLog is called or the
+   *     instance is destroyed
+   * @param prefix only store entries with names that start with this prefix; the prefix is not
+   *     included in the data log entry name
+   * @param logPrefix prefix to add to data log entry names
+   * @return Data logger handle
+   */
+  public int startEntryDataLog(DataLog log, String prefix, String logPrefix) {
+<span class="nc" id="L1396">    return NetworkTablesJNI.startEntryDataLog(m_handle, log, prefix, logPrefix);</span>
+  }
+
+  /**
+   * Stops logging entry changes to a DataLog.
+   *
+   * @param logger data logger handle
+   */
+  public static void stopEntryDataLog(int logger) {
+<span class="nc" id="L1405">    NetworkTablesJNI.stopEntryDataLog(logger);</span>
+<span class="nc" id="L1406">  }</span>
+
+  /**
+   * Starts logging connection changes to a DataLog.
+   *
+   * @param log data log object; lifetime must extend until StopConnectionDataLog is called or the
+   *     instance is destroyed
+   * @param name data log entry name
+   * @return Data logger handle
+   */
+  public int startConnectionDataLog(DataLog log, String name) {
+<span class="nc" id="L1417">    return NetworkTablesJNI.startConnectionDataLog(m_handle, log, name);</span>
+  }
+
+  /**
+   * Stops logging connection changes to a DataLog.
+   *
+   * @param logger data logger handle
+   */
+  public static void stopConnectionDataLog(int logger) {
+<span class="nc" id="L1426">    NetworkTablesJNI.stopConnectionDataLog(logger);</span>
+<span class="nc" id="L1427">  }</span>
+
+  /**
+   * Add logger callback function. By default, log messages are sent to stderr; this function sends
+   * log messages with the specified levels to the provided callback function instead. The callback
+   * function will only be called for log messages with level greater than or equal to minLevel and
+   * less than or equal to maxLevel; messages outside this range will be silently ignored.
+   *
+   * @param minLevel minimum log level
+   * @param maxLevel maximum log level
+   * @param func callback function
+   * @return Listener handle
+   */
+  public int addLogger(int minLevel, int maxLevel, Consumer&lt;NetworkTableEvent&gt; func) {
+<span class="fc" id="L1441">    return m_listeners.addLogger(minLevel, maxLevel, func);</span>
+  }
+
+  /**
+   * Returns whether there is a data schema already registered with the given name that this
+   * instance has published. This does NOT perform a check as to whether the schema has already
+   * been published by another node on the network.
+   *
+   * @param name Name (the string passed as the data type for topics using this schema)
+   * @return True if schema already registered
+   */
+  public boolean hasSchema(String name) {
+<span class="nc" id="L1453">    return m_schemas.containsKey(&quot;/.schema/&quot; + name);</span>
+  }
+
+  /**
+   * Registers a data schema. Data schemas provide information for how a certain data type string
+   * can be decoded. The type string of a data schema indicates the type of the schema itself (e.g.
+   * &quot;protobuf&quot; for protobuf schemas, &quot;struct&quot; for struct schemas, etc). In NetworkTables, schemas
+   * are published just like normal topics, with the name being generated from the provided name:
+   * &quot;/.schema/name&quot;. Duplicate calls to this function with the same name are silently ignored.
+   *
+   * @param name Name (the string passed as the data type for topics using this schema)
+   * @param type Type of schema (e.g. &quot;protobuf&quot;, &quot;struct&quot;, etc)
+   * @param schema Schema data
+   */
+  public void addSchema(String name, String type, byte[] schema) {
+<span class="nc" id="L1468">    m_schemas.computeIfAbsent(&quot;/.schema/&quot; + name, k -&gt; {</span>
+<span class="nc" id="L1469">      RawPublisher pub = getRawTopic(k).publishEx(type, &quot;{\&quot;retained\&quot;:true}&quot;);</span>
+<span class="nc" id="L1470">      pub.setDefault(schema);</span>
+<span class="nc" id="L1471">      return pub;</span>
+    });
+<span class="nc" id="L1473">  }</span>
+
+  /**
+   * Registers a data schema. Data schemas provide information for how a certain data type string
+   * can be decoded. The type string of a data schema indicates the type of the schema itself (e.g.
+   * &quot;protobuf&quot; for protobuf schemas, &quot;struct&quot; for struct schemas, etc). In NetworkTables, schemas
+   * are published just like normal topics, with the name being generated from the provided name:
+   * &quot;/.schema/name&quot;. Duplicate calls to this function with the same name are silently ignored.
+   *
+   * @param name Name (the string passed as the data type for topics using this schema)
+   * @param type Type of schema (e.g. &quot;protobuf&quot;, &quot;struct&quot;, etc)
+   * @param schema Schema data
+   */
+  public void addSchema(String name, String type, String schema) {
+<span class="nc" id="L1487">    m_schemas.computeIfAbsent(&quot;/.schema/&quot; + name, k -&gt; {</span>
+<span class="nc" id="L1488">      RawPublisher pub = getRawTopic(k).publishEx(type, &quot;{\&quot;retained\&quot;:true}&quot;);</span>
+<span class="nc" id="L1489">      pub.setDefault(StandardCharsets.UTF_8.encode(schema));</span>
+<span class="nc" id="L1490">      return pub;</span>
+    });
+<span class="nc" id="L1492">  }</span>
+
+  /**
+   * Registers a protobuf schema. Duplicate calls to this function with the same name are silently
+   * ignored.
+   *
+   * @param proto protobuf serialization object
+   */
+  public void addSchema(Protobuf&lt;?, ?&gt; proto) {
+<span class="nc" id="L1501">    proto.forEachDescriptor(</span>
+        this::hasSchema,
+<span class="nc" id="L1503">        (typeString, schema) -&gt; addSchema(typeString, &quot;proto:FileDescriptorProto&quot;, schema));</span>
+<span class="nc" id="L1504">  }</span>
+
+  /**
+   * Registers a struct schema. Duplicate calls to this function with the same name are silently
+   * ignored.
+   *
+   * @param struct struct serialization object
+   */
+  public void addSchema(Struct&lt;?&gt; struct) {
+<span class="nc" id="L1513">    addSchemaImpl(struct, new HashSet&lt;&gt;());</span>
+<span class="nc" id="L1514">  }</span>
+
+  @Override
+  public boolean equals(Object other) {
+<span class="nc bnc" id="L1518" title="All 2 branches missed.">    if (other == this) {</span>
+<span class="nc" id="L1519">      return true;</span>
+    }
+<span class="nc bnc" id="L1521" title="All 2 branches missed.">    if (!(other instanceof NetworkTableInstance)) {</span>
+<span class="nc" id="L1522">      return false;</span>
+    }
+
+<span class="nc bnc" id="L1525" title="All 2 branches missed.">    return m_handle == ((NetworkTableInstance) other).m_handle;</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L1530">    return m_handle;</span>
+  }
+
+  private void addSchemaImpl(Struct&lt;?&gt; struct, Set&lt;String&gt; seen) {
+<span class="nc" id="L1534">    String typeString = struct.getTypeString();</span>
+<span class="nc bnc" id="L1535" title="All 2 branches missed.">    if (hasSchema(typeString)) {</span>
+<span class="nc" id="L1536">      return;</span>
+    }
+<span class="nc bnc" id="L1538" title="All 2 branches missed.">    if (!seen.add(typeString)) {</span>
+<span class="nc" id="L1539">      throw new UnsupportedOperationException(typeString + &quot;: circular reference with &quot; + seen);</span>
+    }
+<span class="nc" id="L1541">    addSchema(typeString, &quot;structschema&quot;, struct.getSchema());</span>
+<span class="nc bnc" id="L1542" title="All 2 branches missed.">    for (Struct&lt;?&gt; inner : struct.getNested()) {</span>
+<span class="nc" id="L1543">      addSchemaImpl(inner, seen);</span>
+    }
+<span class="nc" id="L1545">    seen.remove(typeString);</span>
+<span class="nc" id="L1546">  }</span>
+
+  private boolean m_owned;
+  private int m_handle;
+<span class="fc" id="L1550">  private final ConcurrentMap&lt;String, RawPublisher&gt; m_schemas = new ConcurrentHashMap&lt;&gt;();</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

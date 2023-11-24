@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="10.12.2">
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\ConnectionListenerTest.java">
+</file>
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\JNITest.java">
+</file>
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\LoggerTest.java">
+</file>
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\NetworkTableTest.java">
+</file>
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\RawTest.java">
+</file>
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\TableListenerTest.java">
+</file>
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\TimeSyncTest.java">
+</file>
+<file name="D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\src\test\java\edu\wpi\first\networktables\TopicListenerTest.java">
+</file>
+</checkstyle>

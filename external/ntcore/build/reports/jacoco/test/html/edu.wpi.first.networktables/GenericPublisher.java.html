@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenericPublisher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">GenericPublisher.java</span></div><h1>GenericPublisher.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+import java.nio.ByteBuffer;
+import java.util.function.Consumer;
+
+/** NetworkTables generic publisher. */
+public interface GenericPublisher extends Publisher, Consumer&lt;NetworkTableValue&gt; {
+  /**
+   * Get the corresponding topic.
+   *
+   * @return Topic
+   */
+  @Override
+  Topic getTopic();
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  boolean set(NetworkTableValue value);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   * @throws IllegalArgumentException if the value is not a known type
+   */
+  default boolean setValue(Object value) {
+<span class="nc" id="L36">    return setValue(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   * @throws IllegalArgumentException if the value is not a known type
+   */
+  boolean setValue(Object value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setBoolean(boolean value) {
+<span class="nc" id="L56">    return setBoolean(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setBoolean(boolean value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setInteger(long value) {
+<span class="nc" id="L75">    return setInteger(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setInteger(long value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setFloat(float value) {
+<span class="nc" id="L94">    return setFloat(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setFloat(float value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setDouble(double value) {
+<span class="nc" id="L113">    return setDouble(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setDouble(double value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setString(String value) {
+<span class="nc" id="L132">    return setString(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setString(String value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setRaw(byte[] value) {
+<span class="nc" id="L151">    return setRaw(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setRaw(ByteBuffer value) {
+<span class="nc" id="L161">    return setRaw(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setRaw(byte[] value, long time) {
+<span class="fc" id="L172">    return setRaw(value, 0, value.length, time);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish; will send from value.position() to value.limit()
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setRaw(ByteBuffer value, long time) {
+<span class="fc" id="L183">    int pos = value.position();</span>
+<span class="fc" id="L184">    return setRaw(value, pos, value.limit() - pos, time);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.length - start)
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setRaw(byte[] value, int start, int len) {
+<span class="nc" id="L196">    return setRaw(value, start, len, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.length - start)
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setRaw(byte[] value, int start, int len, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.capacity() - start)
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setRaw(ByteBuffer value, int start, int len) {
+<span class="nc" id="L219">    return setRaw(value, start, len, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.capacity() - start)
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setRaw(ByteBuffer value, int start, int len, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setBooleanArray(boolean[] value) {
+<span class="nc" id="L240">    return setBooleanArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setBooleanArray(boolean[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setBooleanArray(Boolean[] value) {
+<span class="nc" id="L259">    return setBooleanArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setBooleanArray(Boolean[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setIntegerArray(long[] value) {
+<span class="nc" id="L278">    return setIntegerArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setIntegerArray(long[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setIntegerArray(Long[] value) {
+<span class="nc" id="L297">    return setIntegerArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setIntegerArray(Long[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setFloatArray(float[] value) {
+<span class="nc" id="L316">    return setFloatArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setFloatArray(float[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setFloatArray(Float[] value) {
+<span class="nc" id="L335">    return setFloatArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setFloatArray(Float[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setDoubleArray(double[] value) {
+<span class="nc" id="L354">    return setDoubleArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setDoubleArray(double[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setDoubleArray(Double[] value) {
+<span class="nc" id="L373">    return setDoubleArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setDoubleArray(Double[] value, long time);
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @return False if the topic already exists with a different type
+   */
+  default boolean setStringArray(String[] value) {
+<span class="nc" id="L392">    return setStringArray(value, 0);</span>
+  }
+
+  /**
+   * Publish a new value.
+   *
+   * @param value value to publish
+   * @param time timestamp; 0 indicates current NT time should be used
+   * @return False if the topic already exists with a different type
+   */
+  boolean setStringArray(String[] value, long time);
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefault(NetworkTableValue defaultValue);
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   * @throws IllegalArgumentException if the value is not a known type
+   */
+  boolean setDefaultValue(Object defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultBoolean(boolean defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultInteger(long defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultFloat(float defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultDouble(double defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultString(String defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  default boolean setDefaultRaw(byte[] defaultValue) {
+<span class="nc" id="L474">    return setDefaultRaw(defaultValue, 0, defaultValue.length);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set; will send from defaultValue.position() to
+   *                     defaultValue.limit()
+   * @return False if the entry exists with a different type
+   */
+  default boolean setDefaultRaw(ByteBuffer defaultValue) {
+<span class="nc" id="L485">    int pos = defaultValue.position();</span>
+<span class="nc" id="L486">    return setDefaultRaw(defaultValue, pos, defaultValue.limit() - pos);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.length - start)
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultRaw(byte[] defaultValue, int start, int len);
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.capacity() - start)
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultRaw(ByteBuffer defaultValue, int start, int len);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultBooleanArray(boolean[] defaultValue);
+
+  boolean setDefaultBooleanArray(Boolean[] defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultIntegerArray(long[] defaultValue);
+
+  boolean setDefaultIntegerArray(Long[] defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultFloatArray(float[] defaultValue);
+
+  boolean setDefaultFloatArray(Float[] defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultDoubleArray(double[] defaultValue);
+
+  boolean setDefaultDoubleArray(Double[] defaultValue);
+
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  boolean setDefaultStringArray(String[] defaultValue);
+
+  @Override
+  default void accept(NetworkTableValue value) {
+<span class="nc" id="L564">    set(value);</span>
+<span class="nc" id="L565">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

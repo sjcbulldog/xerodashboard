@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/createNtcoreWindowsx86-64ReleaseStaticLibrary/output.txt for all output for createNtcoreWindowsx86-64ReleaseStaticLibrary.
+archiving ntcore.lib successful.
+
+Finished createNtcoreWindowsx86-64ReleaseStaticLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/createNtcoreWindowsx86-64ReleaseStaticLibrary/output.txt.

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="edu.wpi.first.networktables.ConnectionListenerTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2023-11-22T18:03:43" hostname="STRIDER" time="3.36">
+  <properties/>
+  <testcase name="[1] 127.0.0.1" classname="edu.wpi.first.networktables.ConnectionListenerTest" time="0.403"/>
+  <testcase name="[2] 127.0.0.1 " classname="edu.wpi.first.networktables.ConnectionListenerTest" time="1.319"/>
+  <testcase name="[3]  127.0.0.1 " classname="edu.wpi.first.networktables.ConnectionListenerTest" time="0.327"/>
+  <testcase name="testJNI()" classname="edu.wpi.first.networktables.ConnectionListenerTest" time="1.305"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

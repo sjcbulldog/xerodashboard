@@ -1,0 +1,6 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreJNILinuxathenaDebugSharedLibraryNtcoreJNICpp/output.txt for all output for compileNtcoreJNILinuxathenaDebugSharedLibraryNtcoreJNICpp.
+compiling NetworkTablesJNI.cpp successful.
+
+compiling types_jni.cpp successful.
+
+Finished compileNtcoreJNILinuxathenaDebugSharedLibraryNtcoreJNICpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreJNILinuxathenaDebugSharedLibraryNtcoreJNICpp/output.txt.

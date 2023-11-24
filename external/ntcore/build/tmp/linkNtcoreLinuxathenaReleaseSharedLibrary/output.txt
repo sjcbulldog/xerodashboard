@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreLinuxathenaReleaseSharedLibrary/output.txt for all output for linkNtcoreLinuxathenaReleaseSharedLibrary.
+linking libntcore.so successful.
+
+Finished linkNtcoreLinuxathenaReleaseSharedLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreLinuxathenaReleaseSharedLibrary/output.txt.

@@ -22,7 +22,7 @@ PathDisplayWidget::PathDisplayWidget(GameFieldManager &mgr, std::shared_ptr<Netw
 	path_location_ = ntmgr_->getEntry(PathLocationNetworkTableEntry);
 
 	update_connection_ = connect(ntmgr.get(), &NetworkTableManager::updatedEntry, this, &PathDisplayWidget::entryUpdateDetected);
-	update_connection_ = connect(ntmgr.get(), &NetworkTableManager::newEntry, this, &PathDisplayWidget::newDetected);
+	new_connection_ = connect(ntmgr.get(), &NetworkTableManager::newEntry, this, &PathDisplayWidget::newDetected);
 	disconnect_connection_ = connect(ntmgr.get(), &NetworkTableManager::disconnected, this, &PathDisplayWidget::disconnectDetected);
 	connect_connection_ = connect(ntmgr.get(), &NetworkTableManager::connected, this, &PathDisplayWidget::connectDetected);
 
@@ -57,52 +57,12 @@ void PathDisplayWidget::connectDetected()
 	}
 }
 
-void PathDisplayWidget::entryUpdateDetected(const QString& name)
+void PathDisplayWidget::entryUpdateDetected(const nt::ValueEventData& data)
 {
-	if (name == RobotLocationNetworkTableEntry)
-	{
-		auto pos = robot_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
-		if (pos.at(0) > -1000.0 && pos.at(1) > -1000 && pos.at(2) > -1000) 
-		{
-			Pose2d pose(pos.at(0), pos.at(1), Rotation2d::fromDegrees(pos.at(2)));
-			robot_track_.push_back(pose);
-			update();
-		}
-	}
-	else if (name == PathLocationNetworkTableEntry)
-	{
-		auto pos = path_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
-		if (pos.at(0) > -1000.0 && pos.at(1) > -1000 && pos.at(2) > -1000)
-		{
-			Pose2d pose(pos.at(0), pos.at(1), Rotation2d::fromDegrees(pos.at(2)));
-			path_track_.push_back(pose);
-			update();
-		}
-	}
 }
 
-void PathDisplayWidget::newDetected(const QString& name)
+void PathDisplayWidget::newDetected(const nt::TopicInfo &info)
 {
-	if (name == RobotLocationNetworkTableEntry)
-	{
-		auto pos = robot_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
-		if (pos.at(0) > -1000.0 && pos.at(1) > -1000 && pos.at(2) > -1000)
-		{
-			Pose2d pose(pos.at(0), pos.at(1), Rotation2d::fromDegrees(pos.at(2)));
-			robot_track_.push_back(pose);
-			update();
-		}
-	}
-	else if (name == PathLocationNetworkTableEntry)
-	{
-		auto pos = robot_location_.GetDoubleArray({ -1000000.0, -1000000.0, -1000000.0 });
-		if (pos.at(0) > -1000.0 && pos.at(1) > -1000 && pos.at(2) > -1000)
-		{
-			Pose2d pose(pos.at(0), pos.at(1), Rotation2d::fromDegrees(pos.at(2)));
-			path_track_.push_back(pose);
-			update();
-		}
-	}
 }
 
 

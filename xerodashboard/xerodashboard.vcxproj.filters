@@ -76,9 +76,6 @@
     <ClCompile Include="SingleChart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Callout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TabEditName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -128,6 +125,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DSFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Callout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -194,9 +194,6 @@
     <ClInclude Include="SingleChart.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Callout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="JsonFieldNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -234,6 +231,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DSEventFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Callout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

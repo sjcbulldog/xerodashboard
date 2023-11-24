@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Topic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">Topic.java</span></div><h1>Topic.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** NetworkTables Topic. */
+public class Topic {
+  /**
+   * Constructor; use NetworkTableInstance.getTopic() instead.
+   *
+   * @param inst Instance
+   * @param handle Native handle
+   */
+<span class="fc" id="L15">  Topic(NetworkTableInstance inst, int handle) {</span>
+<span class="fc" id="L16">    m_inst = inst;</span>
+<span class="fc" id="L17">    m_handle = handle;</span>
+<span class="fc" id="L18">  }</span>
+
+  /**
+   * Determines if the native handle is valid.
+   *
+   * @return True if the native handle is valid, false otherwise.
+   */
+  public boolean isValid() {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">    return m_handle != 0;</span>
+  }
+
+  /**
+   * Gets the native handle for the topic.
+   *
+   * @return Native handle
+   */
+  public int getHandle() {
+<span class="nc" id="L35">    return m_handle;</span>
+  }
+
+  /**
+   * Gets the instance for the topic.
+   *
+   * @return Instance
+   */
+  public NetworkTableInstance getInstance() {
+<span class="nc" id="L44">    return m_inst;</span>
+  }
+
+  /**
+   * Gets the name of the topic.
+   *
+   * @return the topic's name
+   */
+  public String getName() {
+<span class="nc" id="L53">    return NetworkTablesJNI.getTopicName(m_handle);</span>
+  }
+
+  /**
+   * Gets the type of the topic.
+   *
+   * @return the topic's type
+   */
+  public NetworkTableType getType() {
+<span class="nc" id="L62">    return NetworkTableType.getFromInt(NetworkTablesJNI.getType(m_handle));</span>
+  }
+
+  /**
+   * Gets the type string of the topic. This may have more information than the numeric type
+   * (especially for raw values).
+   *
+   * @return the topic's type
+   */
+  public String getTypeString() {
+<span class="nc" id="L72">    return NetworkTablesJNI.getTopicTypeString(m_handle);</span>
+  }
+
+  /**
+   * Gets combined information about the topic.
+   *
+   * @return Topic information
+   */
+  public TopicInfo getInfo() {
+<span class="nc" id="L81">    return NetworkTablesJNI.getTopicInfo(m_inst, m_handle);</span>
+  }
+
+  /**
+   * Make value persistent through server restarts.
+   *
+   * @param persistent True for persistent, false for not persistent.
+   */
+  public void setPersistent(boolean persistent) {
+<span class="nc" id="L90">    NetworkTablesJNI.setTopicPersistent(m_handle, persistent);</span>
+<span class="nc" id="L91">  }</span>
+
+  /**
+   * Returns whether the value is persistent through server restarts.
+   *
+   * @return True if the value is persistent.
+   */
+  public boolean isPersistent() {
+<span class="nc" id="L99">    return NetworkTablesJNI.getTopicPersistent(m_handle);</span>
+  }
+
+  /**
+   * Make the server retain the topic even when there are no publishers.
+   *
+   * @param retained True for retained, false for not retained.
+   */
+  public void setRetained(boolean retained) {
+<span class="nc" id="L108">    NetworkTablesJNI.setTopicRetained(m_handle, retained);</span>
+<span class="nc" id="L109">  }</span>
+
+  /**
+   * Returns whether the topic is retained by server when there are no publishers.
+   *
+   * @return True if the topic is retained.
+   */
+  public boolean isRetained() {
+<span class="nc" id="L117">    return NetworkTablesJNI.getTopicRetained(m_handle);</span>
+  }
+
+  /**
+   * Determines if the topic is currently being published.
+   *
+   * @return True if the topic exists, false otherwise.
+   */
+  public boolean exists() {
+<span class="nc" id="L126">    return NetworkTablesJNI.getTopicExists(m_handle);</span>
+  }
+
+  /**
+   * Gets the current value of a property (as a JSON string).
+   *
+   * @param name property name
+   * @return JSON string; &quot;null&quot; if the property does not exist.
+   */
+  public String getProperty(String name) {
+<span class="nc" id="L136">    return NetworkTablesJNI.getTopicProperty(m_handle, name);</span>
+  }
+
+  /**
+   * Sets a property value.
+   *
+   * @param name property name
+   * @param value property value (JSON string)
+   * @throws IllegalArgumentException if properties is not parseable as JSON
+   */
+  public void setProperty(String name, String value) {
+<span class="nc" id="L147">    NetworkTablesJNI.setTopicProperty(m_handle, name, value);</span>
+<span class="nc" id="L148">  }</span>
+
+  /**
+   * Deletes a property. Has no effect if the property does not exist.
+   *
+   * @param name property name
+   */
+  public void deleteProperty(String name) {
+<span class="nc" id="L156">    NetworkTablesJNI.deleteTopicProperty(m_handle, name);</span>
+<span class="nc" id="L157">  }</span>
+
+  /**
+   * Gets all topic properties as a JSON object string. Each key in the object is the property name,
+   * and the corresponding value is the property value.
+   *
+   * @return JSON string
+   */
+  public String getProperties() {
+<span class="nc" id="L166">    return NetworkTablesJNI.getTopicProperties(m_handle);</span>
+  }
+
+  /**
+   * Updates multiple topic properties. Each key in the passed-in object is the name of the property
+   * to add/update, and the corresponding value is the property value to set for that property. Null
+   * values result in deletion of the corresponding property.
+   *
+   * @param properties JSON object string with keys to add/update/delete
+   * @throws IllegalArgumentException if properties is not a JSON object
+   */
+  public void setProperties(String properties) {
+<span class="nc" id="L178">    NetworkTablesJNI.setTopicProperties(m_handle, properties);</span>
+<span class="nc" id="L179">  }</span>
+
+  /**
+   * Create a new subscriber to the topic.
+   *
+   * &lt;p&gt;The subscriber is only active as long as the returned object is not closed.
+   *
+   * @param options subscribe options
+   * @return subscriber
+   */
+  public GenericSubscriber genericSubscribe(PubSubOption... options) {
+<span class="nc" id="L190">    return genericSubscribe(&quot;&quot;, options);</span>
+  }
+
+  /**
+   * Create a new subscriber to the topic.
+   *
+   * &lt;p&gt;The subscriber is only active as long as the returned object is not closed.
+   *
+   * &lt;p&gt;Subscribers that do not match the published data type do not return any values. To determine
+   * if the data type matches, use the appropriate Topic functions.
+   *
+   * @param typeString type string
+   * @param options subscribe options
+   * @return subscriber
+   */
+  public GenericSubscriber genericSubscribe(String typeString, PubSubOption... options) {
+<span class="nc" id="L206">    return new GenericEntryImpl(</span>
+        this,
+<span class="nc" id="L208">        NetworkTablesJNI.subscribe(</span>
+<span class="nc" id="L209">            m_handle, NetworkTableType.getFromString(typeString).getValue(), typeString, options));</span>
+  }
+
+  /**
+   * Create a new publisher to the topic.
+   *
+   * &lt;p&gt;The publisher is only active as long as the returned object is not closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same topic. Conflicts between
+   * publishers are typically resolved by the server on a first-come, first-served basis. Any
+   * published values that do not match the topic's data type are dropped (ignored). To determine if
+   * the data type matches, use the appropriate Topic functions.
+   *
+   * @param typeString type string
+   * @param options publish options
+   * @return publisher
+   */
+  public GenericPublisher genericPublish(String typeString, PubSubOption... options) {
+<span class="nc" id="L227">    return new GenericEntryImpl(</span>
+        this,
+<span class="nc" id="L229">        NetworkTablesJNI.publish(</span>
+<span class="nc" id="L230">            m_handle, NetworkTableType.getFromString(typeString).getValue(), typeString, options));</span>
+  }
+
+  /**
+   * Create a new publisher to the topic, with type string and initial properties.
+   *
+   * &lt;p&gt;The publisher is only active as long as the returned object is not closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same topic. Conflicts between
+   * publishers are typically resolved by the server on a first-come, first-served basis. Any
+   * published values that do not match the topic's data type are dropped (ignored). To determine if
+   * the data type matches, use the appropriate Topic functions.
+   *
+   * @param typeString type string
+   * @param properties JSON properties
+   * @param options publish options
+   * @return publisher
+   * @throws IllegalArgumentException if properties is not a JSON object
+   */
+  public GenericPublisher genericPublishEx(
+      String typeString, String properties, PubSubOption... options) {
+<span class="nc" id="L251">    return new GenericEntryImpl(</span>
+        this,
+<span class="nc" id="L253">        NetworkTablesJNI.publishEx(</span>
+            m_handle,
+<span class="nc" id="L255">            NetworkTableType.getFromString(typeString).getValue(),</span>
+            typeString,
+            properties,
+            options));
+  }
+
+  /**
+   * Create a new generic entry for the topic.
+   *
+   * &lt;p&gt;Entries act as a combination of a subscriber and a weak publisher. The subscriber is active
+   * as long as the entry is not closed. The publisher is created when the entry is first written
+   * to, and remains active until either unpublish() is called or the entry is closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same topic. Conflicts between
+   * publishers are typically resolved by the server on a first-come, first-served basis. Any
+   * published values that do not match the topic's data type are dropped (ignored). To determine if
+   * the data type matches, use the appropriate Topic functions.
+   *
+   * @param options publish and/or subscribe options
+   * @return entry
+   */
+  public GenericEntry getGenericEntry(PubSubOption... options) {
+<span class="nc" id="L277">    return getGenericEntry(&quot;&quot;, options);</span>
+  }
+
+  /**
+   * Create a new generic entry for the topic.
+   *
+   * &lt;p&gt;Entries act as a combination of a subscriber and a weak publisher. The subscriber is active
+   * as long as the entry is not closed. The publisher is created when the entry is first written
+   * to, and remains active until either unpublish() is called or the entry is closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same topic. Conflicts between
+   * publishers are typically resolved by the server on a first-come, first-served basis. Any
+   * published values that do not match the topic's data type are dropped (ignored). To determine if
+   * the data type matches, use the appropriate Topic functions.
+   *
+   * @param typeString type string
+   * @param options publish and/or subscribe options
+   * @return entry
+   */
+  public GenericEntry getGenericEntry(String typeString, PubSubOption... options) {
+<span class="fc" id="L297">    return new GenericEntryImpl(</span>
+        this,
+<span class="fc" id="L299">        NetworkTablesJNI.getEntry(</span>
+<span class="fc" id="L300">            m_handle, NetworkTableType.getFromString(typeString).getValue(), typeString, options));</span>
+  }
+
+  @Override
+  public boolean equals(Object other) {
+<span class="nc bnc" id="L305" title="All 2 branches missed.">    if (other == this) {</span>
+<span class="nc" id="L306">      return true;</span>
+    }
+<span class="nc bnc" id="L308" title="All 2 branches missed.">    if (!(other instanceof Topic)) {</span>
+<span class="nc" id="L309">      return false;</span>
+    }
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">    return m_handle == ((Topic) other).m_handle;</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L317">    return m_handle;</span>
+  }
+
+  protected NetworkTableInstance m_inst;
+  protected int m_handle;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

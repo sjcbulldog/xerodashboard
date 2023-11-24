@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreDevLinuxathenaExecutableNtcoreDevCpp/output.txt for all output for compileNtcoreDevLinuxathenaExecutableNtcoreDevCpp.
+compiling main.cpp successful.
+
+Finished compileNtcoreDevLinuxathenaExecutableNtcoreDevCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreDevLinuxathenaExecutableNtcoreDevCpp/output.txt.

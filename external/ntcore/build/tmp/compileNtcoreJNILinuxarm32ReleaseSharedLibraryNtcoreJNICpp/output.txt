@@ -1,0 +1,6 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreJNILinuxarm32ReleaseSharedLibraryNtcoreJNICpp/output.txt for all output for compileNtcoreJNILinuxarm32ReleaseSharedLibraryNtcoreJNICpp.
+compiling NetworkTablesJNI.cpp successful.
+
+compiling types_jni.cpp successful.
+
+Finished compileNtcoreJNILinuxarm32ReleaseSharedLibraryNtcoreJNICpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreJNILinuxarm32ReleaseSharedLibraryNtcoreJNICpp/output.txt.

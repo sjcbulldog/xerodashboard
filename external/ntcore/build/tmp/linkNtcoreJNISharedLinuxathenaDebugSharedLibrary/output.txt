@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreJNISharedLinuxathenaDebugSharedLibrary/output.txt for all output for linkNtcoreJNISharedLinuxathenaDebugSharedLibrary.
+linking libntcorejni.so successful.
+
+Finished linkNtcoreJNISharedLinuxathenaDebugSharedLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreJNISharedLinuxathenaDebugSharedLibrary/output.txt.

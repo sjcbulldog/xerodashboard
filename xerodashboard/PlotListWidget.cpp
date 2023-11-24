@@ -39,11 +39,14 @@ void PlotListWidget::readExistingPlots()
 	for (const QString& key : keys)
 	{
 		QString longname = plot_key_ + key;
-		newEntryDetected(longname);
+		auto plot = plotmgr_->processNewKey(longname);
+		if (plot != nullptr) {
+			updatePlotStatus(plot);
+		}
 	}
 }
 
-QMimeData* PlotListWidget::mimeData(const QList<QTreeWidgetItem*> items) const
+QMimeData* PlotListWidget::mimeData(const QList<QTreeWidgetItem*> &items) const
 {
 	QMimeData* data = nullptr;
 
@@ -91,37 +94,42 @@ void PlotListWidget::updatePlotStatus(std::shared_ptr<Plot> plot)
 	item->setText(1, plot->statusString());
 }
 
-void PlotListWidget::newEntryDetected(const QString& name)
+void PlotListWidget::newEntryDetected(const nt::TopicInfo& info)
 {
 	QString plotname;
 	QStringList key;
 
+	QString name = QString::fromStdString(info.name);
 	if (name.startsWith(plot_key_))
 	{
 		auto plot = plotmgr_->processNewKey(name);
-		if (plot != nullptr)
+		if (plot != nullptr) {
 			updatePlotStatus(plot);
+			topics_[info.topic] = name;
+		}
 	}
 }
 
-void PlotListWidget::updatedEntryDetected(const QString& name)
+void PlotListWidget::updatedEntryDetected(const nt::ValueEventData& data)
 {
 	QString plotname;
 	QStringList key;
 
-	if (name.startsWith(plot_key_))
+	if (topics_.contains(data.topic))
 	{
+		QString name = topics_[data.topic];
 		auto plot = plotmgr_->processUpdatedKey(name);
 		if (plot != nullptr)
 			updatePlotStatus(plot);
 	}
 }
 
-void PlotListWidget::deletedEntryDetected(const QString& name)
+void PlotListWidget::deletedEntryDetected(const nt::TopicInfo& info)
 {
 	QString plotname;
 	QStringList key;
 
+	QString name = QString::fromStdString(info.name);
 	if (name.startsWith(plot_key_))
 	{
 		plotmgr_->processDeletedKey(name);

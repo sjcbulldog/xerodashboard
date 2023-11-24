@@ -239,53 +239,53 @@ void DashView::createPlot(const QJsonObject& obj)
 
 void DashView::createNTWidget(const QJsonObject& obj)
 {
-	if (!obj.contains(JsonFieldNames::Path) || !obj.value(JsonFieldNames::Path).isString())
-		return;
+	//if (!obj.contains(JsonFieldNames::Path) || !obj.value(JsonFieldNames::Path).isString())
+	//	return;
 
-	QString value = obj.value(JsonFieldNames::Path).toString();
+	//QString value = obj.value(JsonFieldNames::Path).toString();
 
-	QString title;
-	int pos = value.lastIndexOf("/");
-	if (pos == -1)
-		title = value;
-	else
-		title = value.mid(pos + 1);
+	//QString title;
+	//int pos = value.lastIndexOf("/");
+	//if (pos == -1)
+	//	title = value;
+	//else
+	//	title = value.mid(pos + 1);
 
-	XeroItemFrame* frame = createNewFrame();
-	
-	NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value, frame);
-	frame->setWidget(vwid);
-	frame->setVisible(true);
-	frame->setTitle(title);
+	//XeroItemFrame* frame = createNewFrame();
+	//
+	//NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value, frame);
+	//frame->setWidget(vwid);
+	//frame->setVisible(true);
+	//frame->setTitle(title);
 
-	if (obj.contains(JsonFieldNames::Display) && obj.value(JsonFieldNames::Display).isString())
-	{
-		vwid->setDisplayType(obj.value(JsonFieldNames::Display).toString());
-	}
+	//if (obj.contains(JsonFieldNames::Display) && obj.value(JsonFieldNames::Display).isString())
+	//{
+	//	vwid->setDisplayType(obj.value(JsonFieldNames::Display).toString());
+	//}
 
-	if (obj.contains(JsonFieldNames::Title) && obj.value(JsonFieldNames::Title).isString())
-	{
-		frame->setTitle(obj.value(JsonFieldNames::Title).toString());
-	}
+	//if (obj.contains(JsonFieldNames::Title) && obj.value(JsonFieldNames::Title).isString())
+	//{
+	//	frame->setTitle(obj.value(JsonFieldNames::Title).toString());
+	//}
 
-	if (obj.contains(JsonFieldNames::X) && obj.contains(JsonFieldNames::Y) && 
-		obj.contains(JsonFieldNames::Width) && obj.contains(JsonFieldNames::Height) && 
-		obj.value(JsonFieldNames::X).isDouble() && obj.value(JsonFieldNames::Y).isDouble() &&
-		obj.value(JsonFieldNames::Width).isDouble() && obj.value(JsonFieldNames::Height).isDouble())
+	//if (obj.contains(JsonFieldNames::X) && obj.contains(JsonFieldNames::Y) && 
+	//	obj.contains(JsonFieldNames::Width) && obj.contains(JsonFieldNames::Height) && 
+	//	obj.value(JsonFieldNames::X).isDouble() && obj.value(JsonFieldNames::Y).isDouble() &&
+	//	obj.value(JsonFieldNames::Width).isDouble() && obj.value(JsonFieldNames::Height).isDouble())
 
-	{
-		int x = obj.value(JsonFieldNames::X).toInt();
-		int y = obj.value(JsonFieldNames::Y).toInt();
-		int w = obj.value(JsonFieldNames::Width).toInt();
-		int h = obj.value(JsonFieldNames::Height).toInt();
+	//{
+	//	int x = obj.value(JsonFieldNames::X).toInt();
+	//	int y = obj.value(JsonFieldNames::Y).toInt();
+	//	int w = obj.value(JsonFieldNames::Width).toInt();
+	//	int h = obj.value(JsonFieldNames::Height).toInt();
 
-		if (x < 0)
-			x = 0;
-		if (y < 0)
-			y = 0;
+	//	if (x < 0)
+	//		x = 0;
+	//	if (y < 0)
+	//		y = 0;
 
-		frame->setGeometry(x, y, w, h);
-	}
+	//	frame->setGeometry(x, y, w, h);
+	//}
 }
 
 QJsonArray DashView::getJSONDesc()
@@ -361,6 +361,8 @@ void DashView::paintEvent(QPaintEvent* ev)
 
 void DashView::dragEnterEvent(QDragEnterEvent* ev)
 {
+	auto data = ev->mimeData();
+	QStringList fmts = data->formats();
 	if (ev->mimeData()->hasFormat("text/plain"))
 	{
 		ev->acceptProposedAction();
@@ -372,6 +374,10 @@ void DashView::dropEvent(QDropEvent* ev)
 	QString value = ev->mimeData()->text();
 	if (value.startsWith("NT:"))
 	{
+		int index = value.indexOf("$$$");
+		QString topicno = value.mid(index, 3);
+		NT_Topic topic = topicno.toInt();
+
 		QString title;
 		int pos = value.lastIndexOf("/");
 		if (pos == -1)
@@ -381,7 +387,7 @@ void DashView::dropEvent(QDropEvent* ev)
 
 		XeroItemFrame* frame = createNewFrame();
 
-		NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value.mid(3), frame);
+		NTValueDisplayWidget* vwid = new NTValueDisplayWidget(ntmgr_, value.mid(3), topic, frame);
 		frame->setWidget(vwid);
 		frame->setVisible(true);
 		frame->setTitle(title);

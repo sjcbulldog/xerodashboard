@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/createNtcoreLinuxathenaDebugStaticLibrary/output.txt for all output for createNtcoreLinuxathenaDebugStaticLibrary.
+archiving libntcored.a successful.
+
+Finished createNtcoreLinuxathenaDebugStaticLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/createNtcoreLinuxathenaDebugStaticLibrary/output.txt.

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="edu.wpi.first.networktables.NetworkTableTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2023-11-22T18:03:47" hostname="STRIDER" time="0.026">
+  <properties/>
+  <testcase name="[1] /, ///" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.005"/>
+  <testcase name="[2] /no/normal/req, /no/normal/req" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.0"/>
+  <testcase name="[3] /no/leading/slash, no/leading/slash" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.0"/>
+  <testcase name="[4] /what/an/awful/key/, //////what////an/awful/////key///" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[1] [/], " classname="edu.wpi.first.networktables.NetworkTableTest" time="0.0"/>
+  <testcase name="[2] [/], /" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[3] [/, /foo, /foo/bar, /foo/bar/baz], /foo/bar/baz" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[4] [/, /foo, /foo/bar, /foo/bar/], /foo/bar/" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[1] simple, simple" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.0"/>
+  <testcase name="[2] simple, one/two/many/simple" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[3] simple, //////an/////awful/key////simple" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[1] a, a" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[2] a, ///a" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[3] leading/slash, /leading/slash" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.001"/>
+  <testcase name="[4] no/leading/slash, no/leading/slash" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.0"/>
+  <testcase name="[5] what/an/awful/key/, //////what////an/awful/////key///" classname="edu.wpi.first.networktables.NetworkTableTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

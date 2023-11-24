@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PubSubOptions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">PubSubOptions.java</span></div><h1>PubSubOptions.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** NetworkTables publish/subscribe options. */
+@SuppressWarnings(&quot;MemberName&quot;)
+public class PubSubOptions {
+  /**
+   * Construct from a list of options.
+   *
+   * @param options options
+   */
+<span class="nc" id="L15">  public PubSubOptions(PubSubOption... options) {</span>
+<span class="nc bnc" id="L16" title="All 2 branches missed.">    for (PubSubOption option : options) {</span>
+<span class="nc bnc" id="L17" title="All 10 branches missed.">      switch (option.m_kind) {</span>
+        case periodic:
+<span class="nc" id="L19">          periodic = option.m_dValue;</span>
+<span class="nc" id="L20">          break;</span>
+        case sendAll:
+<span class="nc" id="L22">          sendAll = option.m_bValue;</span>
+<span class="nc" id="L23">          break;</span>
+        case topicsOnly:
+<span class="nc" id="L25">          topicsOnly = option.m_bValue;</span>
+<span class="nc" id="L26">          break;</span>
+        case pollStorage:
+<span class="nc" id="L28">          pollStorage = option.m_iValue;</span>
+<span class="nc" id="L29">          break;</span>
+        case keepDuplicates:
+<span class="nc" id="L31">          keepDuplicates = option.m_bValue;</span>
+<span class="nc" id="L32">          break;</span>
+        case disableRemote:
+<span class="nc" id="L34">          disableRemote = option.m_bValue;</span>
+<span class="nc" id="L35">          break;</span>
+        case disableLocal:
+<span class="nc" id="L37">          disableLocal = option.m_bValue;</span>
+<span class="nc" id="L38">          break;</span>
+        case excludePublisher:
+<span class="nc" id="L40">          excludePublisher = option.m_iValue;</span>
+<span class="nc" id="L41">          break;</span>
+        case excludeSelf:
+<span class="nc" id="L43">          excludeSelf = option.m_bValue;</span>
+<span class="nc" id="L44">          break;</span>
+        default:
+          break;
+      }
+    }
+<span class="nc" id="L49">  }</span>
+
+  PubSubOptions(
+      int pollStorage,
+      double periodic,
+      int excludePublisher,
+      boolean sendAll,
+      boolean topicsOnly,
+      boolean keepDuplicates,
+      boolean prefixMatch,
+      boolean disableRemote,
+      boolean disableLocal,
+<span class="nc" id="L61">      boolean excludeSelf) {</span>
+<span class="nc" id="L62">    this.pollStorage = pollStorage;</span>
+<span class="nc" id="L63">    this.periodic = periodic;</span>
+<span class="nc" id="L64">    this.excludePublisher = excludePublisher;</span>
+<span class="nc" id="L65">    this.sendAll = sendAll;</span>
+<span class="nc" id="L66">    this.topicsOnly = topicsOnly;</span>
+<span class="nc" id="L67">    this.keepDuplicates = keepDuplicates;</span>
+<span class="nc" id="L68">    this.prefixMatch = prefixMatch;</span>
+<span class="nc" id="L69">    this.disableRemote = disableRemote;</span>
+<span class="nc" id="L70">    this.disableLocal = disableLocal;</span>
+<span class="nc" id="L71">    this.excludeSelf = excludeSelf;</span>
+<span class="nc" id="L72">  }</span>
+
+  /** Default value of periodic. */
+  public static final double kDefaultPeriodic = 0.1;
+
+  /**
+   * Polling storage size for a subscription. Specifies the maximum number of updates NetworkTables
+   * should store between calls to the subscriber's readQueue() function. If zero, defaults to 1 if
+   * sendAll is false, 20 if sendAll is true.
+   */
+  public int pollStorage;
+
+  /**
+   * How frequently changes will be sent over the network, in seconds. NetworkTables may send more
+   * frequently than this (e.g. use a combined minimum period for all values) or apply a restricted
+   * range to this value. The default is 100 ms.
+   */
+<span class="nc" id="L89">  public double periodic = kDefaultPeriodic;</span>
+
+  /**
+   * For subscriptions, if non-zero, value updates for readQueue() are not queued for this
+   * publisher.
+   */
+  public int excludePublisher;
+
+  /** Send all value changes over the network. */
+  public boolean sendAll;
+
+  /** For subscriptions, don't ask for value changes (only topic announcements). */
+  public boolean topicsOnly;
+
+  /** Preserve duplicate value changes (rather than ignoring them). */
+  public boolean keepDuplicates;
+
+  /**
+   * Perform prefix match on subscriber topic names. Is ignored/overridden by subscribe() functions;
+   * only present in struct for the purposes of getting information about subscriptions.
+   */
+  public boolean prefixMatch;
+
+  /**
+   * For subscriptions, if remote value updates should not be queued for readQueue(). See also
+   * disableLocal.
+   */
+  public boolean disableRemote;
+
+  /**
+   * For subscriptions, if local value updates should not be queued for readQueue(). See also
+   * disableRemote.
+   */
+  public boolean disableLocal;
+
+  /** For entries, don't queue (for readQueue) value updates for the entry's internal publisher. */
+  public boolean excludeSelf;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

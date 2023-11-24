@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreJNILinuxarm32ReleaseSharedLibrary/output.txt for all output for linkNtcoreJNILinuxarm32ReleaseSharedLibrary.
+linking libntcorejni.so successful.
+
+Finished linkNtcoreJNILinuxarm32ReleaseSharedLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreJNILinuxarm32ReleaseSharedLibrary/output.txt.

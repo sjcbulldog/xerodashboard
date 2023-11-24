@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StructArrayTopic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">StructArrayTopic.java</span></div><h1>StructArrayTopic.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructBuffer;
+
+/**
+ * NetworkTables struct-encoded array value topic.
+ *
+ * @param &lt;T&gt; value class
+ */
+public final class StructArrayTopic&lt;T&gt; extends Topic {
+  private StructArrayTopic(Topic topic, Struct&lt;T&gt; struct) {
+<span class="nc" id="L17">    super(topic.m_inst, topic.m_handle);</span>
+<span class="nc" id="L18">    m_struct = struct;</span>
+<span class="nc" id="L19">  }</span>
+
+  private StructArrayTopic(NetworkTableInstance inst, int handle, Struct&lt;T&gt; struct) {
+<span class="nc" id="L22">    super(inst, handle);</span>
+<span class="nc" id="L23">    m_struct = struct;</span>
+<span class="nc" id="L24">  }</span>
+
+  /**
+   * Create a StructArrayTopic from a generic topic.
+   *
+   * @param &lt;T&gt; value class (inferred from struct)
+   * @param topic generic topic
+   * @param struct struct serialization implementation
+   * @return StructArrayTopic for value class
+   */
+  public static &lt;T&gt; StructArrayTopic&lt;T&gt; wrap(Topic topic, Struct&lt;T&gt; struct) {
+<span class="nc" id="L35">    return new StructArrayTopic&lt;T&gt;(topic, struct);</span>
+  }
+
+  /**
+   * Create a StructArrayTopic from a native handle; generally
+   * NetworkTableInstance.getStructArrayTopic() should be used instead.
+   *
+   * @param &lt;T&gt; value class (inferred from struct)
+   * @param inst Instance
+   * @param handle Native handle
+   * @param struct struct serialization implementation
+   * @return StructArrayTopic for value class
+   */
+  public static &lt;T&gt; StructArrayTopic&lt;T&gt; wrap(
+      NetworkTableInstance inst, int handle, Struct&lt;T&gt; struct) {
+<span class="nc" id="L50">    return new StructArrayTopic&lt;T&gt;(inst, handle, struct);</span>
+  }
+
+  /**
+   * Create a new subscriber to the topic.
+   *
+   * &lt;p&gt;The subscriber is only active as long as the returned object is not closed.
+   *
+   * &lt;p&gt;Subscribers that do not match the published data type do not return any values. To determine
+   * if the data type matches, use the appropriate Topic functions.
+   *
+   * @param defaultValue default value used when a default is not provided to a getter function
+   * @param options subscribe options
+   * @return subscriber
+   */
+  public StructArraySubscriber&lt;T&gt; subscribe(T[] defaultValue, PubSubOption... options) {
+<span class="nc" id="L66">    return new StructArrayEntryImpl&lt;T&gt;(</span>
+        this,
+<span class="nc" id="L68">        StructBuffer.create(m_struct),</span>
+<span class="nc" id="L69">        NetworkTablesJNI.subscribe(</span>
+<span class="nc" id="L70">            m_handle, NetworkTableType.kRaw.getValue(), m_struct.getTypeString() + &quot;[]&quot;, options),</span>
+        defaultValue,
+        false);
+  }
+
+  /**
+   * Create a new publisher to the topic.
+   *
+   * &lt;p&gt;The publisher is only active as long as the returned object is not closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same topic. Conflicts between
+   * publishers are typically resolved by the server on a first-come, first-served basis. Any
+   * published values that do not match the topic's data type are dropped (ignored). To determine if
+   * the data type matches, use the appropriate Topic functions.
+   *
+   * @param options publish options
+   * @return publisher
+   */
+  public StructArrayPublisher&lt;T&gt; publish(PubSubOption... options) {
+<span class="nc" id="L89">    m_inst.addSchema(m_struct);</span>
+<span class="nc" id="L90">    return new StructArrayEntryImpl&lt;T&gt;(</span>
+        this,
+<span class="nc" id="L92">        StructBuffer.create(m_struct),</span>
+<span class="nc" id="L93">        NetworkTablesJNI.publish(</span>
+<span class="nc" id="L94">            m_handle, NetworkTableType.kRaw.getValue(), m_struct.getTypeString() + &quot;[]&quot;, options),</span>
+        null,
+        true);
+  }
+
+  /**
+   * Create a new publisher to the topic, with type string and initial properties.
+   *
+   * &lt;p&gt;The publisher is only active as long as the returned object is not closed.
+   *
+   * &lt;p&gt;It is not possible to publish two different data types to the same topic. Conflicts between
+   * publishers are typically resolved by the server on a first-come, first-served basis. Any
+   * published values that do not match the topic's data type are dropped (ignored). To determine if
+   * the data type matches, use the appropriate Topic functions.
+   *
+   * @param properties JSON properties
+   * @param options publish options
+   * @return publisher
+   * @throws IllegalArgumentException if properties is not a JSON object
+   */
+  public StructArrayPublisher&lt;T&gt; publishEx(String properties, PubSubOption... options) {
+<span class="nc" id="L115">    m_inst.addSchema(m_struct);</span>
+<span class="nc" id="L116">    return new StructArrayEntryImpl&lt;T&gt;(</span>
+        this,
+<span class="nc" id="L118">        StructBuffer.create(m_struct),</span>
+<span class="nc" id="L119">        NetworkTablesJNI.publishEx(</span>
+            m_handle,
+<span class="nc" id="L121">            NetworkTableType.kRaw.getValue(),</span>
+<span class="nc" id="L122">            m_struct.getTypeString() + &quot;[]&quot;,</span>
+            properties,
+            options),
+        null,
+        true);
+  }
+
+  /**
+   * Create a new entry for the topic.
+   *
+   * &lt;p&gt;Entries act as a combination of a subscriber and a weak publisher. The subscriber is active
+   * as long as the entry is not closed. The publisher is created when the entry is first written
+   * to, and remains active until either unpublish() is called or the entry is closed.
+   *
+   * &lt;p&gt;It is not possible to use two different data types with the same topic. Conflicts between
+   * publishers are typically resolved by the server on a first-come, first-served basis. Any
+   * published values that do not match the topic's data type are dropped (ignored), and the entry
+   * will show no new values if the data type does not match. To determine if the data type matches,
+   * use the appropriate Topic functions.
+   *
+   * @param defaultValue default value used when a default is not provided to a getter function
+   * @param options publish and/or subscribe options
+   * @return entry
+   */
+  public StructArrayEntry&lt;T&gt; getEntry(T[] defaultValue, PubSubOption... options) {
+<span class="nc" id="L147">    return new StructArrayEntryImpl&lt;T&gt;(</span>
+        this,
+<span class="nc" id="L149">        StructBuffer.create(m_struct),</span>
+<span class="nc" id="L150">        NetworkTablesJNI.getEntry(</span>
+<span class="nc" id="L151">            m_handle, NetworkTableType.kRaw.getValue(), m_struct.getTypeString() + &quot;[]&quot;, options),</span>
+        defaultValue,
+        false);
+  }
+
+  public Struct&lt;T&gt; getStruct() {
+<span class="nc" id="L157">    return m_struct;</span>
+  }
+
+  @Override
+  public boolean equals(Object other) {
+<span class="nc bnc" id="L162" title="All 2 branches missed.">    if (other == this) {</span>
+<span class="nc" id="L163">      return true;</span>
+    }
+<span class="nc bnc" id="L165" title="All 2 branches missed.">    if (!(other instanceof StructArrayTopic)) {</span>
+<span class="nc" id="L166">      return false;</span>
+    }
+
+<span class="nc bnc" id="L169" title="All 4 branches missed.">    return super.equals(other) &amp;&amp; m_struct == ((StructArrayTopic&lt;?&gt;) other).m_struct;</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L174">    return super.hashCode() ^ m_struct.hashCode();</span>
+  }
+
+  private final Struct&lt;T&gt; m_struct;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/createNtcoreLinuxarm32ReleaseStaticLibrary/output.txt for all output for createNtcoreLinuxarm32ReleaseStaticLibrary.
+archiving libntcore.a successful.
+
+Finished createNtcoreLinuxarm32ReleaseStaticLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/createNtcoreLinuxarm32ReleaseStaticLibrary/output.txt.

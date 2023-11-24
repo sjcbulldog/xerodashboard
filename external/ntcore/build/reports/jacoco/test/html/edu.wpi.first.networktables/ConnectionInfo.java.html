@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConnectionInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">ConnectionInfo.java</span></div><h1>ConnectionInfo.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** NetworkTables Connection information. */
+@SuppressWarnings(&quot;MemberName&quot;)
+public final class ConnectionInfo {
+  /**
+   * The remote identifier (as set on the remote node by {@link
+   * NetworkTableInstance#startClient4(String)}).
+   */
+  public final String remote_id;
+
+  /** The IP address of the remote node. */
+  public final String remote_ip;
+
+  /** The port number of the remote node. */
+  public final int remote_port;
+
+  /**
+   * The last time any update was received from the remote node (same scale as returned by {@link
+   * NetworkTablesJNI#now()}).
+   */
+  public final long last_update;
+
+  /**
+   * The protocol version being used for this connection. This is in protocol layer format, so
+   * 0x0200 = 2.0, 0x0300 = 3.0).
+   */
+  public final int protocol_version;
+
+  /**
+   * Constructor. This should generally only be used internally to NetworkTables.
+   *
+   * @param remoteId Remote identifier
+   * @param remoteIp Remote IP address
+   * @param remotePort Remote port number
+   * @param lastUpdate Last time an update was received
+   * @param protocolVersion The protocol version used for the connection
+   */
+  public ConnectionInfo(
+<span class="fc" id="L44">      String remoteId, String remoteIp, int remotePort, long lastUpdate, int protocolVersion) {</span>
+<span class="fc" id="L45">    remote_id = remoteId;</span>
+<span class="fc" id="L46">    remote_ip = remoteIp;</span>
+<span class="fc" id="L47">    remote_port = remotePort;</span>
+<span class="fc" id="L48">    last_update = lastUpdate;</span>
+<span class="fc" id="L49">    protocol_version = protocolVersion;</span>
+<span class="fc" id="L50">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -89,7 +89,7 @@ private:
 	void changeState(State newst);
 	void readRowData(int row);
 
-	std::shared_ptr<nt::Value> getPlotValue(const QString& name);
+	nt::Value getPlotValue(const QString& name);
 
 private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;

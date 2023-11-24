@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreDevLinuxathenaExecutable/output.txt for all output for linkNtcoreDevLinuxathenaExecutable.
+linking ntcoreDev successful.
+
+Finished linkNtcoreDevLinuxathenaExecutable, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreDevLinuxathenaExecutable/output.txt.

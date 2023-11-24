@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreDevLinuxarm32ExecutableNtcoreDevCpp/output.txt for all output for compileNtcoreDevLinuxarm32ExecutableNtcoreDevCpp.
+compiling main.cpp successful.
+
+Finished compileNtcoreDevLinuxarm32ExecutableNtcoreDevCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreDevLinuxarm32ExecutableNtcoreDevCpp/output.txt.

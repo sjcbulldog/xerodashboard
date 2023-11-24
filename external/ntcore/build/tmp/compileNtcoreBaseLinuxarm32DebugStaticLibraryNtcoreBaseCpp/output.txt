@@ -1,0 +1,72 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreBaseLinuxarm32DebugStaticLibraryNtcoreBaseCpp/output.txt for all output for compileNtcoreBaseLinuxarm32DebugStaticLibraryNtcoreBaseCpp.
+compiling ConnectionList.cpp successful.
+
+compiling InstanceImpl.cpp successful.
+
+compiling ListenerStorage.cpp successful.
+
+compiling NetworkPing.cpp successful.
+
+compiling LoggerImpl.cpp successful.
+
+compiling WebSocketConnection.cpp successful.
+
+compiling UvStreamConnection3.cpp successful.
+
+compiling LocalStorage.cpp successful.
+
+compiling ClientImpl.cpp successful.
+
+compiling NetworkLoopQueue.cpp successful.
+
+compiling WireEncoder.cpp successful.
+
+compiling WireDecoder.cpp successful.
+
+compiling NetworkTableEntry.cpp successful.
+
+compiling NTSendableBuilder.cpp successful.
+
+compiling NetworkTableInstance.cpp successful.
+
+compiling ntcore_test.cpp successful.
+
+compiling ntcore_meta.cpp successful.
+
+compiling ntcore_meta_c.cpp successful.
+
+compiling Topic.cpp successful.
+
+compiling Types_internal.cpp successful.
+
+compiling ValueCircularBuffer.cpp successful.
+
+compiling Value_internal.cpp successful.
+
+compiling ClientImpl3.cpp successful.
+
+compiling NetworkClient.cpp successful.
+
+compiling ntcore_c_types.cpp successful.
+
+compiling Value.cpp successful.
+
+compiling ntcore_c.cpp successful.
+
+compiling ServerImpl.cpp successful.
+
+compiling WireDecoder3.cpp successful.
+
+compiling ntcore_cpp.cpp successful.
+
+compiling NTSendable.cpp successful.
+
+compiling ntcore_cpp_types.cpp successful.
+
+compiling NetworkServer.cpp successful.
+
+compiling WireEncoder3.cpp successful.
+
+compiling NetworkTable.cpp successful.
+
+Finished compileNtcoreBaseLinuxarm32DebugStaticLibraryNtcoreBaseCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreBaseLinuxarm32DebugStaticLibraryNtcoreBaseCpp/output.txt.

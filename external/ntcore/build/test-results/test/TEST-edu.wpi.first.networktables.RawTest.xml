@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="edu.wpi.first.networktables.RawTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2023-11-22T18:03:47" hostname="STRIDER" time="0.027">
+  <properties/>
+  <testcase name="testRawByteArray()" classname="edu.wpi.first.networktables.RawTest" time="0.008"/>
+  <testcase name="testGenericNativeByteBuffer()" classname="edu.wpi.first.networktables.RawTest" time="0.014"/>
+  <testcase name="testRawNativeByteBuffer()" classname="edu.wpi.first.networktables.RawTest" time="0.001"/>
+  <testcase name="testGenericByteBuffer()" classname="edu.wpi.first.networktables.RawTest" time="0.001"/>
+  <testcase name="testGenericByteArray()" classname="edu.wpi.first.networktables.RawTest" time="0.001"/>
+  <testcase name="testRawByteBuffer()" classname="edu.wpi.first.networktables.RawTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

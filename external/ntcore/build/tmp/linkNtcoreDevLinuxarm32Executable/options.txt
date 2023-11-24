@@ -1,0 +1,13 @@
+-o
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\exe\\ntcoreDev\\linuxarm32\\ntcoreDev
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\objs\\ntcoreDev\\linuxarm32\\ntcoreDevCpp\\efalnc7ataogt8gguiukqknt7\\main.o
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\libs\\ntcore\\shared\\linuxarm32\\debug\\libntcored.so
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\libs\\ntcoreJNIShared\\shared\\linuxarm32\\debug\\libntcorejni.so
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\wpiutil\\build\\libs\\wpiutil\\shared\\linuxarm32\\debug\\libwpiutild.so
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\wpiutil\\build\\libs\\wpiutilJNIShared\\shared\\linuxarm32\\debug\\libwpiutiljni.so
+D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\wpinet\\build\\libs\\wpinet\\shared\\linuxarm32\\debug\\libwpinetd.so
+-rdynamic
+-pthread
+-ldl
+-latomic
+-Wl,-rpath,'$ORIGIN'

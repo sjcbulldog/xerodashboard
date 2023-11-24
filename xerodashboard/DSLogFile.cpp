@@ -31,5 +31,7 @@ bool DSLogFile::load(const QString& filename)
 		get2(file);
 		file.read(21);
 	}
+
+	return true;
 }
 

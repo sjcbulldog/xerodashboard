@@ -1,0 +1,72 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreBaseLinuxathenaReleaseStaticLibraryNtcoreBaseCpp/output.txt for all output for compileNtcoreBaseLinuxathenaReleaseStaticLibraryNtcoreBaseCpp.
+compiling ConnectionList.cpp successful.
+
+compiling InstanceImpl.cpp successful.
+
+compiling ListenerStorage.cpp successful.
+
+compiling LocalStorage.cpp successful.
+
+compiling LoggerImpl.cpp successful.
+
+compiling ClientImpl.cpp successful.
+
+compiling NetworkPing.cpp successful.
+
+compiling NetworkLoopQueue.cpp successful.
+
+compiling WebSocketConnection.cpp successful.
+
+compiling WireEncoder3.cpp successful.
+
+compiling WireEncoder.cpp successful.
+
+compiling WireDecoder3.cpp successful.
+
+compiling NetworkTableEntry.cpp successful.
+
+compiling NTSendable.cpp successful.
+
+compiling NetworkTableInstance.cpp successful.
+
+compiling NTSendableBuilder.cpp successful.
+
+compiling NetworkTable.cpp successful.
+
+compiling WireDecoder.cpp successful.
+
+compiling ntcore_meta.cpp successful.
+
+compiling ntcore_meta_c.cpp successful.
+
+compiling Types_internal.cpp successful.
+
+compiling ntcore_test.cpp successful.
+
+compiling ValueCircularBuffer.cpp successful.
+
+compiling Value.cpp successful.
+
+compiling Value_internal.cpp successful.
+
+compiling ntcore_c.cpp successful.
+
+compiling NetworkServer.cpp successful.
+
+compiling ntcore_c_types.cpp successful.
+
+compiling ServerImpl.cpp successful.
+
+compiling NetworkClient.cpp successful.
+
+compiling ntcore_cpp.cpp successful.
+
+compiling ntcore_cpp_types.cpp successful.
+
+compiling Topic.cpp successful.
+
+compiling UvStreamConnection3.cpp successful.
+
+compiling ClientImpl3.cpp successful.
+
+Finished compileNtcoreBaseLinuxathenaReleaseStaticLibraryNtcoreBaseCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreBaseLinuxathenaReleaseStaticLibraryNtcoreBaseCpp/output.txt.

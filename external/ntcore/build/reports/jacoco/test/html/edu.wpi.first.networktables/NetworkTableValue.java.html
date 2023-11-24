@@ -1,0 +1,741 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetworkTableValue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">NetworkTableValue.java</span></div><h1>NetworkTableValue.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+import java.util.Objects;
+
+/** A network table entry value. */
+@SuppressWarnings({&quot;UnnecessaryParentheses&quot;, &quot;PMD.MethodReturnsInternalArray&quot;})
+public final class NetworkTableValue {
+<span class="nc" id="L12">  NetworkTableValue(NetworkTableType type, Object value, long time, long serverTime) {</span>
+<span class="nc" id="L13">    m_type = type;</span>
+<span class="nc" id="L14">    m_value = value;</span>
+<span class="nc" id="L15">    m_time = time;</span>
+<span class="nc" id="L16">    m_serverTime = serverTime;</span>
+<span class="nc" id="L17">  }</span>
+
+  NetworkTableValue(NetworkTableType type, Object value, long time) {
+<span class="nc bnc" id="L20" title="All 2 branches missed.">    this(type, value, time, time == 0 ? 0 : 1);</span>
+<span class="nc" id="L21">  }</span>
+
+  NetworkTableValue(NetworkTableType type, Object value) {
+<span class="nc" id="L24">    this(type, value, NetworkTablesJNI.now(), 1);</span>
+<span class="nc" id="L25">  }</span>
+
+  NetworkTableValue(int type, Object value, long time, long serverTime) {
+<span class="nc" id="L28">    this(NetworkTableType.getFromInt(type), value, time, serverTime);</span>
+<span class="nc" id="L29">  }</span>
+
+  /**
+   * Get the data type.
+   *
+   * @return The type.
+   */
+  public NetworkTableType getType() {
+<span class="nc" id="L37">    return m_type;</span>
+  }
+
+  /**
+   * Get the data value stored.
+   *
+   * @return The type.
+   */
+  public Object getValue() {
+<span class="nc" id="L46">    return m_value;</span>
+  }
+
+  /**
+   * Get the creation time of the value in local time.
+   *
+   * @return The time, in the units returned by NetworkTablesJNI.now().
+   */
+  public long getTime() {
+<span class="nc" id="L55">    return m_time;</span>
+  }
+
+  /**
+   * Get the creation time of the value in server time.
+   *
+   * @return The server time.
+   */
+  public long getServerTime() {
+<span class="nc" id="L64">    return m_serverTime;</span>
+  }
+
+  /*
+   * Type Checkers
+   */
+
+  /**
+   * Determine if entry value contains a value or is unassigned.
+   *
+   * @return True if the entry value contains a value.
+   */
+  public boolean isValid() {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">    return m_type != NetworkTableType.kUnassigned;</span>
+  }
+
+  /**
+   * Determine if entry value contains a boolean.
+   *
+   * @return True if the entry value is of boolean type.
+   */
+  public boolean isBoolean() {
+<span class="nc bnc" id="L86" title="All 2 branches missed.">    return m_type == NetworkTableType.kBoolean;</span>
+  }
+
+  /**
+   * Determine if entry value contains a long.
+   *
+   * @return True if the entry value is of long type.
+   */
+  public boolean isInteger() {
+<span class="nc bnc" id="L95" title="All 2 branches missed.">    return m_type == NetworkTableType.kInteger;</span>
+  }
+
+  /**
+   * Determine if entry value contains a float.
+   *
+   * @return True if the entry value is of float type.
+   */
+  public boolean isFloat() {
+<span class="nc bnc" id="L104" title="All 2 branches missed.">    return m_type == NetworkTableType.kFloat;</span>
+  }
+
+  /**
+   * Determine if entry value contains a double.
+   *
+   * @return True if the entry value is of double type.
+   */
+  public boolean isDouble() {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">    return m_type == NetworkTableType.kDouble;</span>
+  }
+
+  /**
+   * Determine if entry value contains a String.
+   *
+   * @return True if the entry value is of String type.
+   */
+  public boolean isString() {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">    return m_type == NetworkTableType.kString;</span>
+  }
+
+  /**
+   * Determine if entry value contains a byte[].
+   *
+   * @return True if the entry value is of byte[] type.
+   */
+  public boolean isRaw() {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">    return m_type == NetworkTableType.kRaw;</span>
+  }
+
+  /**
+   * Determine if entry value contains a boolean[].
+   *
+   * @return True if the entry value is of boolean[] type.
+   */
+  public boolean isBooleanArray() {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">    return m_type == NetworkTableType.kBooleanArray;</span>
+  }
+
+  /**
+   * Determine if entry value contains a long[].
+   *
+   * @return True if the entry value is of long[] type.
+   */
+  public boolean isIntegerArray() {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">    return m_type == NetworkTableType.kIntegerArray;</span>
+  }
+
+  /**
+   * Determine if entry value contains a float[].
+   *
+   * @return True if the entry value is of float[] type.
+   */
+  public boolean isFloatArray() {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">    return m_type == NetworkTableType.kFloatArray;</span>
+  }
+
+  /**
+   * Determine if entry value contains a double[].
+   *
+   * @return True if the entry value is of double[] type.
+   */
+  public boolean isDoubleArray() {
+<span class="nc bnc" id="L167" title="All 2 branches missed.">    return m_type == NetworkTableType.kDoubleArray;</span>
+  }
+
+  /**
+   * Determine if entry value contains a String[].
+   *
+   * @return True if the entry value is of String[] type.
+   */
+  public boolean isStringArray() {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">    return m_type == NetworkTableType.kStringArray;</span>
+  }
+
+  /*
+   * Type-Safe Getters
+   */
+
+  /**
+   * Get the boolean value.
+   *
+   * @return The boolean value.
+   * @throws ClassCastException if the entry value is not of boolean type.
+   */
+  public boolean getBoolean() {
+<span class="nc bnc" id="L190" title="All 2 branches missed.">    if (m_type != NetworkTableType.kBoolean) {</span>
+<span class="nc" id="L191">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to boolean&quot;);</span>
+    }
+<span class="nc" id="L193">    return (Boolean) m_value;</span>
+  }
+
+  /**
+   * Get the long value.
+   *
+   * @return The long value.
+   * @throws ClassCastException if the entry value is not of long type.
+   */
+  public long getInteger() {
+<span class="nc bnc" id="L203" title="All 2 branches missed.">    if (m_type != NetworkTableType.kInteger) {</span>
+<span class="nc" id="L204">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to long&quot;);</span>
+    }
+<span class="nc" id="L206">    return ((Number) m_value).longValue();</span>
+  }
+
+  /**
+   * Get the float value.
+   *
+   * @return The float value.
+   * @throws ClassCastException if the entry value is not of float type.
+   */
+  public float getFloat() {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">    if (m_type != NetworkTableType.kFloat) {</span>
+<span class="nc" id="L217">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to float&quot;);</span>
+    }
+<span class="nc" id="L219">    return ((Number) m_value).floatValue();</span>
+  }
+
+  /**
+   * Get the double value.
+   *
+   * @return The double value.
+   * @throws ClassCastException if the entry value is not of double type.
+   */
+  public double getDouble() {
+<span class="nc bnc" id="L229" title="All 2 branches missed.">    if (m_type != NetworkTableType.kDouble) {</span>
+<span class="nc" id="L230">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to double&quot;);</span>
+    }
+<span class="nc" id="L232">    return ((Number) m_value).doubleValue();</span>
+  }
+
+  /**
+   * Get the String value.
+   *
+   * @return The String value.
+   * @throws ClassCastException if the entry value is not of String type.
+   */
+  public String getString() {
+<span class="nc bnc" id="L242" title="All 2 branches missed.">    if (m_type != NetworkTableType.kString) {</span>
+<span class="nc" id="L243">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to String&quot;);</span>
+    }
+<span class="nc" id="L245">    return (String) m_value;</span>
+  }
+
+  /**
+   * Get the byte[] value.
+   *
+   * @return The byte[] value.
+   * @throws ClassCastException if the entry value is not of byte[] type.
+   */
+  public byte[] getRaw() {
+<span class="nc bnc" id="L255" title="All 2 branches missed.">    if (m_type != NetworkTableType.kRaw) {</span>
+<span class="nc" id="L256">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to byte[]&quot;);</span>
+    }
+<span class="nc" id="L258">    return (byte[]) m_value;</span>
+  }
+
+  /**
+   * Get the boolean[] value.
+   *
+   * @return The boolean[] value.
+   * @throws ClassCastException if the entry value is not of boolean[] type.
+   */
+  public boolean[] getBooleanArray() {
+<span class="nc bnc" id="L268" title="All 2 branches missed.">    if (m_type != NetworkTableType.kBooleanArray) {</span>
+<span class="nc" id="L269">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to boolean[]&quot;);</span>
+    }
+<span class="nc" id="L271">    return (boolean[]) m_value;</span>
+  }
+
+  /**
+   * Get the long[] value.
+   *
+   * @return The long[] value.
+   * @throws ClassCastException if the entry value is not of long[] type.
+   */
+  public long[] getIntegerArray() {
+<span class="nc bnc" id="L281" title="All 2 branches missed.">    if (m_type != NetworkTableType.kIntegerArray) {</span>
+<span class="nc" id="L282">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to long[]&quot;);</span>
+    }
+<span class="nc" id="L284">    return (long[]) m_value;</span>
+  }
+
+  /**
+   * Get the float[] value.
+   *
+   * @return The float[] value.
+   * @throws ClassCastException if the entry value is not of float[] type.
+   */
+  public float[] getFloatArray() {
+<span class="nc bnc" id="L294" title="All 2 branches missed.">    if (m_type != NetworkTableType.kFloatArray) {</span>
+<span class="nc" id="L295">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to float[]&quot;);</span>
+    }
+<span class="nc" id="L297">    return (float[]) m_value;</span>
+  }
+
+  /**
+   * Get the double[] value.
+   *
+   * @return The double[] value.
+   * @throws ClassCastException if the entry value is not of double[] type.
+   */
+  public double[] getDoubleArray() {
+<span class="nc bnc" id="L307" title="All 2 branches missed.">    if (m_type != NetworkTableType.kDoubleArray) {</span>
+<span class="nc" id="L308">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to double[]&quot;);</span>
+    }
+<span class="nc" id="L310">    return (double[]) m_value;</span>
+  }
+
+  /**
+   * Get the String[] value.
+   *
+   * @return The String[] value.
+   * @throws ClassCastException if the entry value is not of String[] type.
+   */
+  public String[] getStringArray() {
+<span class="nc bnc" id="L320" title="All 2 branches missed.">    if (m_type != NetworkTableType.kStringArray) {</span>
+<span class="nc" id="L321">      throw new ClassCastException(&quot;cannot convert &quot; + m_type + &quot; to String[]&quot;);</span>
+    }
+<span class="nc" id="L323">    return (String[]) m_value;</span>
+  }
+
+  /*
+   * Factory functions.
+   */
+
+  /**
+   * Creates a boolean value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeBoolean(boolean value) {
+<span class="nc" id="L337">    return new NetworkTableValue(NetworkTableType.kBoolean, Boolean.valueOf(value));</span>
+  }
+
+  /**
+   * Creates a boolean value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeBoolean(boolean value, long time) {
+<span class="nc" id="L348">    return new NetworkTableValue(NetworkTableType.kBoolean, Boolean.valueOf(value), time);</span>
+  }
+
+  /**
+   * Creates a long value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeInteger(long value) {
+<span class="nc" id="L358">    return new NetworkTableValue(NetworkTableType.kInteger, Long.valueOf(value));</span>
+  }
+
+  /**
+   * Creates a long value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeInteger(long value, long time) {
+<span class="nc" id="L369">    return new NetworkTableValue(NetworkTableType.kInteger, Long.valueOf(value), time);</span>
+  }
+
+  /**
+   * Creates a float value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeFloat(float value) {
+<span class="nc" id="L379">    return new NetworkTableValue(NetworkTableType.kFloat, Float.valueOf(value));</span>
+  }
+
+  /**
+   * Creates a float value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeFloat(float value, long time) {
+<span class="nc" id="L390">    return new NetworkTableValue(NetworkTableType.kFloat, Float.valueOf(value), time);</span>
+  }
+
+  /**
+   * Creates a double value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeDouble(double value) {
+<span class="nc" id="L400">    return new NetworkTableValue(NetworkTableType.kDouble, Double.valueOf(value));</span>
+  }
+
+  /**
+   * Creates a double value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeDouble(double value, long time) {
+<span class="nc" id="L411">    return new NetworkTableValue(NetworkTableType.kDouble, Double.valueOf(value), time);</span>
+  }
+
+  /**
+   * Creates a String value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeString(String value) {
+<span class="nc" id="L421">    return new NetworkTableValue(NetworkTableType.kString, (value));</span>
+  }
+
+  /**
+   * Creates a String value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeString(String value, long time) {
+<span class="nc" id="L432">    return new NetworkTableValue(NetworkTableType.kString, (value), time);</span>
+  }
+
+  /**
+   * Creates a byte[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeRaw(byte[] value) {
+<span class="nc" id="L442">    return new NetworkTableValue(NetworkTableType.kRaw, (value));</span>
+  }
+
+  /**
+   * Creates a byte[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeRaw(byte[] value, long time) {
+<span class="nc" id="L453">    return new NetworkTableValue(NetworkTableType.kRaw, (value), time);</span>
+  }
+
+  /**
+   * Creates a boolean[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeBooleanArray(boolean[] value) {
+<span class="nc" id="L463">    return new NetworkTableValue(NetworkTableType.kBooleanArray, (value));</span>
+  }
+
+  /**
+   * Creates a boolean[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeBooleanArray(boolean[] value, long time) {
+<span class="nc" id="L474">    return new NetworkTableValue(NetworkTableType.kBooleanArray, (value), time);</span>
+  }
+
+  /**
+   * Creates a boolean[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeBooleanArray(Boolean[] value) {
+<span class="nc" id="L484">    return new NetworkTableValue(NetworkTableType.kBooleanArray, toNativeBooleanArray(value));</span>
+  }
+
+  /**
+   * Creates a boolean[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeBooleanArray(Boolean[] value, long time) {
+<span class="nc" id="L495">    return new NetworkTableValue(NetworkTableType.kBooleanArray, toNativeBooleanArray(value), time);</span>
+  }
+
+  /**
+   * Creates a long[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeIntegerArray(long[] value) {
+<span class="nc" id="L505">    return new NetworkTableValue(NetworkTableType.kIntegerArray, (value));</span>
+  }
+
+  /**
+   * Creates a long[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeIntegerArray(long[] value, long time) {
+<span class="nc" id="L516">    return new NetworkTableValue(NetworkTableType.kIntegerArray, (value), time);</span>
+  }
+
+  /**
+   * Creates a long[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeIntegerArray(Long[] value) {
+<span class="nc" id="L526">    return new NetworkTableValue(NetworkTableType.kIntegerArray, toNativeIntegerArray(value));</span>
+  }
+
+  /**
+   * Creates a long[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeIntegerArray(Long[] value, long time) {
+<span class="nc" id="L537">    return new NetworkTableValue(NetworkTableType.kIntegerArray, toNativeIntegerArray(value), time);</span>
+  }
+
+  /**
+   * Creates a float[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeFloatArray(float[] value) {
+<span class="nc" id="L547">    return new NetworkTableValue(NetworkTableType.kFloatArray, (value));</span>
+  }
+
+  /**
+   * Creates a float[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeFloatArray(float[] value, long time) {
+<span class="nc" id="L558">    return new NetworkTableValue(NetworkTableType.kFloatArray, (value), time);</span>
+  }
+
+  /**
+   * Creates a float[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeFloatArray(Float[] value) {
+<span class="nc" id="L568">    return new NetworkTableValue(NetworkTableType.kFloatArray, toNativeFloatArray(value));</span>
+  }
+
+  /**
+   * Creates a float[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeFloatArray(Float[] value, long time) {
+<span class="nc" id="L579">    return new NetworkTableValue(NetworkTableType.kFloatArray, toNativeFloatArray(value), time);</span>
+  }
+
+  /**
+   * Creates a double[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeDoubleArray(double[] value) {
+<span class="nc" id="L589">    return new NetworkTableValue(NetworkTableType.kDoubleArray, (value));</span>
+  }
+
+  /**
+   * Creates a double[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeDoubleArray(double[] value, long time) {
+<span class="nc" id="L600">    return new NetworkTableValue(NetworkTableType.kDoubleArray, (value), time);</span>
+  }
+
+  /**
+   * Creates a double[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeDoubleArray(Double[] value) {
+<span class="nc" id="L610">    return new NetworkTableValue(NetworkTableType.kDoubleArray, toNativeDoubleArray(value));</span>
+  }
+
+  /**
+   * Creates a double[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeDoubleArray(Double[] value, long time) {
+<span class="nc" id="L621">    return new NetworkTableValue(NetworkTableType.kDoubleArray, toNativeDoubleArray(value), time);</span>
+  }
+
+  /**
+   * Creates a String[] value.
+   *
+   * @param value the value
+   * @return The entry value
+   */
+  public static NetworkTableValue makeStringArray(String[] value) {
+<span class="nc" id="L631">    return new NetworkTableValue(NetworkTableType.kStringArray, (value));</span>
+  }
+
+  /**
+   * Creates a String[] value.
+   *
+   * @param value the value
+   * @param time the creation time to use (instead of the current time)
+   * @return The entry value
+   */
+  public static NetworkTableValue makeStringArray(String[] value, long time) {
+<span class="nc" id="L642">    return new NetworkTableValue(NetworkTableType.kStringArray, (value), time);</span>
+  }
+
+  @Override
+  public boolean equals(Object other) {
+<span class="nc bnc" id="L647" title="All 2 branches missed.">    if (other == this) {</span>
+<span class="nc" id="L648">      return true;</span>
+    }
+<span class="nc bnc" id="L650" title="All 2 branches missed.">    if (!(other instanceof NetworkTableValue)) {</span>
+<span class="nc" id="L651">      return false;</span>
+    }
+<span class="nc" id="L653">    NetworkTableValue ntOther = (NetworkTableValue) other;</span>
+<span class="nc bnc" id="L654" title="All 4 branches missed.">    return m_type == ntOther.m_type &amp;&amp; m_value.equals(ntOther.m_value);</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L659">    return Objects.hash(m_type, m_value);</span>
+  }
+
+  // arraycopy() doesn't know how to unwrap boxed values; this is a false positive in PMD
+  // (see https://sourceforge.net/p/pmd/bugs/804/)
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static boolean[] toNativeBooleanArray(Boolean[] arr) {
+<span class="nc" id="L666">    boolean[] out = new boolean[arr.length];</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L668">      out[i] = arr[i];</span>
+    }
+<span class="nc" id="L670">    return out;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static double[] toNativeDoubleArray(Number[] arr) {
+<span class="nc" id="L675">    double[] out = new double[arr.length];</span>
+<span class="nc bnc" id="L676" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L677">      out[i] = arr[i].doubleValue();</span>
+    }
+<span class="nc" id="L679">    return out;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static long[] toNativeIntegerArray(Number[] arr) {
+<span class="nc" id="L684">    long[] out = new long[arr.length];</span>
+<span class="nc bnc" id="L685" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L686">      out[i] = arr[i].longValue();</span>
+    }
+<span class="nc" id="L688">    return out;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static float[] toNativeFloatArray(Number[] arr) {
+<span class="nc" id="L693">    float[] out = new float[arr.length];</span>
+<span class="nc bnc" id="L694" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L695">      out[i] = arr[i].floatValue();</span>
+    }
+<span class="nc" id="L697">    return out;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static Boolean[] fromNativeBooleanArray(boolean[] arr) {
+<span class="nc" id="L702">    Boolean[] out = new Boolean[arr.length];</span>
+<span class="nc bnc" id="L703" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L704">      out[i] = arr[i];</span>
+    }
+<span class="nc" id="L706">    return out;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static Long[] fromNativeIntegerArray(long[] arr) {
+<span class="nc" id="L711">    Long[] out = new Long[arr.length];</span>
+<span class="nc bnc" id="L712" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L713">      out[i] = arr[i];</span>
+    }
+<span class="nc" id="L715">    return out;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static Float[] fromNativeFloatArray(float[] arr) {
+<span class="nc" id="L720">    Float[] out = new Float[arr.length];</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L722">      out[i] = arr[i];</span>
+    }
+<span class="nc" id="L724">    return out;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidArrayLoops&quot;)
+  static Double[] fromNativeDoubleArray(double[] arr) {
+<span class="nc" id="L729">    Double[] out = new Double[arr.length];</span>
+<span class="nc bnc" id="L730" title="All 2 branches missed.">    for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L731">      out[i] = arr[i];</span>
+    }
+<span class="nc" id="L733">    return out;</span>
+  }
+
+  private NetworkTableType m_type;
+  private Object m_value;
+  private long m_time;
+  private long m_serverTime;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

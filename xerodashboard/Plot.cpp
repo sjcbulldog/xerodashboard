@@ -33,9 +33,9 @@ void Plot::readRowData(int row)
 
 	auto entry = ntmgr_->getEntry(datakey);
 	auto value = entry.GetValue();
-	if (value != nullptr && value->IsValid() && value->IsDoubleArray())
+	if (value.IsValid() && value.IsDoubleArray())
 	{
-		auto data = value->GetDoubleArray();
+		auto data = value.GetDoubleArray();
 		if (data.size() == columns_.size())
 		{
 			QVector<double> rowdata;
@@ -49,7 +49,7 @@ void Plot::readRowData(int row)
 	}
 }
 
-std::shared_ptr<nt::Value> Plot::getPlotValue(const QString& name)
+nt::Value Plot::getPlotValue(const QString& name)
 {
 	QString plotbase = key_ + name_ + "/";
 	return 	ntmgr_->getEntry(plotbase + name).GetValue();
@@ -60,11 +60,11 @@ void Plot::readData()
 	bool newiscomp = true;
 
 	auto value = getPlotValue("complete");
-	if (value == nullptr || !value->IsValid() || !value->IsBoolean())
+	if (!value.IsValid() || !value.IsBoolean())
 		newiscomp = false;
 	else
 	{
-		newiscomp = value->GetBoolean();
+		newiscomp = value.GetBoolean();
 	}
 
 	if (newiscomp == false && isComplete())
@@ -79,18 +79,18 @@ void Plot::readData()
 	}
 
 	value = getPlotValue("points");
-	if (value == nullptr || !value->IsValid() || !value->IsDouble())
+	if (!value.IsValid() || !value.IsDouble())
 		return;
 
-	points_ = static_cast<int>(value->GetDouble());
+	points_ = static_cast<int>(value.GetDouble());
 
 	value = getPlotValue("columns");
-	if (value == nullptr || !value->IsValid() || !value->IsStringArray())
+	if (!value.IsValid() || !value.IsStringArray())
 		return;
 
 	if (columns_.size() == 0)
 	{
-		auto colnames = value->GetStringArray();
+		auto colnames = value.GetStringArray();
 		for (int i = 0; i < colnames.size(); i++)
 			columns_.push_back(QString::fromStdString(colnames[i]));
 	}
@@ -115,9 +115,9 @@ void Plot::readData()
 
 	value = getPlotValue("complete");
 
-	if (value != nullptr && value->IsValid() && value->IsBoolean())
+	if (value.IsValid() && value.IsBoolean())
 	{
-		if (value->GetBoolean())
+		if (value.GetBoolean())
 		{
 			if (connected_)
 				changeState(State::Complete);

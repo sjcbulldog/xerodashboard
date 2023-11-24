@@ -23,18 +23,18 @@ public:
 protected:
 	void paintEvent(QPaintEvent* ev) override;
 	void resizeEvent(QResizeEvent* ev) override;
-	void PathDisplayWidget::contextMenuEvent(QContextMenuEvent* ev) override;
+	void contextMenuEvent(QContextMenuEvent* ev) override;
 
-	QSize PathDisplayWidget::minimumSizeHint() const override;
-	QSize PathDisplayWidget::sizeHint() const override;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 private:
 	void doPaint(QPainter& p);
 	void createTransforms();
 	void setFieldFromMenu(bool triggered, std::shared_ptr<GameField> field);
 
-	void newDetected(const QString& path);
-	void entryUpdateDetected(const QString& path);
+	void newDetected(const nt::TopicInfo& info);
+	void entryUpdateDetected(const nt::ValueEventData& path);
 	void disconnectDetected();
 	void connectDetected();
 
@@ -61,4 +61,6 @@ private:
 	QMetaObject::Connection new_connection_;
 	QMetaObject::Connection disconnect_connection_;
 	QMetaObject::Connection connect_connection_;
+
+	QMap<NT_Topic, QString> topics_;
 };

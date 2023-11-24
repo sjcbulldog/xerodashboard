@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreDevWindowsx86-64Executable/output.txt for all output for linkNtcoreDevWindowsx86-64Executable.
+linking ntcoreDev.exe successful.
+
+Finished linkNtcoreDevWindowsx86-64Executable, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreDevWindowsx86-64Executable/output.txt.

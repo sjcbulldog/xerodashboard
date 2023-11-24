@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PubSubOption.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">PubSubOption.java</span></div><h1>PubSubOption.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+/** NetworkTables publish/subscribe option. */
+public class PubSubOption {
+<span class="nc" id="L9">  enum Kind {</span>
+<span class="nc" id="L10">    periodic,</span>
+<span class="nc" id="L11">    sendAll,</span>
+<span class="nc" id="L12">    topicsOnly,</span>
+<span class="nc" id="L13">    pollStorage,</span>
+<span class="nc" id="L14">    keepDuplicates,</span>
+<span class="nc" id="L15">    disableRemote,</span>
+<span class="nc" id="L16">    disableLocal,</span>
+<span class="nc" id="L17">    excludePublisher,</span>
+<span class="nc" id="L18">    excludeSelf</span>
+  }
+
+<span class="nc" id="L21">  PubSubOption(Kind kind, boolean value) {</span>
+<span class="nc" id="L22">    m_kind = kind;</span>
+<span class="nc" id="L23">    m_bValue = value;</span>
+<span class="nc" id="L24">    m_iValue = 0;</span>
+<span class="nc" id="L25">    m_dValue = 0;</span>
+<span class="nc" id="L26">  }</span>
+
+<span class="nc" id="L28">  PubSubOption(Kind kind, int value) {</span>
+<span class="nc" id="L29">    m_kind = kind;</span>
+<span class="nc" id="L30">    m_bValue = false;</span>
+<span class="nc" id="L31">    m_iValue = value;</span>
+<span class="nc" id="L32">    m_dValue = 0;</span>
+<span class="nc" id="L33">  }</span>
+
+<span class="nc" id="L35">  PubSubOption(Kind kind, double value) {</span>
+<span class="nc" id="L36">    m_kind = kind;</span>
+<span class="nc" id="L37">    m_bValue = false;</span>
+<span class="nc" id="L38">    m_iValue = 0;</span>
+<span class="nc" id="L39">    m_dValue = value;</span>
+<span class="nc" id="L40">  }</span>
+
+  /**
+   * How frequently changes will be sent over the network. NetworkTables may send more frequently
+   * than this (e.g. use a combined minimum period for all values) or apply a restricted range to
+   * this value. The default if unspecified is 100 ms.
+   *
+   * @param period time between updates, in seconds
+   * @return option
+   */
+  public static PubSubOption periodic(double period) {
+<span class="nc" id="L51">    return new PubSubOption(Kind.periodic, period);</span>
+  }
+
+  /**
+   * If enabled, sends all value changes over the network. This option defaults to disabled.
+   *
+   * @param enabled True to enable, false to disable
+   * @return option
+   */
+  public static PubSubOption sendAll(boolean enabled) {
+<span class="nc" id="L61">    return new PubSubOption(Kind.sendAll, enabled);</span>
+  }
+
+  /**
+   * If enabled on a subscription, does not request value changes. This option defaults to disabled.
+   *
+   * @param enabled True to enable, false to disable
+   * @return option
+   */
+  public static PubSubOption topicsOnly(boolean enabled) {
+<span class="nc" id="L71">    return new PubSubOption(Kind.topicsOnly, enabled);</span>
+  }
+
+  /**
+   * If enabled, preserves duplicate value changes (rather than ignoring them). This option defaults
+   * to disabled.
+   *
+   * @param enabled True to enable, false to disable
+   * @return option
+   */
+  public static PubSubOption keepDuplicates(boolean enabled) {
+<span class="nc" id="L82">    return new PubSubOption(Kind.keepDuplicates, enabled);</span>
+  }
+
+  /**
+   * Polling storage for subscription. Specifies the maximum number of updates NetworkTables should
+   * store between calls to the subscriber's readQueue() function. Defaults to 1 if sendAll is
+   * false, 20 if sendAll is true.
+   *
+   * @param depth number of entries to save for polling.
+   * @return option
+   */
+  public static PubSubOption pollStorage(int depth) {
+<span class="nc" id="L94">    return new PubSubOption(Kind.pollStorage, depth);</span>
+  }
+
+  /**
+   * For subscriptions, specify whether remote value updates should not be queued for readQueue().
+   * See also disableLocal(). Defaults to false (remote value updates are queued).
+   *
+   * @param disabled True to disable, false to enable
+   * @return option
+   */
+  public static PubSubOption disableRemote(boolean disabled) {
+<span class="nc" id="L105">    return new PubSubOption(Kind.disableRemote, disabled);</span>
+  }
+
+  /**
+   * For subscriptions, specify whether local value updates should not be queued for readQueue().
+   * See also disableRemote(). Defaults to false (local value updates are queued).
+   *
+   * @param disabled True to disable, false to enable
+   * @return option
+   */
+  public static PubSubOption disableLocal(boolean disabled) {
+<span class="nc" id="L116">    return new PubSubOption(Kind.disableLocal, disabled);</span>
+  }
+
+  /**
+   * Don't queue value updates for the given publisher. Only has an effect on subscriptions. Only
+   * one exclusion may be set.
+   *
+   * @param publisher publisher handle to exclude
+   * @return option
+   */
+  public static PubSubOption excludePublisher(int publisher) {
+<span class="nc" id="L127">    return new PubSubOption(Kind.excludePublisher, publisher);</span>
+  }
+
+  /**
+   * Don't queue value updates for the given publisher. Only has an effect on subscriptions. Only
+   * one exclusion may be set.
+   *
+   * @param publisher publisher to exclude
+   * @return option
+   */
+  public static PubSubOption excludePublisher(Publisher publisher) {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">    return excludePublisher(publisher != null ? publisher.getHandle() : 0);</span>
+  }
+
+  /**
+   * Don't queue value updates for the internal publisher for an entry. Only has an effect on
+   * entries.
+   *
+   * @param enabled True to enable, false to disable
+   * @return option
+   */
+  public static PubSubOption excludeSelf(boolean enabled) {
+<span class="nc" id="L149">    return new PubSubOption(Kind.excludeSelf, enabled);</span>
+  }
+
+  final Kind m_kind;
+  final boolean m_bValue;
+  final int m_iValue;
+  final double m_dValue;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

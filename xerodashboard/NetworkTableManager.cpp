@@ -1,5 +1,7 @@
 #include "NetworkTableManager.h"
 #include <QtCore/QDebug>
+#include <variant>
+#include <algorithm>
 
 NetworkTableManager::NetworkTableManager(const QString &ipaddr)
 {
@@ -8,8 +10,11 @@ NetworkTableManager::NetworkTableManager(const QString &ipaddr)
 	auto fn = std::bind(&NetworkTableManager::listenNotify, this, std::placeholders::_1);
 	int flags = 0xffffffff;
 
-	listen_ = inst_.AddEntryListener("/", fn, flags);
-	inst_.StartClient(ipaddr.toStdString().c_str());
+	const std::string_view root[] = { "/" };
+
+	listen_ = inst_.AddListener(std::span<const std::string_view>{ root }, flags, fn);
+	inst_.SetServer(ipaddr.toStdString().c_str());
+	inst_.StartClient3("xerodashboard");
 
 	connected_ = inst_.IsConnected();
 	if (connected_)
@@ -18,7 +23,7 @@ NetworkTableManager::NetworkTableManager(const QString &ipaddr)
 
 NetworkTableManager::~NetworkTableManager()
 {
-	inst_.RemoveEntryListener(listen_);
+	inst_.RemoveListener(listen_);
 	inst_.StopClient();
 }
 
@@ -47,33 +52,73 @@ QStringList NetworkTableManager::getSubKeys(const QString& name)
 	return ret;
 }
 
-void NetworkTableManager::listenNotify(const nt::EntryNotification& ev)
+void NetworkTableManager::listenNotify(const nt::Event& ev)
 {
-	QString name = QString::fromStdString(ev.name);
 	QMutexLocker guard(&lock_);
 
-	if ((ev.flags & NT_NOTIFY_NEW) == NT_NOTIFY_NEW)
+	if ((ev.flags & NT_EVENT_PUBLISH) == NT_EVENT_PUBLISH)
 	{
-		if (deletedEntries_.contains(name))
-			deletedEntries_.removeOne(name);
+		if (std::holds_alternative<nt::TopicInfo>(ev.data))
+		{
+			nt::TopicInfo info = std::get<nt::TopicInfo>(ev.data);
+			QString name = QString::fromStdString(info.name);
 
-		if (!newEntries_.contains(name))
-			newEntries_.push_back(name);
+			deletedEntries_.removeIf([&name](const nt::TopicInfo &i) -> bool {
+				return QString::fromStdString(i.name) == name;
+			});
+
+			auto it = std::find_if(newEntries_.begin(), newEntries_.end(), [&name](const nt::TopicInfo& info) {
+				return QString::fromStdString(info.name) == name;
+			});
+
+			if (it == newEntries_.end()) 
+			{
+				newEntries_.push_back(info);
+			}
+		}
 	}
-	else if ((ev.flags & NT_NOTIFY_UPDATE) == NT_NOTIFY_UPDATE)
+	else if ((ev.flags & NT_EVENT_UNPUBLISH) == NT_EVENT_UNPUBLISH)
 	{
-		if (!deletedEntries_.contains(name) && !updatedEntries_.contains(name))
-			updatedEntries_.push_back(name);
+		if (std::holds_alternative<nt::TopicInfo>(ev.data))
+		{
+			nt::TopicInfo info = std::get<nt::TopicInfo>(ev.data);
+			QString name = QString::fromStdString(info.name);
+
+			newEntries_.removeIf([&name](const nt::TopicInfo &i) -> bool {
+				return QString::fromStdString(i.name) == name;
+			});
+
+			auto it = std::find_if(deletedEntries_.begin(), deletedEntries_.end(), [&name](const nt::TopicInfo& info) {
+				return QString::fromStdString(info.name) == name;
+				});
+
+			if (it == deletedEntries_.end())
+			{
+				deletedEntries_.push_back(info);
+			}
+		}
 	}
-	else if ((ev.flags & NT_NOTIFY_DELETE) == NT_NOTIFY_DELETE)
+	else if ((ev.flags & NT_EVENT_PROPERTIES) == NT_EVENT_PROPERTIES)
 	{
-		if (newEntries_.contains(name))
-			newEntries_.removeOne(name);
-
-		if (updatedEntries_.contains(name))
-			updatedEntries_.removeOne(name);
-
-		deletedEntries_.push_back(name);
+		//
+		// Nothing for now
+		//
+	}
+	else if ((ev.flags & NT_EVENT_VALUE_REMOTE) == NT_EVENT_VALUE_REMOTE)
+	{
+		if (std::holds_alternative<nt::ValueEventData>(ev.data))
+		{
+			nt::ValueEventData data = std::get<nt::ValueEventData>(ev.data);
+			updatedEntries_.push_back(data);
+		}
+	}
+	else if ((ev.flags & NT_EVENT_VALUE_LOCAL) == NT_EVENT_VALUE_LOCAL)
+	{
+		if (std::holds_alternative<nt::ValueEventData>(ev.data))
+		{
+			nt::ValueEventData data = std::get<nt::ValueEventData>(ev.data);
+			updatedEntries_.push_back(data);
+		}
 	}
 }
 
@@ -98,21 +143,21 @@ void NetworkTableManager::processNetworkTableEvents()
 		QMutexLocker guard(&lock_);
 		while (deletedEntries_.size() > 0)
 		{
-			QString entry = deletedEntries_.first();
+			auto entry = deletedEntries_.first();
 			deletedEntries_.removeFirst();
 			emit deletedEntry(entry);
 		}
 
 		while (newEntries_.size() > 0)
 		{
-			QString entry = newEntries_.first();
+			auto entry = newEntries_.first();
 			newEntries_.removeFirst();
 			emit newEntry(entry);
 		}
 
 		while (updatedEntries_.size() > 0)
 		{
-			QString entry = updatedEntries_.first();
+			auto entry = updatedEntries_.first();
 			updatedEntries_.removeFirst();
 			emit updatedEntry(entry);
 		}

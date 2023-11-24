@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreTestWindowsx86-64DebugGoogleTestExe/output.txt for all output for linkNtcoreTestWindowsx86-64DebugGoogleTestExe.
+linking ntcoreTest.exe successful.
+
+Finished linkNtcoreTestWindowsx86-64DebugGoogleTestExe, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreTestWindowsx86-64DebugGoogleTestExe/output.txt.

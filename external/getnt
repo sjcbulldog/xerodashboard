@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+   echo usage: exactly one argument is required
+   exit 1
+fi
+
+LOC=$1
+
+echo -n "Removing old directories ... "
+rm -rf ntcore wpiutil wpinet
+echo done
+
+mkdir ntcore wpiutil wpinet
+
+echo -n "Copying libraries ... "
+cp -r $LOC/ntcore/build ntcore
+cp -r $LOC/wpiutil/build/libs wpiutil
+cp -r $LOC/wpinet/build/libs wpinet
+echo done
+
+mkdir -p ntcore/gen
+echo -n "Copying generated header files ... "
+cp -r $LOC/ntcore/build/generated/main/native/include ntcore/gen
+echo done
+
+mkdir -p ntcore/include
+echo -n "Copying header files ... "
+cp -r $LOC/ntcore/src/main/native/include/* ntcore/include
+echo done
+
+mkdir -p wpiutil/thirdparty/json
+mkdir -p wpiutil/thirdparty/llvm
+mkdir -p wpiutil/include
+echo -n "Copying wpiutil headers ..."
+cp -r $LOC/wpiutil/src/main/native/thirdparty/json/include wpiutil/thirdparty/json
+cp -r $LOC/wpiutil/src/main/native/thirdparty/llvm/include wpiutil/thirdparty/llvm
+cp -r $LOC/wpiutil/src/main/native/include/wpi wpiutil/include
+echo done
+
+mkdir -p wpinet/thirdparty/libuv
+echo -n "Copying wpinet headers ..."
+cp -r $LOC/wpinet/src/main/native/thirdparty/libuv/include wpinet/thirdparty/libuv
+echo done

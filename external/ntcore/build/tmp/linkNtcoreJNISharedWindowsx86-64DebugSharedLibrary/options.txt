@@ -1,0 +1,15 @@
+/DEBUG:FULL
+/PDBALTPATH:%_PDB%
+/SOURCELINK:D:\\cygwin64\\home\\bwg\\robottools\\frc\\allwpilib\\ntcore\\build\\tmp\\generateSourceLinkFileNtcoreJNISharedWindowsx86-64DebugSharedLibrary\\SourceLink.json
+/OUT:D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcoreJNIShared\shared\windowsx86-64\debug\ntcorejni.dll
+/NOLOGO
+/DLL
+/IMPLIB:D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcoreJNIShared\shared\windowsx86-64\debug\ntcorejni.lib
+"/LIBPATH:C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\lib\x64"
+"/LIBPATH:C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
+"/LIBPATH:C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\ucrt\x64"
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreJNIShared\shared\windowsx86-64\debug\ntcoreJNISharedCpp\6r3yqjpu8yncp7s3uw4qm85vq\NetworkTablesJNI.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreJNIShared\shared\windowsx86-64\debug\ntcoreJNISharedCpp\ddwaxlscg31g5ay9a7oros1sc\types_jni.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcore\shared\windowsx86-64\debug\ntcored.lib
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\wpiutil\build\libs\wpiutil\shared\windowsx86-64\debug\wpiutild.lib
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\wpinet\build\libs\wpinet\shared\windowsx86-64\debug\wpinetd.lib

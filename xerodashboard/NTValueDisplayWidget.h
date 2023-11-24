@@ -12,7 +12,7 @@ class NTValueDisplayWidget : public QWidget
 	Q_OBJECT
 
 public:
-	NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> ntmgr, const QString &path, QWidget * parent = Q_NULLPTR);
+	NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> ntmgr, const QString &path, NT_Topic topic, QWidget * parent = Q_NULLPTR);
 	~NTValueDisplayWidget();
 
 	QJsonObject getJSONDesc() const;
@@ -29,8 +29,8 @@ protected:
 	bool event(QEvent* ev) override;
 
 private:
-	void newDetected(const QString& path);
-	void entryUpdateDetected(const QString& path);
+	void newDetected(const nt::TopicInfo &info);
+	void entryUpdateDetected(const nt::ValueEventData& value);
 	void disconnectDetected();
 	void connectDetected();
 
@@ -47,6 +47,7 @@ private:
 	nt::NetworkTableEntry entry_;
 	std::shared_ptr<NetworkTableManager> ntmgr_;
 	QString path_;
+	NT_Topic topic_;
 	bool connected_;
 	QMetaObject::Connection update_connection_;
 	QMetaObject::Connection new_connection_;

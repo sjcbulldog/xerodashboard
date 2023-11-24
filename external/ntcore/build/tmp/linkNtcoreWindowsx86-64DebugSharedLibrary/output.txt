@@ -1,0 +1,6 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreWindowsx86-64DebugSharedLibrary/output.txt for all output for linkNtcoreWindowsx86-64DebugSharedLibrary.
+linking ntcored.dll successful.
+NTSendable.obj : warning LNK4197: export '??_7Sendable@wpi@@6B@' specified multiple times; using first specification
+   Creating library D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcore\shared\windowsx86-64\debug\ntcored.lib and object D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcore\shared\windowsx86-64\debug\ntcored.exp
+
+Finished linkNtcoreWindowsx86-64DebugSharedLibrary, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreWindowsx86-64DebugSharedLibrary/output.txt.

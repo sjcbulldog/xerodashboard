@@ -18,12 +18,13 @@ protected:
 	QMimeData* mimeData(const QList<QTreeWidgetItem*> items) const;
 
 private:
-	void newEntryDetected(const QString &name);
-	void updatedEntryDetected(const QString &name);
-	void deletedEntryDetected(const QString &name);
+	void newEntryDetected(const nt::TopicInfo &info);
+	void updatedEntryDetected(const nt::ValueEventData &value);
+	void deletedEntryDetected(const nt::TopicInfo&info);
 	void connectDetected();
 	void disconnectDetected();
 
 private:
 	std::shared_ptr<NetworkTableManager> ntmgr_;
+	QMap<NT_Topic, QString> name_from_handle_;
 };

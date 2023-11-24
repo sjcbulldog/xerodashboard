@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreLinuxarm32DebugSharedLibraryNtcoreCpp/output.txt for all output for compileNtcoreLinuxarm32DebugSharedLibraryNtcoreCpp.
+compiling singlelib.cpp successful.
+
+Finished compileNtcoreLinuxarm32DebugSharedLibraryNtcoreCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreLinuxarm32DebugSharedLibraryNtcoreCpp/output.txt.

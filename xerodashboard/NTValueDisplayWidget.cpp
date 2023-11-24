@@ -9,10 +9,11 @@
 #include <QtGui/QHelpEvent>
 #include <QtGui/QPainter>
 
-NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> ntmgr, const QString& path, QWidget *parent): QWidget(parent)
+NTValueDisplayWidget::NTValueDisplayWidget(std::shared_ptr<NetworkTableManager> ntmgr, const QString& path, NT_Topic topic, QWidget *parent): QWidget(parent)
 {
 	ntmgr_ = ntmgr;
 	path_ = path;
+	topic_ = topic;
 	entry_ = ntmgr->getEntry(path_);
 	connected_ = true;
 
@@ -110,18 +111,18 @@ void NTValueDisplayWidget::connectDetected()
 	}
 }
 
-void NTValueDisplayWidget::entryUpdateDetected(const QString& name)
+void NTValueDisplayWidget::entryUpdateDetected(const nt::ValueEventData& value)
 {
-	if (name == path_)
+	if (value.topic == topic_)
 	{
 		entry_ = ntmgr_->getEntry(path_);
 		update();
 	}
 }
 
-void NTValueDisplayWidget::newDetected(const QString& name)
+void NTValueDisplayWidget::newDetected(const nt::TopicInfo &info)
 {
-	if (name == path_)
+	if (info.topic == topic_)
 	{
 		entry_ = ntmgr_->getEntry(path_);
 		update();
@@ -134,13 +135,13 @@ void NTValueDisplayWidget::paintEvent(QPaintEvent* ev)
 	p.setRenderHint(QPainter::Antialiasing);
 
 	auto value = entry_.GetValue();
-	if (value != nullptr && value->IsValid())
+	if (value.IsValid())
 	{
 		QBrush back(QColor(255, 255, 255));
 		p.setBrush(back);
 		p.drawRect(0, 0, width(), height());
 
-		if (value->IsBoolean())
+		if (value.IsBoolean())
 		{
 			if (display_type_ == "color")
 				drawContentsBoolean(p);
@@ -148,7 +149,7 @@ void NTValueDisplayWidget::paintEvent(QPaintEvent* ev)
 				drawContentsText(p);
 
 		}
-		else if (value->IsDouble())
+		else if (value.IsDouble())
 		{
 			if (display_type_ == "bar")
 				drawContentsBar(p);
@@ -172,15 +173,15 @@ void NTValueDisplayWidget::paintEvent(QPaintEvent* ev)
 void NTValueDisplayWidget::drawContentsBoolean(QPainter& p)
 {
 	auto value = entry_.GetValue();
-	assert(value->IsValid());
-	assert(value->IsBoolean());
+	assert(value.IsValid());
+	assert(value.IsBoolean());
 
 	QColor color;
 	if (!connected_)
 	{
 		color = QColor(128, 128, 128);
 	}
-	else if (value->GetBoolean())
+	else if (value.GetBoolean())
 	{
 		color = QColor(0, 255, 0);
 	}
@@ -197,8 +198,8 @@ void NTValueDisplayWidget::drawContentsBoolean(QPainter& p)
 void NTValueDisplayWidget::drawContentsBar(QPainter& p)
 {
 	auto value = entry_.GetValue();
-	assert(value->IsValid());
-	assert(value->IsDouble());
+	assert(value.IsValid());
+	assert(value.IsDouble());
 
 	int w = width() - 8;
 	int h = height() - 4;
@@ -216,7 +217,7 @@ void NTValueDisplayWidget::drawContentsBar(QPainter& p)
 	}
 	else
 	{
-		double d = value->GetDouble();
+		double d = value.GetDouble();
 		QColor c;
 		int left, right, bar;
 
@@ -261,7 +262,7 @@ void NTValueDisplayWidget::drawContentsText(QPainter &p)
 		txtcolor = QColor(128, 128, 128);
 
 	auto value = entry_.GetValue();
-	if (value->IsValid())
+	if (value.IsValid())
 	{
 		QString txt = NTFormattingUtils::toString(entry_);
 		QPoint pt(width() / 2 - fm.horizontalAdvance(txt) / 2, height() / 2 - fm.height() / 2 + fm.ascent());

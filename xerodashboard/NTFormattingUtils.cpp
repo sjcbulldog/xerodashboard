@@ -8,16 +8,16 @@ QString NTFormattingUtils::toString(const nt::NetworkTableEntry& entry, int leng
 	assert(length >= 3);
 
 	auto value = entry.GetValue();
-	if (value->IsValid())
+	if (value.IsValid())
 	{
-		if (value->IsBoolean())
+		if (value.IsBoolean())
 		{
-			ret = value->GetBoolean() ? "true" : "false";
+			ret = value.GetBoolean() ? "true" : "false";
 		}
-		else if (value->IsBooleanArray())
+		else if (value.IsBooleanArray())
 		{
 			ret = "[";
-			auto v = value->GetBooleanArray();
+			auto v = value.GetBooleanArray();
 			for (int i = 0; i < v.size(); i++)
 			{
 				if (ret.length() > 1)
@@ -28,14 +28,14 @@ QString NTFormattingUtils::toString(const nt::NetworkTableEntry& entry, int leng
 			}
 			ret += "]";
 		}
-		else if (value->IsDouble())
+		else if (value.IsDouble())
 		{
-			ret = QString::number(value->GetDouble());
+			ret = QString::number(value.GetDouble());
 		}
-		else if (value->IsDoubleArray())
+		else if (value.IsDoubleArray())
 		{
 			ret = "[";
-			auto v = value->GetDoubleArray();
+			auto v = value.GetDoubleArray();
 			for (int i = 0; i < v.size(); i++)
 			{
 				if (ret.length() > 1)
@@ -46,14 +46,14 @@ QString NTFormattingUtils::toString(const nt::NetworkTableEntry& entry, int leng
 			}
 			ret += "]";
 		}
-		else if (value->IsString())
+		else if (value.IsString())
 		{
-			ret = QString::fromStdString(value->GetString());
+			ret = QString::fromStdString(std::string(value.GetString()));
 		}
-		else if (value->IsStringArray())
+		else if (value.IsStringArray())
 		{
 			ret = "[";
-			auto v = value->GetStringArray();
+			auto v = value.GetStringArray();
 			for (int i = 0; i < v.size(); i++)
 			{
 				if (ret.length() > 1)

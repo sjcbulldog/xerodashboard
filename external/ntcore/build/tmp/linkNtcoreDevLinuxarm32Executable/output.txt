@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreDevLinuxarm32Executable/output.txt for all output for linkNtcoreDevLinuxarm32Executable.
+linking ntcoreDev successful.
+
+Finished linkNtcoreDevLinuxarm32Executable, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/linkNtcoreDevLinuxarm32Executable/output.txt.

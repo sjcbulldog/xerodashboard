@@ -1,0 +1,5 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreCpp/output.txt for all output for compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreCpp.
+compiling singlelib.cpp successful.
+singlelib.cpp
+
+Finished compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreCpp/output.txt.

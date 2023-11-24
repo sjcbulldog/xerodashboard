@@ -1,0 +1,31 @@
+/DEBUG:FULL
+/PDBALTPATH:%_PDB%
+/OUT:D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\exe\ntcoreTest\windowsx86-64\debug\ntcoreTest.exe
+/NOLOGO
+"/LIBPATH:C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\lib\x64"
+"/LIBPATH:C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
+"/LIBPATH:C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\ucrt\x64"
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\1u4tagg4k04fvec6kxb0hj00b\ServerImplTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\1w4fby1tkwx1g4iogg71t98yi\main.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\2rpecmnjufr4sujzxp2325xcp\MessageMatcher3.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\4wokp5sscu23kvil4coql4nm4\TableListenerTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\5par4l0mvyov1f6hl02kw8pnr\TimeSyncTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\5xkzvnrjrxdss4ztodo7w8868\ValueTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\768ivjxkgw2bu6crehvnx3us3\WireEncoderTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\76orzc5yutnjjdlpcc4e68r2v\ValueListenerTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\7fotd5lkyq0y9b3vq883n4dsu\TopicListenerTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\7lw1faspsntjvdxto1feufbrw\WireDecoderTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\9u8xfi1ycbnnxmys3hfx0hwuh\WireEncoder3Test.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\b36jxnrgvcuu2u6lsuvmk5ea8\WireDecoder3Test.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\b8kunjt4mybk2dlrdeulfv3ax\TestPrinters.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\bkwejgj2kg2kq7mhltw1gxsf3\ValueMatcher.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\c1vsn1tn5r1tj7dozfcrzpxrf\NetworkTableTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\c714k2x5jcfv1bm7edag2xdwr\LoggerTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\c71txswkcnu7ko1uv6mqihsbq\LocalStorageTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\cokuxr1wrfpgah7o184hv2hs9\PubSubOptionsMatcher.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreTestCpp\dvgjveuzaoz6lr9vh89t9gjvh\ConnectionListenerTest.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\objs\ntcoreTest\windowsx86-64\debug\ntcoreCpp\712294aryj7h0l18ehywrsre4\singlelib.obj
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\wpinet\build\libs\wpinet\shared\windowsx86-64\debug\wpinetd.lib
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\wpiutil\build\libs\wpiutil\shared\windowsx86-64\debug\wpiutild.lib
+C:\Users\bwg\.gradle\caches\transforms-3\1dfd11843377ba632d903845864b79ad\transformed\googletest-1.14.0-1-windowsx86-64staticdebug\windows\x86-64\static\googletestd.lib
+D:\cygwin64\home\bwg\robottools\frc\allwpilib\ntcore\build\libs\ntcore\shared\windowsx86-64\debug\ntcored.lib

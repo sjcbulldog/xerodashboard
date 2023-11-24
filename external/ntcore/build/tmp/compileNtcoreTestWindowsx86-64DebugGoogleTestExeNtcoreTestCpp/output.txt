@@ -1,0 +1,59 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreTestCpp/output.txt for all output for compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreTestCpp.
+compiling ConnectionListenerTest.cpp successful.
+ConnectionListenerTest.cpp
+
+compiling main.cpp successful.
+main.cpp
+
+compiling TimeSyncTest.cpp successful.
+TimeSyncTest.cpp
+
+compiling MessageMatcher3.cpp successful.
+MessageMatcher3.cpp
+
+compiling NetworkTableTest.cpp successful.
+NetworkTableTest.cpp
+
+compiling PubSubOptionsMatcher.cpp successful.
+PubSubOptionsMatcher.cpp
+
+compiling WireEncoderTest.cpp successful.
+WireEncoderTest.cpp
+
+compiling WireEncoder3Test.cpp successful.
+WireEncoder3Test.cpp
+
+compiling TestPrinters.cpp successful.
+TestPrinters.cpp
+
+compiling TableListenerTest.cpp successful.
+TableListenerTest.cpp
+
+compiling WireDecoder3Test.cpp successful.
+WireDecoder3Test.cpp
+
+compiling LoggerTest.cpp successful.
+LoggerTest.cpp
+
+compiling TopicListenerTest.cpp successful.
+TopicListenerTest.cpp
+
+compiling ValueMatcher.cpp successful.
+ValueMatcher.cpp
+
+compiling WireDecoderTest.cpp successful.
+WireDecoderTest.cpp
+
+compiling LocalStorageTest.cpp successful.
+LocalStorageTest.cpp
+
+compiling ValueTest.cpp successful.
+ValueTest.cpp
+
+compiling ValueListenerTest.cpp successful.
+ValueListenerTest.cpp
+
+compiling ServerImplTest.cpp successful.
+ServerImplTest.cpp
+
+Finished compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreTestCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreTestWindowsx86-64DebugGoogleTestExeNtcoreTestCpp/output.txt.

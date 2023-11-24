@@ -1,0 +1,1012 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetworkTableEntry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">NetworkTableEntry.java</span></div><h1>NetworkTableEntry.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+import java.nio.ByteBuffer;
+
+/**
+ * NetworkTables Entry.
+ *
+ * &lt;p&gt;For backwards compatibility, the NetworkTableEntry close() does not release the entry.
+ */
+@SuppressWarnings(&quot;UnnecessaryParentheses&quot;)
+public final class NetworkTableEntry implements Publisher, Subscriber {
+  /**
+   * Flag values (as returned by {@link #getFlags()}).
+   *
+   * @deprecated Use isPersistent() instead.
+   */
+  @Deprecated(since = &quot;2022&quot;, forRemoval = true)
+  public static final int kPersistent = 0x01;
+
+  /**
+   * Construct from native handle.
+   *
+   * @param inst Instance
+   * @param handle Native handle
+   */
+  public NetworkTableEntry(NetworkTableInstance inst, int handle) {
+<span class="nc" id="L31">    this(new Topic(inst, NetworkTablesJNI.getTopicFromHandle(handle)), handle);</span>
+<span class="nc" id="L32">  }</span>
+
+  /**
+   * Construct from native handle.
+   *
+   * @param topic Topic
+   * @param handle Native handle
+   */
+<span class="nc" id="L40">  public NetworkTableEntry(Topic topic, int handle) {</span>
+<span class="nc" id="L41">    m_topic = topic;</span>
+<span class="nc" id="L42">    m_handle = handle;</span>
+<span class="nc" id="L43">  }</span>
+
+  @Override
+<span class="nc" id="L46">  public void close() {}</span>
+
+  /**
+   * Determines if the native handle is valid.
+   *
+   * @return True if the native handle is valid, false otherwise.
+   */
+  @Override
+  public boolean isValid() {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">    return m_handle != 0;</span>
+  }
+
+  /**
+   * Gets the native handle for the entry.
+   *
+   * @return Native handle
+   */
+  @Override
+  public int getHandle() {
+<span class="nc" id="L65">    return m_handle;</span>
+  }
+
+  /**
+   * Gets the subscribed-to / published-to topic.
+   *
+   * @return Topic
+   */
+  @Override
+  public Topic getTopic() {
+<span class="nc" id="L75">    return m_topic;</span>
+  }
+
+  /**
+   * Gets the instance for the entry.
+   *
+   * @return Instance
+   */
+  public NetworkTableInstance getInstance() {
+<span class="nc" id="L84">    return m_topic.getInstance();</span>
+  }
+
+  /**
+   * Determines if the entry currently exists.
+   *
+   * @return True if the entry exists, false otherwise.
+   */
+  @Override
+  public boolean exists() {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">    return NetworkTablesJNI.getType(m_handle) != 0;</span>
+  }
+
+  /**
+   * Gets the name of the entry (the key).
+   *
+   * @return the entry's name
+   */
+  public String getName() {
+<span class="nc" id="L103">    return NetworkTablesJNI.getEntryName(m_handle);</span>
+  }
+
+  /**
+   * Gets the type of the entry.
+   *
+   * @return the entry's type
+   */
+  public NetworkTableType getType() {
+<span class="nc" id="L112">    return NetworkTableType.getFromInt(NetworkTablesJNI.getType(m_handle));</span>
+  }
+
+  /**
+   * Returns the flags.
+   *
+   * @return the flags (bitmask)
+   * @deprecated Use isPersistent() or topic properties instead
+   */
+  @Deprecated(since = &quot;2022&quot;, forRemoval = true)
+  public int getFlags() {
+<span class="nc" id="L123">    return NetworkTablesJNI.getEntryFlags(m_handle);</span>
+  }
+
+  /**
+   * Gets the last time the entry's value was changed.
+   *
+   * @return Entry last change time
+   */
+  @Override
+  public long getLastChange() {
+<span class="nc" id="L133">    return NetworkTablesJNI.getEntryLastChange(m_handle);</span>
+  }
+
+  /**
+   * Gets the entry's value. Returns a value with type NetworkTableType.kUnassigned if the value
+   * does not exist.
+   *
+   * @return the entry's value
+   */
+  public NetworkTableValue getValue() {
+<span class="nc" id="L143">    return NetworkTablesJNI.getValue(m_handle);</span>
+  }
+
+  /**
+   * Gets the entry's value as a boolean. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public boolean getBoolean(boolean defaultValue) {
+<span class="nc" id="L154">    return NetworkTablesJNI.getBoolean(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a long. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public long getInteger(long defaultValue) {
+<span class="nc" id="L165">    return NetworkTablesJNI.getInteger(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a float. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public float getFloat(float defaultValue) {
+<span class="nc" id="L176">    return NetworkTablesJNI.getFloat(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a double. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public double getDouble(double defaultValue) {
+<span class="nc" id="L187">    return NetworkTablesJNI.getDouble(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a String. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public String getString(String defaultValue) {
+<span class="nc" id="L198">    return NetworkTablesJNI.getString(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a byte[]. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public byte[] getRaw(byte[] defaultValue) {
+<span class="nc" id="L209">    return NetworkTablesJNI.getRaw(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a boolean[]. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public boolean[] getBooleanArray(boolean[] defaultValue) {
+<span class="nc" id="L220">    return NetworkTablesJNI.getBooleanArray(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a boolean array. If the entry does not exist or is of different type,
+   * it will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public Boolean[] getBooleanArray(Boolean[] defaultValue) {
+<span class="nc" id="L231">    return NetworkTableValue.fromNativeBooleanArray(</span>
+<span class="nc" id="L232">        getBooleanArray(NetworkTableValue.toNativeBooleanArray(defaultValue)));</span>
+  }
+
+  /**
+   * Gets the entry's value as a long[]. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public long[] getIntegerArray(long[] defaultValue) {
+<span class="nc" id="L243">    return NetworkTablesJNI.getIntegerArray(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a boolean array. If the entry does not exist or is of different type,
+   * it will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public Long[] getIntegerArray(Long[] defaultValue) {
+<span class="nc" id="L254">    return NetworkTableValue.fromNativeIntegerArray(</span>
+<span class="nc" id="L255">        getIntegerArray(NetworkTableValue.toNativeIntegerArray(defaultValue)));</span>
+  }
+
+  /**
+   * Gets the entry's value as a float[]. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public float[] getFloatArray(float[] defaultValue) {
+<span class="nc" id="L266">    return NetworkTablesJNI.getFloatArray(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a boolean array. If the entry does not exist or is of different type,
+   * it will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public Float[] getFloatArray(Float[] defaultValue) {
+<span class="nc" id="L277">    return NetworkTableValue.fromNativeFloatArray(</span>
+<span class="nc" id="L278">        getFloatArray(NetworkTableValue.toNativeFloatArray(defaultValue)));</span>
+  }
+
+  /**
+   * Gets the entry's value as a double[]. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public double[] getDoubleArray(double[] defaultValue) {
+<span class="nc" id="L289">    return NetworkTablesJNI.getDoubleArray(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a boolean array. If the entry does not exist or is of different type,
+   * it will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public Double[] getDoubleArray(Double[] defaultValue) {
+<span class="nc" id="L300">    return NetworkTableValue.fromNativeDoubleArray(</span>
+<span class="nc" id="L301">        getDoubleArray(NetworkTableValue.toNativeDoubleArray(defaultValue)));</span>
+  }
+
+  /**
+   * Gets the entry's value as a String[]. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public String[] getStringArray(String[] defaultValue) {
+<span class="nc" id="L312">    return NetworkTablesJNI.getStringArray(m_handle, defaultValue);</span>
+  }
+
+  /**
+   * Gets the entry's value as a double. If the entry does not exist or is of different type, it
+   * will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public Number getNumber(Number defaultValue) {
+<span class="nc" id="L323">    return getDouble(defaultValue.doubleValue());</span>
+  }
+
+  /**
+   * Gets the entry's value as a double array. If the entry does not exist or is of different type,
+   * it will return the default value.
+   *
+   * @param defaultValue the value to be returned if no value is found
+   * @return the entry's value or the given default value
+   */
+  public Number[] getNumberArray(Number[] defaultValue) {
+<span class="nc" id="L334">    return NetworkTableValue.fromNativeDoubleArray(</span>
+<span class="nc" id="L335">        getDoubleArray(NetworkTableValue.toNativeDoubleArray(defaultValue)));</span>
+  }
+
+  /**
+   * Get an array of all value changes since the last call to readQueue.
+   *
+   * &lt;p&gt;The &quot;poll storage&quot; subscribe option can be used to set the queue
+   * depth.
+   *
+   * @return Array of values; empty array if no new changes have been
+   *     published since the previous call.
+   */
+  public NetworkTableValue[] readQueue() {
+<span class="nc" id="L348">    return NetworkTablesJNI.readQueueValue(m_handle);</span>
+  }
+
+  /**
+   * Checks if a data value is of a type that can be placed in a NetworkTable entry.
+   *
+   * @param data the data to check
+   * @return true if the data can be placed in an entry, false if it cannot
+   */
+  public static boolean isValidDataType(Object data) {
+<span class="nc bnc" id="L358" title="All 30 branches missed.">    return data instanceof Number</span>
+        || data instanceof Boolean
+        || data instanceof String
+        || data instanceof long[]
+        || data instanceof Long[]
+        || data instanceof float[]
+        || data instanceof Float[]
+        || data instanceof double[]
+        || data instanceof Double[]
+        || data instanceof Number[]
+        || data instanceof boolean[]
+        || data instanceof Boolean[]
+        || data instanceof String[]
+        || data instanceof byte[]
+        || data instanceof Byte[];
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   * @throws IllegalArgumentException if the value is not a known type
+   */
+  public boolean setDefaultValue(Object defaultValue) {
+<span class="nc bnc" id="L383" title="All 2 branches missed.">    if (defaultValue instanceof NetworkTableValue) {</span>
+<span class="nc" id="L384">      long time = ((NetworkTableValue) defaultValue).getTime();</span>
+<span class="nc" id="L385">      Object otherValue = ((NetworkTableValue) defaultValue).getValue();</span>
+<span class="nc bnc" id="L386" title="All 12 branches missed.">      switch (((NetworkTableValue) defaultValue).getType()) {</span>
+        case kBoolean:
+<span class="nc" id="L388">          return NetworkTablesJNI.setDefaultBoolean(m_handle, time, (Boolean) otherValue);</span>
+        case kInteger:
+<span class="nc" id="L390">          return NetworkTablesJNI.setDefaultInteger(</span>
+<span class="nc" id="L391">              m_handle, time, ((Number) otherValue).longValue());</span>
+        case kFloat:
+<span class="nc" id="L393">          return NetworkTablesJNI.setDefaultFloat(</span>
+<span class="nc" id="L394">              m_handle, time, ((Number) otherValue).floatValue());</span>
+        case kDouble:
+<span class="nc" id="L396">          return NetworkTablesJNI.setDefaultDouble(</span>
+<span class="nc" id="L397">              m_handle, time, ((Number) otherValue).doubleValue());</span>
+        case kString:
+<span class="nc" id="L399">          return NetworkTablesJNI.setDefaultString(m_handle, time, (String) otherValue);</span>
+        case kRaw:
+<span class="nc" id="L401">          return NetworkTablesJNI.setDefaultRaw(m_handle, time, (byte[]) otherValue);</span>
+        case kBooleanArray:
+<span class="nc" id="L403">          return NetworkTablesJNI.setDefaultBooleanArray(m_handle, time, (boolean[]) otherValue);</span>
+        case kIntegerArray:
+<span class="nc" id="L405">          return NetworkTablesJNI.setDefaultIntegerArray(m_handle, time, (long[]) otherValue);</span>
+        case kFloatArray:
+<span class="nc" id="L407">          return NetworkTablesJNI.setDefaultFloatArray(m_handle, time, (float[]) otherValue);</span>
+        case kDoubleArray:
+<span class="nc" id="L409">          return NetworkTablesJNI.setDefaultDoubleArray(m_handle, time, (double[]) otherValue);</span>
+        case kStringArray:
+<span class="nc" id="L411">          return NetworkTablesJNI.setDefaultStringArray(m_handle, time, (String[]) otherValue);</span>
+        default:
+<span class="nc" id="L413">          return true;</span>
+      }
+<span class="nc bnc" id="L415" title="All 2 branches missed.">    } else if (defaultValue instanceof Boolean) {</span>
+<span class="nc" id="L416">      return setDefaultBoolean((Boolean) defaultValue);</span>
+<span class="nc bnc" id="L417" title="All 2 branches missed.">    } else if (defaultValue instanceof Integer) {</span>
+<span class="nc" id="L418">      return setDefaultInteger((Integer) defaultValue);</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">    } else if (defaultValue instanceof Float) {</span>
+<span class="nc" id="L420">      return setDefaultFloat((Float) defaultValue);</span>
+<span class="nc bnc" id="L421" title="All 2 branches missed.">    } else if (defaultValue instanceof Number) {</span>
+<span class="nc" id="L422">      return setDefaultNumber((Number) defaultValue);</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">    } else if (defaultValue instanceof String) {</span>
+<span class="nc" id="L424">      return setDefaultString((String) defaultValue);</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">    } else if (defaultValue instanceof byte[]) {</span>
+<span class="nc" id="L426">      return setDefaultRaw((byte[]) defaultValue);</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">    } else if (defaultValue instanceof boolean[]) {</span>
+<span class="nc" id="L428">      return setDefaultBooleanArray((boolean[]) defaultValue);</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">    } else if (defaultValue instanceof long[]) {</span>
+<span class="nc" id="L430">      return setDefaultIntegerArray((long[]) defaultValue);</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">    } else if (defaultValue instanceof float[]) {</span>
+<span class="nc" id="L432">      return setDefaultFloatArray((float[]) defaultValue);</span>
+<span class="nc bnc" id="L433" title="All 2 branches missed.">    } else if (defaultValue instanceof double[]) {</span>
+<span class="nc" id="L434">      return setDefaultDoubleArray((double[]) defaultValue);</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">    } else if (defaultValue instanceof Boolean[]) {</span>
+<span class="nc" id="L436">      return setDefaultBooleanArray((Boolean[]) defaultValue);</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">    } else if (defaultValue instanceof Long[]) {</span>
+<span class="nc" id="L438">      return setDefaultIntegerArray((Long[]) defaultValue);</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">    } else if (defaultValue instanceof Float[]) {</span>
+<span class="nc" id="L440">      return setDefaultFloatArray((Float[]) defaultValue);</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">    } else if (defaultValue instanceof Number[]) {</span>
+<span class="nc" id="L442">      return setDefaultNumberArray((Number[]) defaultValue);</span>
+<span class="nc bnc" id="L443" title="All 2 branches missed.">    } else if (defaultValue instanceof String[]) {</span>
+<span class="nc" id="L444">      return setDefaultStringArray((String[]) defaultValue);</span>
+    } else {
+<span class="nc" id="L446">      throw new IllegalArgumentException(</span>
+<span class="nc" id="L447">          &quot;Value of type &quot; + defaultValue.getClass().getName() + &quot; cannot be put into a table&quot;);</span>
+    }
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultBoolean(boolean defaultValue) {
+<span class="nc" id="L458">    return NetworkTablesJNI.setDefaultBoolean(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultInteger(long defaultValue) {
+<span class="nc" id="L468">    return NetworkTablesJNI.setDefaultInteger(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultFloat(float defaultValue) {
+<span class="nc" id="L478">    return NetworkTablesJNI.setDefaultFloat(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultDouble(double defaultValue) {
+<span class="nc" id="L488">    return NetworkTablesJNI.setDefaultDouble(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultString(String defaultValue) {
+<span class="nc" id="L498">    return NetworkTablesJNI.setDefaultString(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultRaw(byte[] defaultValue) {
+<span class="nc" id="L508">    return NetworkTablesJNI.setDefaultRaw(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set; will send from defaultValue.position() to
+   *                     defaultValue.capacity()
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultRaw(ByteBuffer defaultValue) {
+<span class="nc" id="L519">    return NetworkTablesJNI.setDefaultRaw(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.length - start)
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultRaw(byte[] defaultValue, int start, int len) {
+<span class="nc" id="L531">    return NetworkTablesJNI.setDefaultRaw(m_handle, 0, defaultValue, start, len);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.capacity() - start)
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultRaw(ByteBuffer defaultValue, int start, int len) {
+<span class="nc" id="L543">    return NetworkTablesJNI.setDefaultRaw(m_handle, 0, defaultValue, start, len);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultBooleanArray(boolean[] defaultValue) {
+<span class="nc" id="L553">    return NetworkTablesJNI.setDefaultBooleanArray(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultBooleanArray(Boolean[] defaultValue) {
+<span class="nc" id="L563">    return setDefaultBooleanArray(NetworkTableValue.toNativeBooleanArray(defaultValue));</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultIntegerArray(long[] defaultValue) {
+<span class="nc" id="L573">    return NetworkTablesJNI.setDefaultIntegerArray(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultIntegerArray(Long[] defaultValue) {
+<span class="nc" id="L583">    return setDefaultIntegerArray(NetworkTableValue.toNativeIntegerArray(defaultValue));</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultFloatArray(float[] defaultValue) {
+<span class="nc" id="L593">    return NetworkTablesJNI.setDefaultFloatArray(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultFloatArray(Float[] defaultValue) {
+<span class="nc" id="L603">    return setDefaultFloatArray(NetworkTableValue.toNativeFloatArray(defaultValue));</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultDoubleArray(double[] defaultValue) {
+<span class="nc" id="L613">    return NetworkTablesJNI.setDefaultDoubleArray(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultDoubleArray(Double[] defaultValue) {
+<span class="nc" id="L623">    return setDefaultDoubleArray(NetworkTableValue.toNativeDoubleArray(defaultValue));</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultStringArray(String[] defaultValue) {
+<span class="nc" id="L633">    return NetworkTablesJNI.setDefaultStringArray(m_handle, 0, defaultValue);</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultNumber(Number defaultValue) {
+<span class="nc" id="L643">    return setDefaultDouble(defaultValue.doubleValue());</span>
+  }
+
+  /**
+   * Sets the entry's value if it does not exist.
+   *
+   * @param defaultValue the default value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDefaultNumberArray(Number[] defaultValue) {
+<span class="nc" id="L653">    return setDefaultDoubleArray(NetworkTableValue.toNativeDoubleArray(defaultValue));</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value that will be assigned
+   * @return False if the table key already exists with a different type
+   * @throws IllegalArgumentException if the value is not a known type
+   */
+  public boolean setValue(Object value) {
+<span class="nc bnc" id="L664" title="All 2 branches missed.">    if (value instanceof NetworkTableValue) {</span>
+<span class="nc" id="L665">      long time = ((NetworkTableValue) value).getTime();</span>
+<span class="nc" id="L666">      Object otherValue = ((NetworkTableValue) value).getValue();</span>
+<span class="nc bnc" id="L667" title="All 12 branches missed.">      switch (((NetworkTableValue) value).getType()) {</span>
+        case kBoolean:
+<span class="nc" id="L669">          return NetworkTablesJNI.setBoolean(m_handle, time, (Boolean) otherValue);</span>
+        case kInteger:
+<span class="nc" id="L671">          return NetworkTablesJNI.setInteger(</span>
+<span class="nc" id="L672">              m_handle, time, ((Number) otherValue).longValue());</span>
+        case kFloat:
+<span class="nc" id="L674">          return NetworkTablesJNI.setFloat(</span>
+<span class="nc" id="L675">              m_handle, time, ((Number) otherValue).floatValue());</span>
+        case kDouble:
+<span class="nc" id="L677">          return NetworkTablesJNI.setDouble(</span>
+<span class="nc" id="L678">              m_handle, time, ((Number) otherValue).doubleValue());</span>
+        case kString:
+<span class="nc" id="L680">          return NetworkTablesJNI.setString(m_handle, time, (String) otherValue);</span>
+        case kRaw:
+<span class="nc" id="L682">          return NetworkTablesJNI.setRaw(m_handle, time, (byte[]) otherValue);</span>
+        case kBooleanArray:
+<span class="nc" id="L684">          return NetworkTablesJNI.setBooleanArray(m_handle, time, (boolean[]) otherValue);</span>
+        case kIntegerArray:
+<span class="nc" id="L686">          return NetworkTablesJNI.setIntegerArray(m_handle, time, (long[]) otherValue);</span>
+        case kFloatArray:
+<span class="nc" id="L688">          return NetworkTablesJNI.setFloatArray(m_handle, time, (float[]) otherValue);</span>
+        case kDoubleArray:
+<span class="nc" id="L690">          return NetworkTablesJNI.setDoubleArray(m_handle, time, (double[]) otherValue);</span>
+        case kStringArray:
+<span class="nc" id="L692">          return NetworkTablesJNI.setStringArray(m_handle, time, (String[]) otherValue);</span>
+        default:
+<span class="nc" id="L694">          return true;</span>
+      }
+<span class="nc bnc" id="L696" title="All 2 branches missed.">    } else if (value instanceof Boolean) {</span>
+<span class="nc" id="L697">      return setBoolean((Boolean) value);</span>
+<span class="nc bnc" id="L698" title="All 2 branches missed.">    } else if (value instanceof Long) {</span>
+<span class="nc" id="L699">      return setInteger((Long) value);</span>
+<span class="nc bnc" id="L700" title="All 2 branches missed.">    } else if (value instanceof Float) {</span>
+<span class="nc" id="L701">      return setFloat((Float) value);</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">    } else if (value instanceof Number) {</span>
+<span class="nc" id="L703">      return setNumber((Number) value);</span>
+<span class="nc bnc" id="L704" title="All 2 branches missed.">    } else if (value instanceof String) {</span>
+<span class="nc" id="L705">      return setString((String) value);</span>
+<span class="nc bnc" id="L706" title="All 2 branches missed.">    } else if (value instanceof byte[]) {</span>
+<span class="nc" id="L707">      return setRaw((byte[]) value);</span>
+<span class="nc bnc" id="L708" title="All 2 branches missed.">    } else if (value instanceof boolean[]) {</span>
+<span class="nc" id="L709">      return setBooleanArray((boolean[]) value);</span>
+<span class="nc bnc" id="L710" title="All 2 branches missed.">    } else if (value instanceof long[]) {</span>
+<span class="nc" id="L711">      return setIntegerArray((long[]) value);</span>
+<span class="nc bnc" id="L712" title="All 2 branches missed.">    } else if (value instanceof float[]) {</span>
+<span class="nc" id="L713">      return setFloatArray((float[]) value);</span>
+<span class="nc bnc" id="L714" title="All 2 branches missed.">    } else if (value instanceof double[]) {</span>
+<span class="nc" id="L715">      return setDoubleArray((double[]) value);</span>
+<span class="nc bnc" id="L716" title="All 2 branches missed.">    } else if (value instanceof Boolean[]) {</span>
+<span class="nc" id="L717">      return setBooleanArray((Boolean[]) value);</span>
+<span class="nc bnc" id="L718" title="All 2 branches missed.">    } else if (value instanceof Long[]) {</span>
+<span class="nc" id="L719">      return setIntegerArray((Long[]) value);</span>
+<span class="nc bnc" id="L720" title="All 2 branches missed.">    } else if (value instanceof Float[]) {</span>
+<span class="nc" id="L721">      return setFloatArray((Float[]) value);</span>
+<span class="nc bnc" id="L722" title="All 2 branches missed.">    } else if (value instanceof Number[]) {</span>
+<span class="nc" id="L723">      return setNumberArray((Number[]) value);</span>
+<span class="nc bnc" id="L724" title="All 2 branches missed.">    } else if (value instanceof String[]) {</span>
+<span class="nc" id="L725">      return setStringArray((String[]) value);</span>
+    } else {
+<span class="nc" id="L727">      throw new IllegalArgumentException(</span>
+<span class="nc" id="L728">          &quot;Value of type &quot; + value.getClass().getName() + &quot; cannot be put into a table&quot;);</span>
+    }
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setBoolean(boolean value) {
+<span class="nc" id="L739">    return NetworkTablesJNI.setBoolean(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setInteger(long value) {
+<span class="nc" id="L749">    return NetworkTablesJNI.setInteger(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setFloat(float value) {
+<span class="nc" id="L759">    return NetworkTablesJNI.setFloat(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDouble(double value) {
+<span class="nc" id="L769">    return NetworkTablesJNI.setDouble(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setString(String value) {
+<span class="nc" id="L779">    return NetworkTablesJNI.setString(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setRaw(byte[] value) {
+<span class="nc" id="L789">    return NetworkTablesJNI.setRaw(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set; will send from value.position() to value.capacity()
+   * @return False if the entry exists with a different type
+   */
+  public boolean setRaw(ByteBuffer value) {
+<span class="nc" id="L799">    return NetworkTablesJNI.setRaw(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.length - start)
+   * @return False if the entry exists with a different type
+   */
+  public boolean setRaw(byte[] value, int start, int len) {
+<span class="nc" id="L811">    return NetworkTablesJNI.setRaw(m_handle, 0, value, start, len);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @param start Start position of data (in buffer)
+   * @param len Length of data (must be less than or equal to value.capacity() - start)
+   * @return False if the entry exists with a different type
+   */
+  public boolean setRaw(ByteBuffer value, int start, int len) {
+<span class="nc" id="L823">    return NetworkTablesJNI.setRaw(m_handle, 0, value, start, len);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setBooleanArray(boolean[] value) {
+<span class="nc" id="L833">    return NetworkTablesJNI.setBooleanArray(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setBooleanArray(Boolean[] value) {
+<span class="nc" id="L843">    return setBooleanArray(NetworkTableValue.toNativeBooleanArray(value));</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setIntegerArray(long[] value) {
+<span class="nc" id="L853">    return NetworkTablesJNI.setIntegerArray(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setIntegerArray(Long[] value) {
+<span class="nc" id="L863">    return setIntegerArray(NetworkTableValue.toNativeIntegerArray(value));</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setFloatArray(float[] value) {
+<span class="nc" id="L873">    return NetworkTablesJNI.setFloatArray(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setFloatArray(Float[] value) {
+<span class="nc" id="L883">    return setFloatArray(NetworkTableValue.toNativeFloatArray(value));</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDoubleArray(double[] value) {
+<span class="nc" id="L893">    return NetworkTablesJNI.setDoubleArray(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setDoubleArray(Double[] value) {
+<span class="nc" id="L903">    return setDoubleArray(NetworkTableValue.toNativeDoubleArray(value));</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setStringArray(String[] value) {
+<span class="nc" id="L913">    return NetworkTablesJNI.setStringArray(m_handle, 0, value);</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setNumber(Number value) {
+<span class="nc" id="L923">    return setDouble(value.doubleValue());</span>
+  }
+
+  /**
+   * Sets the entry's value.
+   *
+   * @param value the value to set
+   * @return False if the entry exists with a different type
+   */
+  public boolean setNumberArray(Number[] value) {
+<span class="nc" id="L933">    return setDoubleArray(NetworkTableValue.toNativeDoubleArray(value));</span>
+  }
+
+  /**
+   * Sets flags.
+   *
+   * @param flags the flags to set (bitmask)
+   * @deprecated Use setPersistent() or topic properties instead
+   */
+  @Deprecated(since = &quot;2022&quot;, forRemoval = true)
+  public void setFlags(int flags) {
+<span class="nc" id="L944">    NetworkTablesJNI.setEntryFlags(m_handle, getFlags() | flags);</span>
+<span class="nc" id="L945">  }</span>
+
+  /**
+   * Clears flags.
+   *
+   * @param flags the flags to clear (bitmask)
+   * @deprecated Use setPersistent() or topic properties instead
+   */
+  @Deprecated(since = &quot;2022&quot;, forRemoval = true)
+  public void clearFlags(int flags) {
+<span class="nc" id="L955">    NetworkTablesJNI.setEntryFlags(m_handle, getFlags() &amp; ~flags);</span>
+<span class="nc" id="L956">  }</span>
+
+  /** Make value persistent through program restarts. */
+  public void setPersistent() {
+<span class="nc" id="L960">    NetworkTablesJNI.setTopicPersistent(m_topic.getHandle(), true);</span>
+<span class="nc" id="L961">  }</span>
+
+  /** Stop making value persistent through program restarts. */
+  public void clearPersistent() {
+<span class="nc" id="L965">    NetworkTablesJNI.setTopicPersistent(m_topic.getHandle(), false);</span>
+<span class="nc" id="L966">  }</span>
+
+  /**
+   * Returns whether the value is persistent through program restarts.
+   *
+   * @return True if the value is persistent.
+   */
+  public boolean isPersistent() {
+<span class="nc" id="L974">    return NetworkTablesJNI.getTopicPersistent(m_topic.getHandle());</span>
+  }
+
+  /** Stops publishing the entry if it's been published. */
+  public void unpublish() {
+<span class="nc" id="L979">    NetworkTablesJNI.unpublish(m_handle);</span>
+<span class="nc" id="L980">  }</span>
+
+  /**
+   * Deletes the entry.
+   *
+   * @deprecated Use unpublish() instead.
+   */
+  @Deprecated(since = &quot;2022&quot;, forRemoval = true)
+  public void delete() {
+<span class="nc" id="L989">    unpublish();</span>
+<span class="nc" id="L990">  }</span>
+
+  @Override
+  public boolean equals(Object other) {
+<span class="nc bnc" id="L994" title="All 2 branches missed.">    if (other == this) {</span>
+<span class="nc" id="L995">      return true;</span>
+    }
+<span class="nc bnc" id="L997" title="All 2 branches missed.">    if (!(other instanceof NetworkTableEntry)) {</span>
+<span class="nc" id="L998">      return false;</span>
+    }
+
+<span class="nc bnc" id="L1001" title="All 2 branches missed.">    return m_handle == ((NetworkTableEntry) other).m_handle;</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L1006">    return m_handle;</span>
+  }
+
+  private final Topic m_topic;
+  protected int m_handle;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,4 @@
+See file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreLinuxathenaReleaseStaticLibraryNtcoreCpp/output.txt for all output for compileNtcoreLinuxathenaReleaseStaticLibraryNtcoreCpp.
+compiling singlelib.cpp successful.
+
+Finished compileNtcoreLinuxathenaReleaseStaticLibraryNtcoreCpp, see full log file:///D:/cygwin64/home/bwg/robottools/frc/allwpilib/ntcore/build/tmp/compileNtcoreLinuxathenaReleaseStaticLibraryNtcoreCpp/output.txt.

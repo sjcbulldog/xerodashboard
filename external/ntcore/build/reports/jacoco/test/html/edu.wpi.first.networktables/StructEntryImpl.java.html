@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StructEntryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ntcore</a> &gt; <a href="index.source.html" class="el_package">edu.wpi.first.networktables</a> &gt; <span class="el_source">StructEntryImpl.java</span></div><h1>StructEntryImpl.java</h1><pre class="source lang-java linenums">// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.networktables;
+
+import edu.wpi.first.util.struct.StructBuffer;
+import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+
+/**
+ * NetworkTables struct-encoded value implementation.
+ *
+ * @param &lt;T&gt; value class
+ */
+final class StructEntryImpl&lt;T&gt; extends EntryBase implements StructEntry&lt;T&gt; {
+  /**
+   * Constructor.
+   *
+   * @param topic Topic
+   * @param handle Native handle
+   * @param defaultValue Default value for get()
+   */
+  StructEntryImpl(
+      StructTopic&lt;T&gt; topic,
+      StructBuffer&lt;T&gt; buf,
+      int handle,
+      T defaultValue,
+      boolean schemaPublished) {
+<span class="nc" id="L30">    super(handle);</span>
+<span class="nc" id="L31">    m_topic = topic;</span>
+<span class="nc" id="L32">    m_defaultValue = defaultValue;</span>
+<span class="nc" id="L33">    m_buf = buf;</span>
+<span class="nc" id="L34">    m_schemaPublished = schemaPublished;</span>
+<span class="nc" id="L35">  }</span>
+
+  @Override
+  public StructTopic&lt;T&gt; getTopic() {
+<span class="nc" id="L39">    return m_topic;</span>
+  }
+
+  @Override
+  public T get() {
+<span class="nc" id="L44">    return fromRaw(NetworkTablesJNI.getRaw(m_handle, m_emptyRaw), m_defaultValue);</span>
+  }
+
+  @Override
+  public T get(T defaultValue) {
+<span class="nc" id="L49">    return fromRaw(NetworkTablesJNI.getRaw(m_handle, m_emptyRaw), defaultValue);</span>
+  }
+
+  @Override
+  public boolean getInto(T out) {
+<span class="nc" id="L54">    byte[] raw = NetworkTablesJNI.getRaw(m_handle, m_emptyRaw);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">    if (raw.length == 0) {</span>
+<span class="nc" id="L56">      return false;</span>
+    }
+<span class="nc" id="L58">    synchronized (m_buf) {</span>
+<span class="nc" id="L59">      m_buf.readInto(out, raw);</span>
+<span class="nc" id="L60">      return true;</span>
+    }
+  }
+
+  @Override
+  public TimestampedObject&lt;T&gt; getAtomic() {
+<span class="nc" id="L66">    return fromRaw(NetworkTablesJNI.getAtomicRaw(m_handle, m_emptyRaw), m_defaultValue);</span>
+  }
+
+  @Override
+  public TimestampedObject&lt;T&gt; getAtomic(T defaultValue) {
+<span class="nc" id="L71">    return fromRaw(NetworkTablesJNI.getAtomicRaw(m_handle, m_emptyRaw), defaultValue);</span>
+  }
+
+  @Override
+  public TimestampedObject&lt;T&gt;[] readQueue() {
+<span class="nc" id="L76">    TimestampedRaw[] raw = NetworkTablesJNI.readQueueRaw(m_handle);</span>
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L78">    TimestampedObject&lt;T&gt;[] arr = (TimestampedObject&lt;T&gt;[]) new TimestampedObject&lt;?&gt;[raw.length];</span>
+<span class="nc" id="L79">    int err = 0;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">    for (int i = 0; i &lt; raw.length; i++) {</span>
+<span class="nc" id="L81">      arr[i] = fromRaw(raw[i], null);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">      if (arr[i].value == null) {</span>
+<span class="nc" id="L83">        err++;</span>
+      }
+    }
+
+    // discard bad values
+<span class="nc bnc" id="L88" title="All 2 branches missed.">    if (err &gt; 0) {</span>
+      @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L90">      TimestampedObject&lt;T&gt;[] newArr =</span>
+          (TimestampedObject&lt;T&gt;[]) new TimestampedObject&lt;?&gt;[raw.length - err];
+<span class="nc" id="L92">      int i = 0;</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">      for (TimestampedObject&lt;T&gt; e : arr) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (e.value != null) {</span>
+<span class="nc" id="L95">          arr[i] = e;</span>
+<span class="nc" id="L96">          i++;</span>
+        }
+      }
+<span class="nc" id="L99">      arr = newArr;</span>
+    }
+
+<span class="nc" id="L102">    return arr;</span>
+  }
+
+  @Override
+  public T[] readQueueValues() {
+<span class="nc" id="L107">    byte[][] raw = NetworkTablesJNI.readQueueValuesRaw(m_handle);</span>
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L109">    T[] arr = (T[]) Array.newInstance(m_topic.getStruct().getTypeClass(), raw.length);</span>
+<span class="nc" id="L110">    int err = 0;</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">    for (int i = 0; i &lt; raw.length; i++) {</span>
+<span class="nc" id="L112">      arr[i] = fromRaw(raw[i], null);</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">      if (arr[i] == null) {</span>
+<span class="nc" id="L114">        err++;</span>
+      }
+    }
+
+    // discard bad values
+<span class="nc bnc" id="L119" title="All 2 branches missed.">    if (err &gt; 0) {</span>
+      @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L121">      T[] newArr = (T[]) Array.newInstance(m_topic.getStruct().getTypeClass(), raw.length - err);</span>
+<span class="nc" id="L122">      int i = 0;</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">      for (T e : arr) {</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if (e != null) {</span>
+<span class="nc" id="L125">          arr[i] = e;</span>
+<span class="nc" id="L126">          i++;</span>
+        }
+      }
+<span class="nc" id="L129">      arr = newArr;</span>
+    }
+
+<span class="nc" id="L132">    return arr;</span>
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidCatchingGenericException&quot;)
+  @Override
+  public void set(T value, long time) {
+    try {
+<span class="nc" id="L139">      synchronized (m_buf) {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (!m_schemaPublished) {</span>
+<span class="nc" id="L141">          m_schemaPublished = true;</span>
+<span class="nc" id="L142">          m_topic.getInstance().addSchema(m_buf.getStruct());</span>
+        }
+<span class="nc" id="L144">        ByteBuffer bb = m_buf.write(value);</span>
+<span class="nc" id="L145">        NetworkTablesJNI.setRaw(m_handle, time, bb, 0, bb.position());</span>
+<span class="nc" id="L146">      }</span>
+<span class="nc" id="L147">    } catch (RuntimeException e) {</span>
+      // ignore
+<span class="nc" id="L149">    }</span>
+<span class="nc" id="L150">  }</span>
+
+  @SuppressWarnings(&quot;PMD.AvoidCatchingGenericException&quot;)
+  @Override
+  public void setDefault(T value) {
+    try {
+<span class="nc" id="L156">      synchronized (m_buf) {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (!m_schemaPublished) {</span>
+<span class="nc" id="L158">          m_schemaPublished = true;</span>
+<span class="nc" id="L159">          m_topic.getInstance().addSchema(m_buf.getStruct());</span>
+        }
+<span class="nc" id="L161">        ByteBuffer bb = m_buf.write(value);</span>
+<span class="nc" id="L162">        NetworkTablesJNI.setDefaultRaw(m_handle, 0, bb, 0, bb.position());</span>
+<span class="nc" id="L163">      }</span>
+<span class="nc" id="L164">    } catch (RuntimeException e) {</span>
+      // ignore
+<span class="nc" id="L166">    }</span>
+<span class="nc" id="L167">  }</span>
+
+  @Override
+  public void unpublish() {
+<span class="nc" id="L171">    NetworkTablesJNI.unpublish(m_handle);</span>
+<span class="nc" id="L172">  }</span>
+
+  @SuppressWarnings(&quot;PMD.AvoidCatchingGenericException&quot;)
+  private T fromRaw(byte[] raw, T defaultValue) {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">    if (raw.length == 0) {</span>
+<span class="nc" id="L177">      return defaultValue;</span>
+    }
+    try {
+<span class="nc" id="L180">      synchronized (m_buf) {</span>
+<span class="nc" id="L181">        return m_buf.read(raw);</span>
+      }
+<span class="nc" id="L183">    } catch (RuntimeException e) {</span>
+<span class="nc" id="L184">      return defaultValue;</span>
+    }
+  }
+
+  @SuppressWarnings(&quot;PMD.AvoidCatchingGenericException&quot;)
+  private TimestampedObject&lt;T&gt; fromRaw(TimestampedRaw raw, T defaultValue) {
+<span class="nc bnc" id="L190" title="All 2 branches missed.">    if (raw.value.length == 0) {</span>
+<span class="nc" id="L191">      return new TimestampedObject&lt;T&gt;(0, 0, defaultValue);</span>
+    }
+    try {
+<span class="nc" id="L194">      synchronized (m_buf) {</span>
+<span class="nc" id="L195">        return new TimestampedObject&lt;T&gt;(raw.timestamp, raw.serverTime, m_buf.read(raw.value));</span>
+      }
+<span class="nc" id="L197">    } catch (RuntimeException e) {</span>
+<span class="nc" id="L198">      return new TimestampedObject&lt;T&gt;(0, 0, defaultValue);</span>
+    }
+  }
+
+  private final StructTopic&lt;T&gt; m_topic;
+  private final T m_defaultValue;
+  private final StructBuffer&lt;T&gt; m_buf;
+  private boolean m_schemaPublished;
+<span class="nc" id="L206">  private static final byte[] m_emptyRaw = new byte[] {};</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
